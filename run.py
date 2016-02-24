@@ -3,7 +3,7 @@ from datetime import datetime
 
 from bson import ObjectId
 from flask import Flask, request, jsonify
-from flask.ext.restful import reqparse, abort, Api, Resource
+from flask.ext.restful import Api, Resource
 from pymongo import MongoClient
 
 import config
@@ -52,17 +52,6 @@ db = conMongo()[config.DB_NAME]
 geo_postsCol = db.geo_posts
 
 
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, datetime):
-        serial = obj.isoformat()
-        return serial
-    elif isinstance(obj, str):
-        return obj
-    raise TypeError("Type not serializable")
-
-
 def initDB(samples):
     geo_postsCol.drop()
     for row in samples:
@@ -78,23 +67,31 @@ def allPosts():
     cursor = geo_postsCol.find({})
     results = []
     for post in cursor:
-        post["_created"] = json_serial(post["_created"])
-        post["_id"] = JSONEncoder().encode(post["_id"])[1:-1]  # 去掉首尾多余的引号
+        if "_created" in post:
+            post["_created"] = JSONEncoder().encode(post["_created"])[1:-1]  # 去掉首尾多余的引号
+        post["_id"] = JSONEncoder().encode(post["_id"])[1:-1]
         results.append(post)
     return results
 
 
 def addPost(post):
+    if "_created" in post:
+        # turn an ISO 8601 string like: 2016-02-23T23:41:54.000Z into datetime object
+        #
+        post["_created"] = datetime.utcnow()
     geo_postsCol.insert(post)
     return jsonify(status="ok", response=201)
 
 
 class JSONEncoder(json.JSONEncoder):
-    """Make ObjectId JSON serializable"""
+    """Make ObjectId and Datetime format JSON serializable"""
 
     def default(self, obj):
         if isinstance(obj, ObjectId):
             return str(obj)
+        elif isinstance(obj, datetime):
+            return obj.strftime("%Y-%m-%d %H:%M:%S")
+        # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 
 
