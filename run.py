@@ -1,9 +1,10 @@
-import json
 from datetime import datetime
 
-from bson import ObjectId
-from flask import Flask, request, jsonify
-from flask.ext.restful import Api, Resource
+from bson.json_util import dumps
+from bson.objectid import ObjectId
+from flask import Flask, request
+from flask import make_response
+from flask.ext.restful import Api, Resource, abort
 from pymongo import MongoClient
 
 import config
@@ -21,8 +22,22 @@ def conMongo():
     return client
 
 
+def output_json(obj, code, headers=None):
+    """
+    This is needed because we need to use a custom JSON converter
+    that knows how to translate MongoDB types to JSON.
+    """
+    resp = make_response(dumps(obj), code)
+    resp.headers.extend(headers or {})
+
+    return resp
+
+
+DEFAULT_REPRESENTATIONS = {'application/json': output_json}
+
 app = creat_app()
 api = Api(app)
+api.representations = DEFAULT_REPRESENTATIONS
 
 SAMPLES = [
     {
@@ -60,18 +75,13 @@ def initDB(samples):
 
 
 def abortIfPostDoesNotExist(post_id):
-    pass
+    if len(dataForPostID(post_id)) <= 0:
+        abort(404, message="Post {} doesn't exist.".format(post_id))
 
 
 def allPosts():
     cursor = geo_postsCol.find({})
-    results = []
-    for post in cursor:
-        if "_created" in post:
-            post["_created"] = JSONEncoder().encode(post["_created"])[1:-1]  # 去掉首尾多余的引号
-        post["_id"] = JSONEncoder().encode(post["_id"])[1:-1]
-        results.append(post)
-    return results
+    return cursor
 
 
 def addPost(post):
@@ -80,36 +90,48 @@ def addPost(post):
         #
         post["_created"] = datetime.utcnow()
     geo_postsCol.insert(post)
-    return jsonify(status="ok", response=201)
+    return "", 201
 
 
-class JSONEncoder(json.JSONEncoder):
-    """Make ObjectId and Datetime format JSON serializable"""
+def dataForPostID(post_id):
+    cursor = geo_postsCol.find({"_id": ObjectId(post_id)})
+    results = []
+    for item in cursor:
+        results.append(item)
+    return results
 
-    def default(self, obj):
-        if isinstance(obj, ObjectId):
-            return str(obj)
-        elif isinstance(obj, datetime):
-            return obj.strftime("%Y-%m-%d %H:%M:%S")
-        # Let the base class default method raise the TypeError
-        return json.JSONEncoder.default(self, obj)
+
+def deletePost(post_id):
+    cursor = geo_postsCol.remove({"_id": ObjectId(post_id)})
+    return "", 204
+
+
+def patchPost(post_id, json_data):
+    cursor = geo_postsCol.update_one(
+        {"_id": ObjectId(post_id)},
+        {
+            "$set": json_data
+        }
+    )
+    return "", 204
 
 
 class Geo_post(Resource):
     def get(self, post_id):  # get a post by its ID
-        print("   get post")
+        print("get post")
         abortIfPostDoesNotExist(post_id)
-        pass
+        return dataForPostID(post_id)
 
     def delete(self, post_id):  # delete a post by its ID
-        print("   delete post")
+        print("delete post")
         abortIfPostDoesNotExist(post_id)
-        pass
+        return deletePost(post_id)
 
-    def post(self, post_id):  # update a particular post by its ID
-        print("   Update post")
+    def patch(self, post_id):  # update a particular post by its ID
+        print("Update post")
         abortIfPostDoesNotExist(post_id)
-        pass
+        json_data = request.get_json(force=True)
+        return patchPost(post_id, json_data)
 
 
 class Geo_postsList(Resource):
@@ -120,10 +142,6 @@ class Geo_postsList(Resource):
     def post(self):  # add a new post
         print("Add geo_post")
         json_data = request.get_json(force=True)
-        # author = json_data['author']
-        # print(author)
-        # qID = addPost(post)
-        # return [{"post_id": qID, "post": post}]  # return the post ID
         return addPost(json_data)
 
 
