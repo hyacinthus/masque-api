@@ -22,42 +22,29 @@ def conMongo():
     return client
 
 
-def output_json(obj, code, headers=None):
-    """
-    This is needed because we need to use a custom JSON converter
-    that knows how to translate MongoDB types to JSON.
-    """
-    resp = make_response(dumps(obj), code)
-    resp.headers.extend(headers or {})
+app = creat_app()
+api = Api(app)
 
+
+@api.representation('application/json')
+def output_json(data, code, headers=None):
+    resp = make_response(dumps(data), code)
+    resp.headers.extend(headers or {})
     return resp
 
 
-DEFAULT_REPRESENTATIONS = {'application/json': output_json}
+@app.before_request
+def before_request():
+    if request.endpoint is not None:
+        db = conMongo()[config.DB_NAME]
+        geo_postsCol = db['geo_posts']
 
-app = creat_app()
-api = Api(app)
-api.representations = DEFAULT_REPRESENTATIONS
 
-SAMPLES = [
-    {
-        "_created": "2014-03-28T00:00:00",
-        "author": "ferstar",
-        "content": "Keep moving!",
-        "hearts": {
-            "mask_id": "abcdef",
-            "user_id": "abcdef"
-        },
-        "location": {
-            "coordinates": [
-                100,
-                0
-            ],
-            "type": "Point"
-        },
-        "mask_id": "abcdef"
-    }
-]
+@app.teardown_request
+def teardown_request(exception):
+    if request.endpoint is not None:
+        conMongo().close()
+
 
 # to parse incoming data fields
 # parser = reqparse.RequestParser()
@@ -65,13 +52,6 @@ SAMPLES = [
 
 db = conMongo()[config.DB_NAME]
 geo_postsCol = db.geo_posts
-
-
-def initDB(samples):
-    geo_postsCol.drop()
-    for row in samples:
-        print("inserting into SAMPLES DB: " + str(row))
-        geo_postsCol.insert(row)
 
 
 def abortIfPostDoesNotExist(post_id):
@@ -106,7 +86,7 @@ def deletePost(post_id):
     return "", 204
 
 
-def patchPost(post_id, json_data):
+def putPost(post_id, json_data):
     cursor = geo_postsCol.update_one(
         {"_id": ObjectId(post_id)},
         {
@@ -116,7 +96,7 @@ def patchPost(post_id, json_data):
     return "", 204
 
 
-class Geo_post(Resource):
+class Geo_postAPI(Resource):
     def get(self, post_id):  # get a post by its ID
         print("get post")
         abortIfPostDoesNotExist(post_id)
@@ -127,16 +107,15 @@ class Geo_post(Resource):
         abortIfPostDoesNotExist(post_id)
         return deletePost(post_id)
 
-    def patch(self, post_id):  # update a particular post by its ID
+    def put(self, post_id):  # update a post by its ID
         print("Update post")
         abortIfPostDoesNotExist(post_id)
         json_data = request.get_json(force=True)
-        return patchPost(post_id, json_data)
+        return putPost(post_id, json_data)
 
 
-class Geo_postsList(Resource):
+class Geo_postListAPI(Resource):
     def get(self):  # get all geo_posts
-        print("fetch all geo_posts")
         return allPosts()
 
     def post(self):  # add a new post
@@ -145,27 +124,8 @@ class Geo_postsList(Resource):
         return addPost(json_data)
 
 
-@app.before_request
-def before_request():
-    # print("before request " + str(request.endpoint) )
-    if request.endpoint == "geo_postslist":
-        print("\n\n>> connecting db >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        db = conMongo()[config.DB_NAME]
-        geo_postsCol = db['geo_posts']
-
-
-@app.teardown_request
-def teardown_request(exception):
-    # print("after request ") + str(request.endpoint)
-    if request.endpoint == "geo_postslist":
-        print(">> disconnect db >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n")
-        conMongo().close()
-
-
-api.add_resource(Geo_postsList, '/geo_posts')
-api.add_resource(Geo_post, '/geo_posts/<string:post_id>')
-# initDB(SAMPLES) #start with a clean DB
-
+api.add_resource(Geo_postListAPI, '/geo_posts', endpoint='geo_posts')
+api.add_resource(Geo_postAPI, '/geo_posts/<string:post_id>', endpoint='geo_post')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
