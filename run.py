@@ -2,7 +2,7 @@ from datetime import datetime
 
 from bson.json_util import dumps
 from bson.objectid import ObjectId
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, jsonify
 from flask.ext.restful import Api, Resource, abort
 from flask_pymongo import PyMongo
 
@@ -24,6 +24,11 @@ def output_json(data, code, headers=None):
     resp = make_response(dumps(data), code)
     resp.headers.extend(headers or {})
     return resp
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'message': 'Not found'}), 404)
 
 
 def notFound(obj):
@@ -67,8 +72,10 @@ class Geo_postListAPI(Resource):
         return "", 201
 
 
-api.add_resource(Geo_postListAPI, '/geo_posts', endpoint='geo_posts')
-api.add_resource(Geo_postAPI, '/geo_posts/<string:post_id>', endpoint='geo_post')
+api.add_resource(Geo_postListAPI, '/geo_posts',
+                 '/geo_posts/', endpoint='geo_posts')
+api.add_resource(Geo_postAPI, '/geo_posts/<string:post_id>',
+                 '/geo_posts/<string:post_id>/', endpoint='geo_post')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
