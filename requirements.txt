@@ -2,4 +2,4 @@
 
 flask
 flask-restful
-pymongo
+flask-pymongo

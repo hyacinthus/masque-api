@@ -5,9 +5,7 @@ from bson.objectid import ObjectId
 from flask import Flask, request
 from flask import make_response
 from flask.ext.restful import Api, Resource, abort
-from pymongo import MongoClient
-
-import config
+from flask_pymongo import PyMongo
 
 
 def creat_app():
@@ -17,12 +15,8 @@ def creat_app():
     return app
 
 
-def conMongo():
-    client = MongoClient(config.DATABASE_URI)
-    return client
-
-
 app = creat_app()
+mongo = PyMongo(app, config_prefix='MONGO')
 api = Api(app)
 
 
@@ -33,34 +27,13 @@ def output_json(data, code, headers=None):
     return resp
 
 
-@app.before_request
-def before_request():
-    if request.endpoint is not None:
-        db = conMongo()[config.DB_NAME]
-        geo_postsCol = db['geo_posts']
-
-
-@app.teardown_request
-def teardown_request(exception):
-    if request.endpoint is not None:
-        conMongo().close()
-
-
-# to parse incoming data fields
-# parser = reqparse.RequestParser()
-# parser.add_argument('geo_post')
-
-db = conMongo()[config.DB_NAME]
-geo_postsCol = db.geo_posts
-
-
 def abortIfPostDoesNotExist(post_id):
     if len(dataForPostID(post_id)) <= 0:
         abort(404, message="Post {} doesn't exist.".format(post_id))
 
 
 def allPosts():
-    cursor = geo_postsCol.find({})
+    cursor = mongo.db.geo_posts.find({})
     return cursor
 
 
@@ -69,12 +42,12 @@ def addPost(post):
         # turn an ISO 8601 string like: 2016-02-23T23:41:54.000Z into datetime object
         #
         post["_created"] = datetime.utcnow()
-    geo_postsCol.insert(post)
+    mongo.db.geo_posts.insert(post)
     return "", 201
 
 
 def dataForPostID(post_id):
-    cursor = geo_postsCol.find({"_id": ObjectId(post_id)})
+    cursor = mongo.db.geo_posts.find({"_id": ObjectId(post_id)})
     results = []
     for item in cursor:
         results.append(item)
@@ -82,12 +55,12 @@ def dataForPostID(post_id):
 
 
 def deletePost(post_id):
-    cursor = geo_postsCol.remove({"_id": ObjectId(post_id)})
+    cursor = mongo.db.geo_posts.remove({"_id": ObjectId(post_id)})
     return "", 204
 
 
 def putPost(post_id, json_data):
-    cursor = geo_postsCol.update_one(
+    cursor = mongo.db.geo_posts.update_one(
         {"_id": ObjectId(post_id)},
         {
             "$set": json_data
@@ -98,17 +71,17 @@ def putPost(post_id, json_data):
 
 class Geo_postAPI(Resource):
     def get(self, post_id):  # get a post by its ID
-        print("get post")
+
         abortIfPostDoesNotExist(post_id)
         return dataForPostID(post_id)
 
     def delete(self, post_id):  # delete a post by its ID
-        print("delete post")
+
         abortIfPostDoesNotExist(post_id)
         return deletePost(post_id)
 
     def put(self, post_id):  # update a post by its ID
-        print("Update post")
+
         abortIfPostDoesNotExist(post_id)
         json_data = request.get_json(force=True)
         return putPost(post_id, json_data)
@@ -119,7 +92,7 @@ class Geo_postListAPI(Resource):
         return allPosts()
 
     def post(self):  # add a new post
-        print("Add geo_post")
+
         json_data = request.get_json(force=True)
         return addPost(json_data)
 
