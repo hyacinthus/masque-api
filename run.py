@@ -1,155 +1,114 @@
-import json
 from datetime import datetime
 
-from bson import ObjectId
-from flask import Flask, request, jsonify
-from flask.ext.restful import reqparse, abort, Api, Resource
-from pymongo import MongoClient
+from bson.json_util import dumps
+from bson.objectid import ObjectId
+from flask import Flask, request, make_response, jsonify
+from flask_pymongo import PyMongo
+from flask_restful import Api, Resource, abort
 
-import config
-
-
-def creat_app():
+def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object('config')
-    app.config.from_pyfile('config.py')
+    app.config.from_pyfile('config.py', silent=True)
     return app
 
 
-def conMongo():
-    client = MongoClient(config.DATABASE_URI)
-    return client
-
-
-app = creat_app()
+app = create_app()
+mongo = PyMongo(app, config_prefix='MONGO')
 api = Api(app)
 
-SAMPLES = [
-    {
-        "_created": "2014-03-28T00:00:00",
-        "author": "ferstar",
-        "content": "Keep moving!",
-        "hearts": {
-            "mask_id": "abcdef",
-            "user_id": "abcdef"
-        },
-        "location": {
-            "coordinates": [
-                100,
-                0
-            ],
-            "type": "Point"
-        },
-        "mask_id": "abcdef"
-    }
-]
 
-# to parse incoming data fields
-# parser = reqparse.RequestParser()
-# parser.add_argument('geo_post')
-
-db = conMongo()[config.DB_NAME]
-geo_postsCol = db.geo_posts
+@api.representation('application/json')
+def output_json(data, code, headers=None):
+    resp = make_response(dumps(data), code)
+    resp.headers.extend(headers or {})
+    return resp
 
 
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, datetime):
-        serial = obj.isoformat()
-        return serial
-    elif isinstance(obj, str):
-        return obj
-    raise TypeError("Type not serializable")
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'message': 'Not found'}), 404)
 
 
-def initDB(samples):
-    geo_postsCol.drop()
-    for row in samples:
-        print("inserting into SAMPLES DB: " + str(row))
-        geo_postsCol.insert(row)
+def check_content(obj):
+    """if no content found return 404, else return cursor."""
+    if obj.count() == 0:
+        abort(404)
+    return obj
 
 
-def abortIfPostDoesNotExist(post_id):
-    pass
-
-
-def allPosts():
-    cursor = geo_postsCol.find({})
-    results = []
-    for post in cursor:
-        post["_created"] = json_serial(post["_created"])
-        post["_id"] = JSONEncoder().encode(post["_id"])[1:-1]  # 去掉首尾多余的引号
-        results.append(post)
-    return results
-
-
-def addPost(post):
-    geo_postsCol.insert(post)
-    return jsonify(status="ok", response=201)
-
-
-class JSONEncoder(json.JSONEncoder):
-    """Make ObjectId JSON serializable"""
-
-    def default(self, obj):
-        if isinstance(obj, ObjectId):
-            return str(obj)
-        return json.JSONEncoder.default(self, obj)
-
-
-class Geo_post(Resource):
-    def get(self, post_id):  # get a post by its ID
-        print("   get post")
-        abortIfPostDoesNotExist(post_id)
-        pass
-
-    def delete(self, post_id):  # delete a post by its ID
-        print("   delete post")
-        abortIfPostDoesNotExist(post_id)
-        pass
-
-    def post(self, post_id):  # update a particular post by its ID
-        print("   Update post")
-        abortIfPostDoesNotExist(post_id)
-        pass
-
-
-class Geo_postsList(Resource):
-    def get(self):  # get all geo_posts
-        print("fetch all geo_posts")
-        return allPosts()
+class GeoPostList(Resource):
+    def get(self):  # get all posts
+        cursor = mongo.db.geo_posts.find({})
+        return check_content(cursor)
 
     def post(self):  # add a new post
-        print("Add geo_post")
-        json_data = request.get_json(force=True)
-        # author = json_data['author']
-        # print(author)
-        # qID = addPost(post)
-        # return [{"post_id": qID, "post": post}]  # return the post ID
-        return addPost(json_data)
+        resp = request.get_json(force=True)
+        resp["_created"] = datetime.utcnow()
+        mongo.db.geo_posts.insert(resp)
+        return "", 201
 
 
-@app.before_request
-def before_request():
-    # print("before request " + str(request.endpoint) )
-    if request.endpoint == "geo_postslist":
-        print("\n\n>> connecting db >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        db = conMongo()[config.DB_NAME]
-        geo_postsCol = db['geo_posts']
+class GeoPost(Resource):
+    def get(self, post_id):  # get a post by its ID
+        cursor = mongo.db.geo_posts.find({"_id": ObjectId(post_id)})
+        return check_content(cursor)
+
+    def put(self, post_id):  # update a post by its ID
+        resp = request.get_json(force=True)
+        cursor = mongo.db.geo_posts.update_one(
+            {"_id": ObjectId(post_id)},
+            {
+                "$set": resp
+            }
+        )
+        return "", 204
+
+    def delete(self, post_id):  # delete a post by its ID
+        cursor = mongo.db.geo_posts.remove({"_id": ObjectId(post_id)})
+        # delete related comments
+        cursor = mongo.db.geo_comments.remove({"post_id": post_id})
+        return "", 204
 
 
-@app.teardown_request
-def teardown_request(exception):
-    # print("after request ") + str(request.endpoint)
-    if request.endpoint == "geo_postslist":
-        print(">> disconnect db >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n")
-        conMongo().close()
+class GeoCommentList(Resource):
+    def get(self):  # get all comments
+        cursor = mongo.db.geo_comments.find({})
+        return check_content(cursor)
+
+    def post(self):  # add a new comment
+        resp = request.get_json(force=True)
+        resp["_created"] = datetime.utcnow()
+        mongo.db.geo_comments.insert(resp)
+        return "", 201
 
 
-api.add_resource(Geo_postsList, '/geo_posts')
-api.add_resource(Geo_post, '/geo_posts/<string:post_id>')
-# initDB(SAMPLES) #start with a clean DB
+class GeoComment(Resource):
+    def get(self, comment_id):  # get a comment by its ID
+        cursor = mongo.db.geo_comments.find({"_id": ObjectId(comment_id)})
+        return check_content(cursor)
+
+    def put(self, comment_id):  # update a comment by its ID
+        resp = request.get_json(force=True)
+        cursor = mongo.db.geo_comments.update_one(
+            {"_id": ObjectId(comment_id)},
+            {
+                "$set": resp
+            }
+        )
+        return "", 204
+
+    def delete(self, comment_id):  # delete a comment by its ID
+        cursor = mongo.db.geo_comments.remove({"_id": ObjectId(comment_id)})
+        return "", 204
+
+
+api.add_resource(GeoPostList, '/geo_posts', endpoint='geo_posts')
+api.add_resource(GeoPost, '/geo_posts/<string:post_id>',
+                 endpoint='geo_post')
+api.add_resource(GeoCommentList, '/geo_comments', endpoint='geo_comments')
+api.add_resource(GeoComment, '/geo_comments/<string:comment_id>',
+                 endpoint='geo_comment')
 
 
 if __name__ == '__main__':
