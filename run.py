@@ -3,18 +3,18 @@ from datetime import datetime
 from bson.json_util import dumps
 from bson.objectid import ObjectId
 from flask import Flask, request, make_response, jsonify
-from flask.ext.restful import Api, Resource, abort
+from flask_restful import Api, Resource, abort
 from flask_pymongo import PyMongo
 
 
-def creat_app():
+def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object('config')
     app.config.from_pyfile('config.py', silent=True)
     return app
 
 
-app = creat_app()
+app = create_app()
 mongo = PyMongo(app, config_prefix='MONGO')
 api = Api(app)
 
@@ -31,17 +31,17 @@ def not_found(error):
     return make_response(jsonify({'message': 'Not found'}), 404)
 
 
-def notFound(obj):
+def check_content(obj):
     """if no content found return 404, else return cursor."""
     if obj.count() == 0:
         abort(404)
     return obj
 
 
-class Geo_postAPI(Resource):
+class GeoPost(Resource):
     def get(self, post_id):  # get a post by its ID
         cursor = mongo.db.geo_posts.find({"_id": ObjectId(post_id)})
-        return notFound(cursor)
+        return check_content(cursor)
 
     def delete(self, post_id):  # delete a post by its ID
         cursor = mongo.db.geo_posts.remove({"_id": ObjectId(post_id)})
@@ -58,10 +58,10 @@ class Geo_postAPI(Resource):
         return "", 204
 
 
-class Geo_postListAPI(Resource):
+class GeoPostList(Resource):
     def get(self):  # get all geo_posts
         cursor = mongo.db.geo_posts.find({})
-        return notFound(cursor)
+        return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
@@ -72,9 +72,9 @@ class Geo_postListAPI(Resource):
         return "", 201
 
 
-api.add_resource(Geo_postListAPI, '/geo_posts',
+api.add_resource(GeoPostList, '/geo_posts',
                  '/geo_posts/', endpoint='geo_posts')
-api.add_resource(Geo_postAPI, '/geo_posts/<string:post_id>',
+api.add_resource(GeoPost, '/geo_posts/<string:post_id>',
                  '/geo_posts/<string:post_id>/', endpoint='geo_post')
 
 if __name__ == '__main__':
