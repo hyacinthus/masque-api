@@ -1,13 +1,6 @@
-from datetime import datetime
-
-from bson.objectid import ObjectId
 from flask_restful import Resource, abort, request
-from pymongo import MongoClient
 
-import config
-
-client = MongoClient(config.MONGO_URI)
-db = client[config.MONGO_DB]
+from model import *
 
 
 def check_content(obj):
@@ -19,33 +12,35 @@ def check_content(obj):
 
 class GeoPostList(Resource):
     def get(self):  # get all posts
-        cursor = db.geo_posts.find({})
+        cursor = connection.GeoPost.find()
         return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
-        resp["_created"] = datetime.utcnow()
-        db.geo_posts.insert(resp)
+        doc = connection.GeoPost()
+        for item in resp:
+            doc[item] = resp[item]
+        doc.save()
         return "", 201
 
 
 class GeoPost(Resource):
     def get(self, post_id):  # get a post by its ID
-        cursor = db.geo_posts.find({"_id": ObjectId(post_id)})
+        cursor = connection.GeoPost.find({"_id": ObjectId(post_id)})
         return check_content(cursor)
 
     def put(self, post_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        cursor = db.geo_posts.update_one(
-            {"_id": ObjectId(post_id)},
-            {
-                "$set": resp
-            }
-        )
+        doc = connection.GeoPost()
+        for item in resp:
+            doc[item] = resp[item]
+        doc["_id"] = post_id
+        doc.save()
         return "", 204
 
     def delete(self, post_id):  # delete a post by its ID
-        cursor = db.geo_posts.remove({"_id": ObjectId(post_id)})
+        cursor = connection.GeoPost.find_and_modify(
+            {"_id": ObjectId(post_id)}, remove=True)
         # delete related comments
-        cursor = db.geo_comments.remove({"post_id": post_id})
+        # cursor = db.geo_comments.remove({"post_id": post_id})
         return "", 204

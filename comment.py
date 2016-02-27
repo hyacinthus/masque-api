@@ -1,13 +1,6 @@
-from datetime import datetime
-
-from bson.objectid import ObjectId
 from flask_restful import Resource, abort, request
-from pymongo import MongoClient
 
-import config
-
-client = MongoClient(config.MONGO_URI)
-db = client[config.MONGO_DB]
+from model import *
 
 
 def check_content(obj):
@@ -19,31 +12,33 @@ def check_content(obj):
 
 class GeoCommentList(Resource):
     def get(self):  # get all comments
-        cursor = db.geo_comments.find({})
+        cursor = connection.GeoComment.find()
         return check_content(cursor)
 
     def post(self):  # add a new comment
         resp = request.get_json(force=True)
-        resp["_created"] = datetime.utcnow()
-        db.geo_comments.insert(resp)
+        doc = connection.GeoComment()
+        for item in resp:
+            doc[item] = resp[item]
+        doc.save()
         return "", 201
 
 
 class GeoComment(Resource):
     def get(self, comment_id):  # get a comment by its ID
-        cursor = db.geo_comments.find({"_id": ObjectId(comment_id)})
+        cursor = connection.GeoComment.find({"_id": ObjectId(comment_id)})
         return check_content(cursor)
 
     def put(self, comment_id):  # update a comment by its ID
         resp = request.get_json(force=True)
-        cursor = db.geo_comments.update_one(
-            {"_id": ObjectId(comment_id)},
-            {
-                "$set": resp
-            }
-        )
+        doc = connection.GeoComment()
+        for item in resp:
+            doc[item] = resp[item]
+        doc["_id"] = comment_id
+        doc.save()
         return "", 204
 
     def delete(self, comment_id):  # delete a comment by its ID
-        cursor = db.geo_comments.remove({"_id": ObjectId(comment_id)})
+        cursor = connection.GeoComment.find_and_modify(
+            {"_id": ObjectId(comment_id)}, remove=True)
         return "", 204
