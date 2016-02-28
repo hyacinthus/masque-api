@@ -19,6 +19,8 @@ class GeoPostList(Resource):
         resp = request.get_json(force=True)
         doc = connection.GeoPost()
         for item in resp:
+            if item == "_id":
+                continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
         return "", 201

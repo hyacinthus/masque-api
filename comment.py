@@ -19,6 +19,8 @@ class GeoCommentList(Resource):
         resp = request.get_json(force=True)
         doc = connection.GeoComment()
         for item in resp:
+            if item == "_id":
+                continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
         return "", 201
