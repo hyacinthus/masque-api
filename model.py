@@ -63,10 +63,7 @@ class GeoPost(Document):
             "user_id": CustomObjectId()
         },
         "location": {
-            "coordinates": [
-                OR(int, float),
-                OR(int, float)
-            ],
+            "coordinates": list,
             "type": IS("Point", "MultiPoint", "LineString", "MultiLineString",
                        "Polygon", "MultiPolygon", "GeometryCollection")
         },
