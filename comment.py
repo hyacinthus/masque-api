@@ -1,6 +1,7 @@
+from bson.objectid import ObjectId
 from flask_restful import Resource, abort, request
 
-from model import *
+from model import connection
 
 
 def check_content(obj):
@@ -25,7 +26,7 @@ class GeoCommentList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return "", 201
+        return 201
 
 
 class GeoComment(Resource):
@@ -40,9 +41,9 @@ class GeoComment(Resource):
             doc[item] = resp[item]
         doc["_id"] = comment_id
         doc.save()
-        return "", 204
+        return 204
 
     def delete(self, comment_id):  # delete a comment by its ID
         cursor = connection.GeoComment.find_and_modify(
             {"_id": ObjectId(comment_id)}, remove=True)
-        return "", 204
+        return 204

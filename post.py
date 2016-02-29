@@ -1,6 +1,8 @@
-from flask_restful import Resource, abort, request
+from bson.objectid import ObjectId
+from flask_restful import Resource, abort, request, reqparse
 
-from model import *
+from config import APIConfig
+from model import connection
 
 
 def check_content(obj):
@@ -14,7 +16,18 @@ def check_content(obj):
 
 class GeoPostList(Resource):
     def get(self):  # get all posts
-        cursor = connection.GeoPost.find()
+        parser = reqparse.RequestParser()
+        parser.add_argument('pageindex',
+                            type=int,
+                            required=True,
+                            help='pageindex cannot be converted!'
+                            )
+        args = parser.parse_args()
+        index = args["pageindex"] - 1
+        cursor = connection.GeoPost.find(
+            skip=(index * APIConfig.PAGESIZE),
+            limit=APIConfig.PAGESIZE,
+            max_scan=APIConfig.MAX_SCAN)
         return check_content(cursor)
 
     def post(self):  # add a new post
@@ -25,7 +38,7 @@ class GeoPostList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return "", 201
+        return 201
 
 
 class GeoPost(Resource):
@@ -40,7 +53,7 @@ class GeoPost(Resource):
             doc[item] = resp[item]
         doc["_id"] = post_id
         doc.save()
-        return "", 204
+        return 204
 
     def delete(self, post_id):  # delete a post by its ID
         cursor = connection.GeoPost.find_and_modify(
@@ -48,4 +61,4 @@ class GeoPost(Resource):
         # delete related comments
         cursor = connection.GeoComment.find_and_modify(
             {"post_id": ObjectId(post_id)}, remove=True)
-        return "", 204
+        return 204

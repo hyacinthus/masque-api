@@ -1,6 +1,7 @@
+from bson.objectid import ObjectId
 from flask_restful import Resource, abort, request
 
-from model import *
+from model import connection
 
 
 def check_content(obj):
@@ -25,7 +26,7 @@ class UserList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return "", 201
+        return 201
 
 
 class User(Resource):
@@ -40,10 +41,10 @@ class User(Resource):
             doc[item] = resp[item]
         doc["_id"] = user_id
         doc.save()
-        return "", 204
+        return 204
 
     def delete(self, user_id):  # delete a post by its ID
         cursor = connection.User.find_and_modify(
             {"_id": ObjectId(user_id)}, remove=True)
         # TODO: delete related data 
-        return "", 204
+        return 204

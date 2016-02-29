@@ -4,23 +4,23 @@ from bson.objectid import ObjectId
 from mongokit import IS, Document, Connection
 from mongokit.schema_document import CustomType
 
-import config
+from config import MongoConfig, CollectionName
 
 
 class CustomDate(CustomType):
     mongo_type = datetime  # optional, just for more validation
-    python_type = str
+    python_type = float
     init_type = None  # optional, fill the first empty value
 
     def to_bson(self, value):
         """convert type to a mongodb type"""
         if value == "" or value is None:  # update time if not received.
-            value = datetime.strftime(datetime.utcnow(), '%Y-%m-%d %H:%M:%S')
-        return datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+            return datetime.utcnow()
+        return datetime.fromtimestamp(value)
 
     def to_python(self, value):
         """convert type to a python type"""
-        return datetime.strftime(value, '%Y-%m-%d %H:%M:%S')
+        return datetime.timestamp(value)
 
     def validate(self, value, path):
         """OPTIONAL : useful to add a validation layer"""
@@ -47,13 +47,13 @@ class CustomObjectId(CustomType):
             pass  # ... do something here
 
 
-connection = Connection(host=config.MONGO_HOST, port=config.MONGO_PORT)
+connection = Connection(host=MongoConfig.HOST, port=MongoConfig.PORT)
 
 
 @connection.register
 class GeoPost(Document):
-    __collection__ = 'geo_posts'
-    __database__ = config.MONGO_DB
+    __collection__ = CollectionName.GEO_POSTS
+    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -80,8 +80,8 @@ class GeoPost(Document):
 
 @connection.register
 class GeoComment(Document):
-    __collection__ = 'geo_comments'
-    __database__ = config.MONGO_DB
+    __collection__ = CollectionName.GEO_COMMENTS
+    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -98,8 +98,8 @@ class GeoComment(Document):
 
 @connection.register
 class User(Document):
-    __collection__ = 'users'
-    __database__ = config.MONGO_DB
+    __collection__ = CollectionName.USERS
+    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "name": str,
