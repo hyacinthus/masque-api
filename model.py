@@ -68,7 +68,7 @@ class GeoPost(Document):
                        "Polygon", "MultiPolygon", "GeometryCollection")
         },
         "content": str,
-        "author": str
+        "author": CustomObjectId()
     }
     # required_fields = [
     #     'mask_id', 'hearts.mask_id', 'hearts.user_id'
@@ -91,7 +91,7 @@ class GeoComment(Document):
             "user_id": CustomObjectId()
         },
         "post_id": CustomObjectId(),
-        "author": str,
+        "author": CustomObjectId(),
         "content": str
     }
 
