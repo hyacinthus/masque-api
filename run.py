@@ -4,6 +4,7 @@ from flask_restful import Api
 
 from comment import GeoComment, GeoCommentList
 from post import GeoPost, GeoPostList
+from user import User, UserList
 
 
 def create_app():
@@ -35,6 +36,9 @@ api.add_resource(GeoPost, '/geo_posts/<string:post_id>',
 api.add_resource(GeoCommentList, '/geo_comments', endpoint='geo_comments')
 api.add_resource(GeoComment, '/geo_comments/<string:comment_id>',
                  endpoint='geo_comment')
+api.add_resource(UserList, '/users', endpoint='users')
+api.add_resource(User, '/users/<string:user_id>',
+                 endpoint='user')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

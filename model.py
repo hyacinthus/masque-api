@@ -94,3 +94,26 @@ class GeoComment(Document):
         "author": str,
         "content": str
     }
+
+
+@connection.register
+class User(Document):
+    __collection__ = 'users'
+    __database__ = config.MONGO_DB
+    structure = {
+        "_id": CustomObjectId(),
+        "name": str,
+        "_created": CustomDate(),
+        "cellphone": str,
+        "exp": int,
+        "user_level_id": CustomObjectId(),
+        "hearts_received": int,
+        "hearts": int,
+        "_updated": CustomDate(),
+        "masks": list,
+        "pinned": {
+            "name": str,
+            "location": list
+        },
+        "themes": list,
+    }
