@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from bson.objectid import ObjectId
-from mongokit import IS, OR, Document, Connection
+from mongokit import IS, Document, Connection
 from mongokit.schema_document import CustomType
 
 import config

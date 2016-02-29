@@ -46,5 +46,6 @@ class GeoPost(Resource):
         cursor = connection.GeoPost.find_and_modify(
             {"_id": ObjectId(post_id)}, remove=True)
         # delete related comments
-        # cursor = db.geo_comments.remove({"post_id": post_id})
+        cursor = connection.GeoComment.find_and_modify(
+            {"post_id": ObjectId(post_id)}, remove=True)
         return "", 204
