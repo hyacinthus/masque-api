@@ -7,7 +7,9 @@ def check_content(obj):
     """if no content found return 404, else return cursor."""
     if obj.count() == 0:
         abort(404)
-    return obj
+    elif obj.count() == 1:
+        return obj[0]  # return a dict if obj has only one item
+    return obj  # or return a list
 
 
 class GeoCommentList(Resource):
