@@ -6,6 +6,8 @@ from mongokit.schema_document import CustomType
 
 from config import MongoConfig
 
+connection = Connection(host=MongoConfig.HOST, port=MongoConfig.PORT)
+
 
 class CustomDate(CustomType):
     mongo_type = datetime  # optional, just for more validation
@@ -47,11 +49,7 @@ class CustomObjectId(CustomType):
             pass  # ... do something here
 
 
-connection = Connection(host=MongoConfig.HOST, port=MongoConfig.PORT)
-
-
-@connection.register
-class Post(Document):
+class Root(Document):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -68,13 +66,19 @@ class Post(Document):
             ],
             "type": IS("Point")
         },
+        "author": CustomObjectId()
+    }
+
+
+@connection.register
+class Post(Root):
+    structure = {
         "content": {
             "type": IS("text", "vote", "photo"),
             "text": str,
             "photo": str,
             "options": list
         },
-        "author": CustomObjectId(),
         "comment_count": int
     }
     # required_fields = [
@@ -88,23 +92,7 @@ class Post(Document):
 @connection.register
 class Comment(Document):
     structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": CustomObjectId(),
-        "hearts": {
-            "mask_id": CustomObjectId(),
-            "user_id": CustomObjectId()
-        },
-        "post_id": CustomObjectId(),
-        "author": CustomObjectId(),
-        "content": str,
-        "location": {
-            "coordinates": [
-                OR(int, float),
-                OR(int, float)
-            ],
-            "type": IS("Point")
-        }
+        "content": str
     }
 
 
