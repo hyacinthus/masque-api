@@ -3,6 +3,7 @@ from flask import Flask, make_response, jsonify
 from flask_restful import Api
 
 from comment import GeoComment, GeoCommentList
+from model import connection
 from post import GeoPost, GeoPostList
 from user import User, UserList
 
@@ -28,6 +29,11 @@ def output_json(data, code, headers=None):
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'message': 'Not found'}), 404)
+
+
+@app.teardown_request
+def teardown_request(exception):  # close db connection after each api request
+    connection.close()
 
 
 api.add_resource(GeoPostList, '/geo_posts', endpoint='geo_posts')
