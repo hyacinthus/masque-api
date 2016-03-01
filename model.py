@@ -1,10 +1,10 @@
 from datetime import datetime
 
 from bson.objectid import ObjectId
-from mongokit import IS, Document, Connection
+from mongokit import IS, OR, Document, Connection
 from mongokit.schema_document import CustomType
 
-from config import MongoConfig, CollectionName
+from config import MongoConfig
 
 
 class CustomDate(CustomType):
@@ -51,24 +51,31 @@ connection = Connection(host=MongoConfig.HOST, port=MongoConfig.PORT)
 
 
 @connection.register
-class GeoPost(Document):
-    __collection__ = CollectionName.GEO_POSTS
-    __database__ = MongoConfig.DB
+class Post(Document):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
+        "_updated": CustomDate(),
         "mask_id": CustomObjectId(),
         "hearts": {
             "mask_id": CustomObjectId(),
             "user_id": CustomObjectId()
         },
         "location": {
-            "coordinates": list,
-            "type": IS("Point", "MultiPoint", "LineString", "MultiLineString",
-                       "Polygon", "MultiPolygon", "GeometryCollection")
+            "coordinates": [
+                OR(int, float),
+                OR(int, float)
+            ],
+            "type": IS("Point")
         },
-        "content": str,
-        "author": CustomObjectId()
+        "content": {
+            "type": IS("text", "vote", "photo"),
+            "text": str,
+            "photo": str,
+            "options": list
+        },
+        "author": CustomObjectId(),
+        "comment_count": int
     }
     # required_fields = [
     #     'mask_id', 'hearts.mask_id', 'hearts.user_id'
@@ -79,9 +86,7 @@ class GeoPost(Document):
 
 
 @connection.register
-class GeoComment(Document):
-    __collection__ = CollectionName.GEO_COMMENTS
-    __database__ = MongoConfig.DB
+class Comment(Document):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -92,14 +97,19 @@ class GeoComment(Document):
         },
         "post_id": CustomObjectId(),
         "author": CustomObjectId(),
-        "content": str
+        "content": str,
+        "location": {
+            "coordinates": [
+                OR(int, float),
+                OR(int, float)
+            ],
+            "type": IS("Point")
+        }
     }
 
 
 @connection.register
 class User(Document):
-    __collection__ = CollectionName.USERS
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "name": str,
@@ -115,5 +125,5 @@ class User(Document):
             "name": str,
             "location": list
         },
-        "themes": list,
+        "themes": list
     }

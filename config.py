@@ -15,6 +15,4 @@ class APIConfig:
 
 
 class CollectionName:
-    GEO_POSTS = "geo_posts"
-    GEO_COMMENTS = "geo_comments"
     USERS = "users"

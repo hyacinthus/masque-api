@@ -1,6 +1,7 @@
 from bson.objectid import ObjectId
 from flask_restful import Resource, abort, request
 
+from config import MongoConfig
 from model import connection
 
 
@@ -13,14 +14,16 @@ def check_content(obj):
     return obj  # or return a list
 
 
-class GeoCommentList(Resource):
-    def get(self):  # get all comments
-        cursor = connection.GeoComment.find()
+class CommentList(Resource):
+    def get(self, theme_id):  # get all comments
+        collection = connection[MongoConfig.DB]["comments_" + theme_id]
+        cursor = collection.Comment.find()
         return check_content(cursor)
 
-    def post(self):  # add a new comment
+    def post(self, theme_id):  # add a new comment
         resp = request.get_json(force=True)
-        doc = connection.GeoComment()
+        collection = connection[MongoConfig.DB]["comments_" + theme_id]
+        doc = collection.Comment()
         for item in resp:
             if item == "_id":
                 continue  # skip if post have an _id item
@@ -29,21 +32,24 @@ class GeoCommentList(Resource):
         return 201
 
 
-class GeoComment(Resource):
-    def get(self, comment_id):  # get a comment by its ID
-        cursor = connection.GeoComment.find({"_id": ObjectId(comment_id)})
+class Comment(Resource):
+    def get(self, theme_id, comment_id):  # get a comment by its ID
+        collection = connection[MongoConfig.DB]["comments_" + theme_id]
+        cursor = collection.Comment.find({"_id": ObjectId(comment_id)})
         return check_content(cursor)
 
-    def put(self, comment_id):  # update a comment by its ID
+    def put(self, theme_id, comment_id):  # update a comment by its ID
         resp = request.get_json(force=True)
-        doc = connection.GeoComment()
+        collection = connection[MongoConfig.DB]["comments_" + theme_id]
+        doc = collection.Comment()
         for item in resp:
             doc[item] = resp[item]
         doc["_id"] = comment_id
         doc.save()
         return 204
 
-    def delete(self, comment_id):  # delete a comment by its ID
-        cursor = connection.GeoComment.find_and_modify(
+    def delete(self, theme_id, comment_id):  # delete a comment by its ID
+        collection = connection[MongoConfig.DB]["comments_" + theme_id]
+        collection.Comment.find_and_modify(
             {"_id": ObjectId(comment_id)}, remove=True)
         return 204

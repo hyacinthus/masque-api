@@ -2,9 +2,9 @@ from bson.json_util import dumps
 from flask import Flask, make_response, jsonify
 from flask_restful import Api
 
-from comment import GeoComment, GeoCommentList
+from comment import Comment, CommentList
 from model import connection
-from post import GeoPost, GeoPostList
+from post import Post, PostList
 from user import User, UserList
 
 
@@ -36,12 +36,13 @@ def teardown_request(exception):  # close db connection after each api request
     connection.close()
 
 
-api.add_resource(GeoPostList, '/geo_posts', endpoint='geo_posts')
-api.add_resource(GeoPost, '/geo_posts/<string:post_id>',
-                 endpoint='geo_post')
-api.add_resource(GeoCommentList, '/geo_comments', endpoint='geo_comments')
-api.add_resource(GeoComment, '/geo_comments/<string:comment_id>',
-                 endpoint='geo_comment')
+api.add_resource(PostList, '/posts_<string:theme_id>', endpoint='posts')
+api.add_resource(Post, '/posts_<string:theme_id>/<string:post_id>',
+                 endpoint='post')
+api.add_resource(CommentList, '/comments_<string:theme_id>',
+                 endpoint='comments')
+api.add_resource(Comment, '/comments_<string:theme_id>/<string:comment_id>',
+                 endpoint='comment')
 api.add_resource(UserList, '/users', endpoint='users')
 api.add_resource(User, '/users/<string:user_id>',
                  endpoint='user')

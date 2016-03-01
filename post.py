@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 from flask_restful import Resource, abort, request, reqparse
 
-from config import APIConfig
+from config import MongoConfig, APIConfig
 from model import connection
 
 
@@ -14,25 +14,27 @@ def check_content(obj):
     return obj  # or return a list
 
 
-class GeoPostList(Resource):
-    def get(self):  # get all posts
+class PostList(Resource):
+    def get(self, theme_id):  # get all posts
         parser = reqparse.RequestParser()
-        parser.add_argument('pageindex',
+        parser.add_argument('page',
                             type=int,
                             required=True,
-                            help='pageindex cannot be converted!'
+                            help='page number must be provided.'
                             )
         args = parser.parse_args()
-        index = args["pageindex"] - 1
-        cursor = connection.GeoPost.find(
+        index = args["page"] - 1
+        collection = connection[MongoConfig.DB]["posts_" + theme_id]
+        cursor = collection.Post.find(
             skip=(index * APIConfig.PAGESIZE),
             limit=APIConfig.PAGESIZE,
             max_scan=APIConfig.MAX_SCAN)
         return check_content(cursor)
 
-    def post(self):  # add a new post
+    def post(self, theme_id):  # add a new post
         resp = request.get_json(force=True)
-        doc = connection.GeoPost()
+        collection = connection[MongoConfig.DB]["posts_" + theme_id]
+        doc = collection.Post()
         for item in resp:
             if item == "_id":
                 continue  # skip if post have an _id item
@@ -41,24 +43,27 @@ class GeoPostList(Resource):
         return 201
 
 
-class GeoPost(Resource):
-    def get(self, post_id):  # get a post by its ID
-        cursor = connection.GeoPost.find({"_id": ObjectId(post_id)})
+class Post(Resource):
+    def get(self, theme_id, post_id):  # get a post by its ID
+        collection = connection[MongoConfig.DB]["posts_" + theme_id]
+        cursor = collection.Post.find({"_id": ObjectId(post_id)})
         return check_content(cursor)
 
-    def put(self, post_id):  # update a post by its ID
+    def put(self, theme_id, post_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.GeoPost()
+        collection = connection[MongoConfig.DB]["posts_" + theme_id]
+        doc = collection.Post()
         for item in resp:
             doc[item] = resp[item]
         doc["_id"] = post_id
         doc.save()
         return 204
 
-    def delete(self, post_id):  # delete a post by its ID
-        cursor = connection.GeoPost.find_and_modify(
+    def delete(self, theme_id, post_id):  # delete a post by its ID
+        collection = connection[MongoConfig.DB]["posts_" + theme_id]
+        collection.Post.find_and_modify(
             {"_id": ObjectId(post_id)}, remove=True)
         # delete related comments
-        cursor = connection.GeoComment.find_and_modify(
+        collection.Comment.find_and_modify(
             {"post_id": ObjectId(post_id)}, remove=True)
         return 204
