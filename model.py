@@ -53,7 +53,6 @@ class Root(Document):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
-        "_updated": CustomDate(),
         "mask_id": CustomObjectId(),
         "hearts": {
             "mask_id": CustomObjectId(),
@@ -79,7 +78,8 @@ class Post(Root):
             "photo": str,
             "options": list
         },
-        "comment_count": int
+        "comment_count": int,
+        "_updated": CustomDate()
     }
     # required_fields = [
     #     'mask_id', 'hearts.mask_id', 'hearts.user_id'
@@ -92,7 +92,8 @@ class Post(Root):
 @connection.register
 class Comment(Document):
     structure = {
-        "content": str
+        "content": str,
+        "post_id": CustomObjectId()
     }
 
 
