@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 from mongokit import IS, OR, Document, Connection
 from mongokit.schema_document import CustomType
 
-from config import MongoConfig
+from config import MongoConfig, CollectionName
 
 connection = Connection(host=MongoConfig.HOST, port=MongoConfig.PORT)
 
@@ -93,7 +93,7 @@ class Post(Root):
 class Comment(Root):
     structure = {
         "content": str,
-        "post_id": CustomObjectId()
+        "post_id": CustomObjectId(),
     }
 
 
@@ -112,4 +112,156 @@ class User(Document):
         "masks": list,
         "pinned": list,
         "themes": list
+    }
+
+
+@connection.register
+class Theme(Document):
+    __collection__ = CollectionName.THEMES
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "category": IS("school", "district", "virtual", "private"),
+        "short_name": str,
+        "full_name": str,
+        "locale": {
+            "nation": str,
+            "province": str,
+            "city": str,
+            "county": str
+        }
+    }
+
+
+@connection.register
+class Device(Document):
+    __collection__ = CollectionName.DEVICES
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "name": str,
+        "user_id": CustomObjectId(),
+        "origin_user_id": CustomObjectId(),
+    }
+
+
+@connection.register
+class UserLevel(Document):
+    __collection__ = CollectionName.USER_LEVELS
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "exp": str,
+        "post_limit": int,
+        "report_limit": int,
+        "message_limit": int,
+        "text_post": bool,
+        "vote_post": bool,
+        "photo_post": bool,
+        "colors": list,
+        "heart_limit": int
+    }
+    # default_values = {
+    #     "text_post": False,
+    #     "vote_post": False,
+    #     "photo_post": False
+    # }
+
+
+@connection.register
+class Mask(Document):
+    __collection__ = CollectionName.MASKS
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "name": str,
+        "mask_url": str,
+    }
+
+
+@connection.register
+class BoardPost(Document):
+    __collection__ = CollectionName.BOARD_POSTS
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "_created": CustomDate(),
+        "mask_id": CustomObjectId(),
+        "hearts": {
+            "mask_id": CustomObjectId(),
+            "user_id": CustomObjectId()
+        },
+        "content": str,
+        "author": CustomObjectId()
+    }
+
+
+@connection.register
+class BoardComment(BoardPost):
+    __collection__ = CollectionName.BOARD_COMMENTS
+    __database__ = MongoConfig.DB
+
+
+@connection.register
+class Parameter(Document):
+    __collection__ = CollectionName.PARAMETERS
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "default_masks": [CustomObjectId()]
+    }
+
+
+@connection.register
+class DeviceTrace(Document):
+    __collection__ = CollectionName.DEVICE_TRACE
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "serial": str,
+        "carrier": str,
+        "cellphone": int,
+        "location": {
+            "coordinates": [
+                OR(int, float),
+                OR(int, float)
+            ],
+            "type": IS("Point")
+        }
+    }
+
+
+@connection.register
+class Message(Document):
+    __collection__ = CollectionName.MESSAGES
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "to": CustomObjectId(),
+        "from": CustomObjectId(),
+        "content": str,
+        "_created": CustomDate(),
+        "archived": bool
+    }
+
+
+@connection.register
+class UserTrace(Document):
+    __collection__ = CollectionName.USER_TRACE
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "user_id": CustomObjectId(),
+        "_created": CustomDate(),
+        "_updated": CustomDate(),
+        "thanks": int,
+        "footprint": [
+            {
+                "coordinates": [
+                    OR(int, float),
+                    OR(int, float)
+                ],
+                "type": IS("Point")
+            }
+        ]
     }
