@@ -90,7 +90,7 @@ class Post(Root):
 
 
 @connection.register
-class Comment(Document):
+class Comment(Root):
     structure = {
         "content": str,
         "post_id": CustomObjectId()
