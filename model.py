@@ -110,9 +110,6 @@ class User(Document):
         "hearts": int,
         "_updated": CustomDate(),
         "masks": list,
-        "pinned": {
-            "name": str,
-            "location": list
-        },
+        "pinned": list,
         "themes": list
     }
