@@ -1,6 +1,7 @@
 from bson.objectid import ObjectId
 from flask_restful import Resource, abort, request
 
+from config import MongoConfig, CollectionName
 from model import connection
 
 
@@ -15,12 +16,14 @@ def check_content(obj):
 
 class UserList(Resource):
     def get(self):  # get all posts
-        cursor = connection.User.find()
+        collection = connection[MongoConfig.DB][CollectionName.USERS]
+        cursor = collection.User.find()
         return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
-        doc = connection.User()
+        collection = connection[MongoConfig.DB][CollectionName.USERS]
+        doc = collection.User()
         for item in resp:
             if item == "_id":
                 continue  # skip if post have an _id item
@@ -31,12 +34,14 @@ class UserList(Resource):
 
 class User(Resource):
     def get(self, user_id):  # get a post by its ID
-        cursor = connection.User.find({"_id": ObjectId(user_id)})
+        collection = connection[MongoConfig.DB][CollectionName.USERS]
+        cursor = collection.User.find({"_id": ObjectId(user_id)})
         return check_content(cursor)
 
     def put(self, user_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.User()
+        collection = connection[MongoConfig.DB][CollectionName.USERS]
+        doc = collection.User()
         for item in resp:
             doc[item] = resp[item]
         doc["_id"] = user_id
@@ -44,7 +49,8 @@ class User(Resource):
         return 204
 
     def delete(self, user_id):  # delete a post by its ID
-        cursor = connection.User.find_and_modify(
+        collection = connection[MongoConfig.DB][CollectionName.USERS]
+        collection.User.find_and_modify(
             {"_id": ObjectId(user_id)}, remove=True)
         # TODO: delete related data 
         return 204
