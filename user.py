@@ -4,6 +4,8 @@ from flask_restful import Resource, abort, request
 from config import MongoConfig, CollectionName
 from model import connection
 
+collection = connection[MongoConfig.DB][CollectionName.USERS]
+
 
 def check_content(obj):
     """if no content found return 404, else return cursor."""
@@ -16,13 +18,11 @@ def check_content(obj):
 
 class UserList(Resource):
     def get(self):  # get all posts
-        collection = connection[MongoConfig.DB][CollectionName.USERS]
         cursor = collection.User.find()
         return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
-        collection = connection[MongoConfig.DB][CollectionName.USERS]
         doc = collection.User()
         for item in resp:
             if item == "_id":
@@ -34,13 +34,11 @@ class UserList(Resource):
 
 class User(Resource):
     def get(self, user_id):  # get a post by its ID
-        collection = connection[MongoConfig.DB][CollectionName.USERS]
         cursor = collection.User.find({"_id": ObjectId(user_id)})
         return check_content(cursor)
 
     def put(self, user_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        collection = connection[MongoConfig.DB][CollectionName.USERS]
         doc = collection.User()
         for item in resp:
             doc[item] = resp[item]
@@ -49,7 +47,6 @@ class User(Resource):
         return 204
 
     def delete(self, user_id):  # delete a post by its ID
-        collection = connection[MongoConfig.DB][CollectionName.USERS]
         collection.User.find_and_modify(
             {"_id": ObjectId(user_id)}, remove=True)
         # TODO: delete related data 
