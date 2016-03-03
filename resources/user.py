@@ -25,11 +25,10 @@ class UserList(Resource):
         resp = request.get_json(force=True)
         doc = collection.User()
         for item in resp:
-            if item == "_id":
-                continue  # skip if post have an _id item
             doc[item] = resp[item]
+        doc["_id"] = str(ObjectId())
         doc.save()
-        return 201
+        return doc, 201
 
 
 class User(Resource):

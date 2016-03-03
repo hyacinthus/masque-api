@@ -140,11 +140,14 @@ class Device(Document):
     __collection__ = CollectionName.DEVICES
     __database__ = MongoConfig.DB
     structure = {
-        "_id": CustomObjectId(),
+        "_id": str,
         "name": str,
         "user_id": str,
         "origin_user_id": str,
     }
+    required_fields = [
+        '_id',
+    ]
 
 
 @connection.register

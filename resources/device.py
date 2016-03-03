@@ -22,8 +22,6 @@ class DeviceList(Resource):
         resp = request.get_json(force=True)
         doc = connection.Device()
         for item in resp:
-            if item == "_id":
-                continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
         return 201
@@ -31,7 +29,7 @@ class DeviceList(Resource):
 
 class Device(Resource):
     def get(self, device_id):  # get a post by its ID
-        cursor = connection.Device.find({"_id": ObjectId(device_id)})
+        cursor = connection.Device.find({"_id": device_id})
         return check_content(cursor)
 
     def put(self, device_id):  # update a post by its ID
