@@ -53,11 +53,11 @@ class Root(Document):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
-        "mask_id": CustomObjectId(),
+        "mask_id": str,
         "hearts": [
             {
-                "mask_id": CustomObjectId(),
-                "user_id": CustomObjectId()
+                "mask_id": str,
+                "user_id": str
             }
         ],
         "location": {
@@ -67,7 +67,7 @@ class Root(Document):
             ],
             "type": IS("Point")
         },
-        "author": CustomObjectId()
+        "author": str
     }
 
 
@@ -95,7 +95,7 @@ class Post(Root):
 class Comment(Root):
     structure = {
         "content": str,
-        "post_id": CustomObjectId(),
+        "post_id": str,
     }
 
 
@@ -107,7 +107,7 @@ class User(Document):
         "_created": CustomDate(),
         "cellphone": str,
         "exp": int,
-        "user_level_id": CustomObjectId(),
+        "user_level_id": str,
         "hearts_received": int,
         "hearts_owned": int,
         "_updated": CustomDate(),
@@ -142,8 +142,8 @@ class Device(Document):
     structure = {
         "_id": CustomObjectId(),
         "name": str,
-        "user_id": CustomObjectId(),
-        "origin_user_id": CustomObjectId(),
+        "user_id": str,
+        "origin_user_id": str,
     }
 
 
@@ -188,15 +188,15 @@ class BoardPost(Document):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
-        "mask_id": CustomObjectId(),
+        "mask_id": str,
         "hearts": [
             {
-                "mask_id": CustomObjectId(),
-                "user_id": CustomObjectId()
+                "mask_id": str,
+                "user_id": str
             }
         ],
         "content": str,
-        "author": CustomObjectId()
+        "author": str
     }
 
 
@@ -212,7 +212,7 @@ class Parameter(Document):
     __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
-        "default_masks": [CustomObjectId()]
+        "default_masks": list
     }
 
 
@@ -241,8 +241,8 @@ class Message(Document):
     __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
-        "to": CustomObjectId(),
-        "from": CustomObjectId(),
+        "to": str,
+        "from": str,
         "content": str,
         "_created": CustomDate(),
         "archived": bool
@@ -255,7 +255,7 @@ class UserTrace(Document):
     __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
-        "user_id": CustomObjectId(),
+        "user_id": str,
         "_created": CustomDate(),
         "_updated": CustomDate(),
         "thanks": int,
