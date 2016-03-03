@@ -54,10 +54,12 @@ class Root(Document):
         "_id": CustomObjectId(),
         "_created": CustomDate(),
         "mask_id": CustomObjectId(),
-        "hearts": {
-            "mask_id": CustomObjectId(),
-            "user_id": CustomObjectId()
-        },
+        "hearts": [
+            {
+                "mask_id": CustomObjectId(),
+                "user_id": CustomObjectId()
+            }
+        ],
         "location": {
             "coordinates": [
                 OR(int, float),
@@ -107,7 +109,7 @@ class User(Document):
         "exp": int,
         "user_level_id": CustomObjectId(),
         "hearts_received": int,
-        "hearts": int,
+        "hearts_owned": int,
         "_updated": CustomDate(),
         "masks": list,
         "pinned": list,
@@ -187,10 +189,12 @@ class BoardPost(Document):
         "_id": CustomObjectId(),
         "_created": CustomDate(),
         "mask_id": CustomObjectId(),
-        "hearts": {
-            "mask_id": CustomObjectId(),
-            "user_id": CustomObjectId()
-        },
+        "hearts": [
+            {
+                "mask_id": CustomObjectId(),
+                "user_id": CustomObjectId()
+            }
+        ],
         "content": str,
         "author": CustomObjectId()
     }
