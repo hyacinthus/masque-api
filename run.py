@@ -2,20 +2,20 @@ from bson.json_util import dumps
 from flask import Flask, make_response, jsonify
 from flask_restful import Api
 
-from board_comment import BoardComment, BoardCommentList
-from board_post import BoardPost, BoardPostList
-from comment import Comment, CommentList
-from device import Device, DeviceList
-from device_trace import DeviceTrace, DeviceTraceList
-from mask import Mask, MaskList
-from message import Message, MessageList
 from model import connection
-from parameter import Parameter, ParameterList
-from post import Post, PostList
-from theme import Theme, ThemeList
-from user import User, UserList
-from user_level import UserLevel, UserLevelList
-from user_trace import UserTrace, UserTraceList
+from resources.board_comment import BoardComment, BoardCommentList
+from resources.board_post import BoardPost, BoardPostList
+from resources.comment import Comment, CommentList
+from resources.device import Device, DeviceList
+from resources.device_trace import DeviceTrace, DeviceTraceList
+from resources.mask import Mask, MaskList
+from resources.message import Message, MessageList
+from resources.parameter import Parameter, ParameterList
+from resources.post import Post, PostList
+from resources.theme import Theme, ThemeList
+from resources.user import User, UserList
+from resources.user_level import UserLevel, UserLevelList
+from resources.user_trace import UserTrace, UserTraceList
 
 
 def create_app():
