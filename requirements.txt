@@ -8,9 +8,11 @@ six
 python-dateutil
 aniso8601
 pytz
-flask
 flask-restful
 pymongo>2.8,<3.0
 
-# install the newest mongokit version from github
+# install the newest mongokit from github
 -e git+https://github.com/namlook/mongokit@development#egg=mongokit
+
+# install the newest flask from github
+-e git+https://github.com/ferstar/flask.git@patch-1#egg=flask

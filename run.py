@@ -100,4 +100,4 @@ api.add_resource(UserTrace, '/user_traces/<string:user_trace_id>',
                  endpoint='user_trace')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run()
