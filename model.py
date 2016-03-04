@@ -123,7 +123,7 @@ class Theme(Document):
     __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
-        "category": IS("school", "district", "virtual", "private"),
+        "category": IS("school", "district", "virtual", "private", "system"),
         "short_name": str,
         "full_name": str,
         "locale": {
