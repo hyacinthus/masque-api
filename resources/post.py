@@ -19,16 +19,17 @@ class PostList(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('page',
                             type=int,
-                            required=True,
-                            help='page number must be provided.'
-                            )
+                            help='page number must be int')
         args = parser.parse_args()
-        index = args["page"] - 1
+        if args['page'] is None:
+            args['page'] = 1
+        index = args['page'] - 1
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         cursor = collection.Post.find(
             skip=(index * APIConfig.PAGESIZE),
             limit=APIConfig.PAGESIZE,
-            max_scan=APIConfig.MAX_SCAN)
+            max_scan=APIConfig.MAX_SCAN,
+            sort=[("_updated", -1)])  # sorted by update time in reversed order
         return check_content(cursor)
 
     def post(self, theme_id):  # add a new post
@@ -39,8 +40,9 @@ class PostList(Resource):
             if item == "_id":
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
+        doc['_id'] = str(ObjectId())
         doc.save()
-        return 201
+        return {"_id": doc['_id']}, 201
 
 
 class Post(Resource):
@@ -57,7 +59,7 @@ class Post(Resource):
             doc[item] = resp[item]
         doc["_id"] = post_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, theme_id, post_id):  # delete a post by its ID
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
@@ -66,4 +68,4 @@ class Post(Resource):
         # delete related comments
         collection.Comment.find_and_modify(
             {"post_id": ObjectId(post_id)}, remove=True)
-        return 204
+        return None, 204

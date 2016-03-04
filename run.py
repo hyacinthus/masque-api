@@ -46,8 +46,11 @@ def teardown_request(exception):  # close db connection after each api request
     connection.close()
 
 
-api.add_resource(PostList, '/posts_<string:theme_id>', endpoint='posts')
-api.add_resource(Post, '/posts_<string:theme_id>/<string:post_id>',
+api.add_resource(PostList, '/theme/<string:theme_id>/posts',
+                 '/theme/<string:theme_id>/posts/',
+                 endpoint='posts')
+api.add_resource(Post, '/theme/<string:theme_id>/post/<string:post_id>',
+                 '/theme/<string:theme_id>/post/<string:post_id>/',
                  endpoint='post')
 
 api.add_resource(CommentList, '/comments_<string:theme_id>',
@@ -55,7 +58,7 @@ api.add_resource(CommentList, '/comments_<string:theme_id>',
 api.add_resource(Comment, '/comments_<string:theme_id>/<string:comment_id>',
                  endpoint='comment')
 
-api.add_resource(UserList, '/users', endpoint='users')
+api.add_resource(UserList, '/users', '/users/', endpoint='users')
 api.add_resource(User, '/users/<string:user_id>',
                  endpoint='user')
 
