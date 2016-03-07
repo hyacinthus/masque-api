@@ -29,6 +29,15 @@ class CommentList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
+        connection.ExtraUserField.find_and_modify(
+            {"_id": ObjectId(resp['author'])},
+            {
+                '$addToSet': {
+                    "comments": theme_id
+                }
+            },
+            upsert=True
+        )  # add theme_id into ExtraUserField.comments list if not exist
         return None, 201
 
 

@@ -101,6 +101,8 @@ class Comment(Root):
 
 @connection.register
 class User(Document):
+    __collection__ = CollectionName.USERS
+    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "name": str,
@@ -271,4 +273,26 @@ class UserTrace(Document):
                 "type": IS("Point")
             }
         ]
+    }
+
+
+@connection.register
+class ExtraUserField(Document):
+    __collection__ = CollectionName.EXTRA_USER_FIELDS
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "posts": list,
+        "comments": list,
+        "pinned": list,
+        "themes": list
+    }
+    required_fields = [
+        '_id'
+    ]
+    default_values = {
+        "posts": [],
+        "comments": [],
+        "pinned": [],
+        "themes": []
     }

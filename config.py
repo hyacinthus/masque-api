@@ -26,3 +26,4 @@ class CollectionName:
     DEVICE_TRACE = "device_trace"
     MESSAGES = "messages"
     USER_TRACE = "user_trace"
+    EXTRA_USER_FIELDS = "extra_user_fields"
