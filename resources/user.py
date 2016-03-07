@@ -1,6 +1,7 @@
 from bson.objectid import ObjectId
 from flask_restful import Resource, abort, request
 
+from config import MongoConfig
 from model import connection
 
 
@@ -50,3 +51,24 @@ class User(Resource):
             {"_id": ObjectId(user_id)}, remove=True)
         # TODO: delete related data 
         return None, 204
+
+
+class UserPostList(Resource):
+    def get(self, user_id):
+        """get a user's posts
+        add theme_id to each post
+        """
+        cursor = connection.ExtraUserField.find({"_id": ObjectId(user_id)})
+        result = []
+        for theme_id in cursor[0]["posts"]:
+            collection = connection[MongoConfig.DB]["posts_" + theme_id]
+            cur = collection.Post.find({"author": user_id})
+            for item in cur:
+                item["theme_id"] = theme_id
+                result.append(item)
+        return sorted(result, key=lambda k: k["_updated"], reverse=True)
+
+
+class UserCommentList(Resource):
+    def get(self, user_id):
+        pass
