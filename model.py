@@ -105,7 +105,6 @@ class User(Document):
     __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
-        "name": str,
         "_created": CustomDate(),
         "cellphone": str,
         "exp": int,
