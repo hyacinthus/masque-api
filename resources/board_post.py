@@ -26,7 +26,7 @@ class BoardPostList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class BoardPost(Resource):
@@ -41,10 +41,10 @@ class BoardPost(Resource):
             doc[item] = resp[item]
         doc["_id"] = board_post_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, board_post_id):  # delete a post by its ID
         connection.BoardPost.find_and_modify(
             {"_id": ObjectId(board_post_id)}, remove=True)
         # TODO: delete related data 
-        return 204
+        return None, 204

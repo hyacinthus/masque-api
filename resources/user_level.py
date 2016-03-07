@@ -26,7 +26,7 @@ class UserLevelList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class UserLevel(Resource):
@@ -41,10 +41,10 @@ class UserLevel(Resource):
             doc[item] = resp[item]
         doc["_id"] = user_level_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, user_level_id):  # delete a post by its ID
         connection.UserLevel.find_and_modify(
             {"_id": ObjectId(user_level_id)}, remove=True)
         # TODO: delete related data
-        return 204
+        return None, 204

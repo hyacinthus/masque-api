@@ -26,7 +26,7 @@ class BoardCommentList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class BoardComment(Resource):
@@ -42,10 +42,10 @@ class BoardComment(Resource):
             doc[item] = resp[item]
         doc["_id"] = board_comment_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, board_comment_id):  # delete a post by its ID
         connection.BoardComment.find_and_modify(
             {"_id": ObjectId(board_comment_id)}, remove=True)
         # TODO: delete related data 
-        return 204
+        return None, 204

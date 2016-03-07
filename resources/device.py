@@ -24,7 +24,7 @@ class DeviceList(Resource):
         for item in resp:
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class Device(Resource):
@@ -39,10 +39,10 @@ class Device(Resource):
             doc[item] = resp[item]
         doc["_id"] = device_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, device_id):  # delete a post by its ID
         connection.Device.find_and_modify(
             {"_id": ObjectId(device_id)}, remove=True)
         # TODO: delete related data 
-        return 204
+        return None, 204

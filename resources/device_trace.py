@@ -26,7 +26,7 @@ class DeviceTraceList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class DeviceTrace(Resource):
@@ -41,10 +41,10 @@ class DeviceTrace(Resource):
             doc[item] = resp[item]
         doc["_id"] = device_trace_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, device_trace_id):  # delete a post by its ID
         connection.DeviceTrace.find_and_modify(
             {"_id": ObjectId(device_trace_id)}, remove=True)
         # TODO: delete related data 
-        return 204
+        return None, 204

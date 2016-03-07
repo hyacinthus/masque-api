@@ -43,10 +43,10 @@ class User(Resource):
             doc[item] = resp[item]
         doc["_id"] = user_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, user_id):  # delete a post by its ID
         collection.User.find_and_modify(
             {"_id": ObjectId(user_id)}, remove=True)
         # TODO: delete related data 
-        return 204
+        return None, 204

@@ -26,7 +26,7 @@ class UserTraceList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class UserTrace(Resource):
@@ -41,10 +41,10 @@ class UserTrace(Resource):
             doc[item] = resp[item]
         doc["_id"] = user_trace_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, user_trace_id):  # delete a post by its ID
         connection.UserTrace.find_and_modify(
             {"_id": ObjectId(user_trace_id)}, remove=True)
         # TODO: delete related data
-        return 204
+        return None, 204

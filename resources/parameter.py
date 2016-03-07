@@ -26,7 +26,7 @@ class ParameterList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class Parameter(Resource):
@@ -41,10 +41,10 @@ class Parameter(Resource):
             doc[item] = resp[item]
         doc["_id"] = parameter_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, parameter_id):  # delete a post by its ID
         connection.Parameter.find_and_modify(
             {"_id": ObjectId(parameter_id)}, remove=True)
         # TODO: delete related data
-        return 204
+        return None, 204

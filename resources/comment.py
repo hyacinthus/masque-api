@@ -29,7 +29,7 @@ class CommentList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class Comment(Resource):
@@ -46,10 +46,10 @@ class Comment(Resource):
             doc[item] = resp[item]
         doc["_id"] = comment_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, theme_id, comment_id):  # delete a comment by its ID
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         collection.Comment.find_and_modify(
             {"_id": ObjectId(comment_id)}, remove=True)
-        return 204
+        return None, 204

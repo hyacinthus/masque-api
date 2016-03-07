@@ -26,7 +26,7 @@ class MaskList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class Mask(Resource):
@@ -41,10 +41,10 @@ class Mask(Resource):
             doc[item] = resp[item]
         doc["_id"] = mask_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, mask_id):  # delete a post by its ID
         connection.Mask.find_and_modify(
             {"_id": ObjectId(mask_id)}, remove=True)
         # TODO: delete related data 
-        return 204
+        return None, 204

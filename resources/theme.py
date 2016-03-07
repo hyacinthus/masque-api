@@ -26,7 +26,7 @@ class ThemeList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class Theme(Resource):
@@ -41,10 +41,10 @@ class Theme(Resource):
             doc[item] = resp[item]
         doc["_id"] = theme_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, theme_id):  # delete a post by its ID
         connection.Theme.find_and_modify(
             {"_id": ObjectId(theme_id)}, remove=True)
         # TODO: delete related data
-        return 204
+        return None, 204

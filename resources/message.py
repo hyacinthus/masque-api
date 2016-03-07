@@ -26,7 +26,7 @@ class MessageList(Resource):
                 continue  # skip if post have an _id item
             doc[item] = resp[item]
         doc.save()
-        return 201
+        return None, 201
 
 
 class Message(Resource):
@@ -41,10 +41,10 @@ class Message(Resource):
             doc[item] = resp[item]
         doc["_id"] = message_id
         doc.save()
-        return 204
+        return None, 204
 
     def delete(self, message_id):  # delete a post by its ID
         connection.Message.find_and_modify(
             {"_id": ObjectId(message_id)}, remove=True)
         # TODO: delete related data
-        return 204
+        return None, 204
