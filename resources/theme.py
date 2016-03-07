@@ -13,14 +13,14 @@ def check_content(obj):
     return obj  # or return a list
 
 
-class ThemeList(Resource):
+class ThemesList(Resource):
     def get(self):  # get all posts
-        cursor = connection.Theme.find()
+        cursor = connection.Themes.find()
         return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
-        doc = connection.Theme()
+        doc = connection.Themes()
         for item in resp:
             if item == "_id":
                 continue  # skip if post have an _id item
@@ -29,14 +29,14 @@ class ThemeList(Resource):
         return None, 201
 
 
-class Theme(Resource):
+class Themes(Resource):
     def get(self, theme_id):  # get a post by its ID
-        cursor = connection.Theme.find({"_id": ObjectId(theme_id)})
+        cursor = connection.Themes.find({"_id": ObjectId(theme_id)})
         return check_content(cursor)
 
     def put(self, theme_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.Theme()
+        doc = connection.Themes()
         for item in resp:
             doc[item] = resp[item]
         doc["_id"] = theme_id
@@ -44,7 +44,7 @@ class Theme(Resource):
         return None, 204
 
     def delete(self, theme_id):  # delete a post by its ID
-        connection.Theme.find_and_modify(
+        connection.Themes.find_and_modify(
             {"_id": ObjectId(theme_id)}, remove=True)
         # TODO: delete related data
         return None, 204

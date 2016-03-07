@@ -13,14 +13,14 @@ def check_content(obj):
     return obj  # or return a list
 
 
-class UserLevelList(Resource):
+class UserLevelsList(Resource):
     def get(self):  # get all posts
-        cursor = connection.UserLevel.find()
+        cursor = connection.UserLevels.find()
         return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
-        doc = connection.UserLevel()
+        doc = connection.UserLevels()
         for item in resp:
             if item == "_id":
                 continue  # skip if post have an _id item
@@ -29,14 +29,14 @@ class UserLevelList(Resource):
         return None, 201
 
 
-class UserLevel(Resource):
+class UserLevels(Resource):
     def get(self, user_level_id):  # get a post by its ID
-        cursor = connection.UserLevel.find({"_id": ObjectId(user_level_id)})
+        cursor = connection.UserLevels.find({"_id": ObjectId(user_level_id)})
         return check_content(cursor)
 
     def put(self, user_level_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.UserLevel()
+        doc = connection.UserLevels()
         for item in resp:
             doc[item] = resp[item]
         doc["_id"] = user_level_id
@@ -44,7 +44,7 @@ class UserLevel(Resource):
         return None, 204
 
     def delete(self, user_level_id):  # delete a post by its ID
-        connection.UserLevel.find_and_modify(
+        connection.UserLevels.find_and_modify(
             {"_id": ObjectId(user_level_id)}, remove=True)
         # TODO: delete related data
         return None, 204

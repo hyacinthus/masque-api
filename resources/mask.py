@@ -13,14 +13,14 @@ def check_content(obj):
     return obj  # or return a list
 
 
-class MaskList(Resource):
+class MasksList(Resource):
     def get(self):  # get all posts
-        cursor = connection.Mask.find()
+        cursor = connection.Masks.find()
         return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
-        doc = connection.Mask()
+        doc = connection.Masks()
         for item in resp:
             if item == "_id":
                 continue  # skip if post have an _id item
@@ -29,14 +29,14 @@ class MaskList(Resource):
         return None, 201
 
 
-class Mask(Resource):
+class Masks(Resource):
     def get(self, mask_id):  # get a post by its ID
-        cursor = connection.Mask.find({"_id": ObjectId(mask_id)})
+        cursor = connection.Masks.find({"_id": ObjectId(mask_id)})
         return check_content(cursor)
 
     def put(self, mask_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.Mask()
+        doc = connection.Masks()
         for item in resp:
             doc[item] = resp[item]
         doc["_id"] = mask_id
@@ -44,7 +44,7 @@ class Mask(Resource):
         return None, 204
 
     def delete(self, mask_id):  # delete a post by its ID
-        connection.Mask.find_and_modify(
+        connection.Masks.find_and_modify(
             {"_id": ObjectId(mask_id)}, remove=True)
         # TODO: delete related data 
         return None, 204

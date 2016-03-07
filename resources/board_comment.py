@@ -13,14 +13,14 @@ def check_content(obj):
     return obj  # or return a list
 
 
-class BoardCommentList(Resource):
+class BoardCommentsList(Resource):
     def get(self):  # get all posts
-        cursor = connection.BoardComment.find()
+        cursor = connection.BoardComments.find()
         return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
-        doc = connection.BoardComment()
+        doc = connection.BoardComments()
         for item in resp:
             if item == "_id":
                 continue  # skip if post have an _id item
@@ -29,15 +29,15 @@ class BoardCommentList(Resource):
         return None, 201
 
 
-class BoardComment(Resource):
+class BoardComments(Resource):
     def get(self, board_comment_id):  # get a post by its ID
-        cursor = connection.BoardComment.find(
+        cursor = connection.BoardComments.find(
             {"_id": ObjectId(board_comment_id)})
         return check_content(cursor)
 
     def put(self, board_comment_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.BoardComment()
+        doc = connection.BoardComments()
         for item in resp:
             doc[item] = resp[item]
         doc["_id"] = board_comment_id
@@ -45,7 +45,7 @@ class BoardComment(Resource):
         return None, 204
 
     def delete(self, board_comment_id):  # delete a post by its ID
-        connection.BoardComment.find_and_modify(
+        connection.BoardComments.find_and_modify(
             {"_id": ObjectId(board_comment_id)}, remove=True)
         # TODO: delete related data 
         return None, 204

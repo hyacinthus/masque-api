@@ -72,7 +72,7 @@ class Root(Document):
 
 
 @connection.register
-class Post(Root):
+class Posts(Root):
     structure = {
         "content": {
             "type": IS("text", "vote", "photo"),
@@ -92,7 +92,7 @@ class Post(Root):
 
 
 @connection.register
-class Comment(Root):
+class Comments(Root):
     structure = {
         "content": str,
         "post_id": str,
@@ -100,7 +100,7 @@ class Comment(Root):
 
 
 @connection.register
-class User(Document):
+class Users(Document):
     __collection__ = CollectionName.USERS
     __database__ = MongoConfig.DB
     structure = {
@@ -119,7 +119,7 @@ class User(Document):
 
 
 @connection.register
-class Theme(Document):
+class Themes(Document):
     __collection__ = CollectionName.THEMES
     __database__ = MongoConfig.DB
     structure = {
@@ -137,7 +137,7 @@ class Theme(Document):
 
 
 @connection.register
-class Device(Document):
+class Devices(Document):
     __collection__ = CollectionName.DEVICES
     __database__ = MongoConfig.DB
     structure = {
@@ -152,7 +152,7 @@ class Device(Document):
 
 
 @connection.register
-class UserLevel(Document):
+class UserLevels(Document):
     __collection__ = CollectionName.USER_LEVELS
     __database__ = MongoConfig.DB
     structure = {
@@ -175,7 +175,7 @@ class UserLevel(Document):
 
 
 @connection.register
-class Mask(Document):
+class Masks(Document):
     __collection__ = CollectionName.MASKS
     __database__ = MongoConfig.DB
     structure = {
@@ -186,7 +186,7 @@ class Mask(Document):
 
 
 @connection.register
-class BoardPost(Document):
+class BoardPosts(Document):
     __collection__ = CollectionName.BOARD_POSTS
     __database__ = MongoConfig.DB
     structure = {
@@ -205,13 +205,13 @@ class BoardPost(Document):
 
 
 @connection.register
-class BoardComment(BoardPost):
+class BoardComments(BoardPosts):
     __collection__ = CollectionName.BOARD_COMMENTS
     __database__ = MongoConfig.DB
 
 
 @connection.register
-class Parameter(Document):
+class Parameters(Document):
     __collection__ = CollectionName.PARAMETERS
     __database__ = MongoConfig.DB
     structure = {
@@ -240,7 +240,7 @@ class DeviceTrace(Document):
 
 
 @connection.register
-class Message(Document):
+class Messages(Document):
     __collection__ = CollectionName.MESSAGES
     __database__ = MongoConfig.DB
     structure = {
@@ -254,7 +254,7 @@ class Message(Document):
 
 
 @connection.register
-class UserTrace(Document):
+class UserTraces(Document):
     __collection__ = CollectionName.USER_TRACE
     __database__ = MongoConfig.DB
     structure = {
@@ -276,7 +276,7 @@ class UserTrace(Document):
 
 
 @connection.register
-class ExtraUserField(Document):
+class ExtraUserFields(Document):
     __collection__ = CollectionName.EXTRA_USER_FIELDS
     __database__ = MongoConfig.DB
     structure = {
@@ -298,7 +298,7 @@ class ExtraUserField(Document):
 
 
 @connection.register
-class UserPosts(Document):
+class UsersPostss(Document):
     __collection__ = CollectionName.USER_POSTS
     __database__ = MongoConfig.DB
     structure = {
@@ -314,7 +314,7 @@ class UserPosts(Document):
 
 
 @connection.register
-class UserComments(Document):
+class UsersCommentss(Document):
     __collection__ = CollectionName.USER_COMMENTS
     __database__ = MongoConfig.DB
     structure = {
@@ -330,7 +330,7 @@ class UserComments(Document):
 
 
 @connection.register
-class UserStars(Document):
+class UsersStars(Document):
     __collection__ = CollectionName.USER_STARS
     __database__ = MongoConfig.DB
     structure = {

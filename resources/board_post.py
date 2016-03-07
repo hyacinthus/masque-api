@@ -13,14 +13,14 @@ def check_content(obj):
     return obj  # or return a list
 
 
-class BoardPostList(Resource):
+class BoardPostsList(Resource):
     def get(self):  # get all posts
-        cursor = connection.BoardPost.find()
+        cursor = connection.BoardPosts.find()
         return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
-        doc = connection.BoardPost()
+        doc = connection.BoardPosts()
         for item in resp:
             if item == "_id":
                 continue  # skip if post have an _id item
@@ -29,14 +29,14 @@ class BoardPostList(Resource):
         return None, 201
 
 
-class BoardPost(Resource):
+class BoardPosts(Resource):
     def get(self, board_post_id):  # get a post by its ID
-        cursor = connection.BoardPost.find({"_id": ObjectId(board_post_id)})
+        cursor = connection.BoardPosts.find({"_id": ObjectId(board_post_id)})
         return check_content(cursor)
 
     def put(self, board_post_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.BoardPost()
+        doc = connection.BoardPosts()
         for item in resp:
             doc[item] = resp[item]
         doc["_id"] = board_post_id
@@ -44,7 +44,7 @@ class BoardPost(Resource):
         return None, 204
 
     def delete(self, board_post_id):  # delete a post by its ID
-        connection.BoardPost.find_and_modify(
+        connection.BoardPosts.find_and_modify(
             {"_id": ObjectId(board_post_id)}, remove=True)
         # TODO: delete related data 
         return None, 204

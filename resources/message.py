@@ -13,14 +13,14 @@ def check_content(obj):
     return obj  # or return a list
 
 
-class MessageList(Resource):
+class MessagesList(Resource):
     def get(self):  # get all posts
-        cursor = connection.Message.find()
+        cursor = connection.Messages.find()
         return check_content(cursor)
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
-        doc = connection.Message()
+        doc = connection.Messages()
         for item in resp:
             if item == "_id":
                 continue  # skip if post have an _id item
@@ -29,14 +29,14 @@ class MessageList(Resource):
         return None, 201
 
 
-class Message(Resource):
+class Messages(Resource):
     def get(self, message_id):  # get a post by its ID
-        cursor = connection.Message.find({"_id": ObjectId(message_id)})
+        cursor = connection.Messages.find({"_id": ObjectId(message_id)})
         return check_content(cursor)
 
     def put(self, message_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.Message()
+        doc = connection.Messages()
         for item in resp:
             doc[item] = resp[item]
         doc["_id"] = message_id
@@ -44,7 +44,7 @@ class Message(Resource):
         return None, 204
 
     def delete(self, message_id):  # delete a post by its ID
-        connection.Message.find_and_modify(
+        connection.Messages.find_and_modify(
             {"_id": ObjectId(message_id)}, remove=True)
         # TODO: delete related data
         return None, 204
