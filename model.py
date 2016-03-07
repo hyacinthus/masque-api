@@ -113,8 +113,7 @@ class User(Document):
         "hearts_owned": int,
         "_updated": CustomDate(),
         "masks": list,
-        "pinned": list,
-        "themes": list
+        "home": str
     }
 
 
