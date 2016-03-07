@@ -16,6 +16,10 @@ class APIConfig:
 
 class CollectionName:
     USERS = "users"
+    EXTRA_USER_FIELDS = "extra_user_fields"
+    USER_POSTS = "user_posts"
+    USER_COMMENTS = "user_comments"
+    USER_STARS = "user_stars"
     THEMES = "themes"
     DEVICES = "devices"
     USER_LEVELS = "user_levels"
@@ -26,4 +30,5 @@ class CollectionName:
     DEVICE_TRACE = "device_trace"
     MESSAGES = "messages"
     USER_TRACE = "user_trace"
-    EXTRA_USER_FIELDS = "extra_user_fields"
+
+

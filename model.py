@@ -113,7 +113,8 @@ class User(Document):
         "hearts_owned": int,
         "_updated": CustomDate(),
         "masks": list,
-        "home": str
+        "home": str,
+        "pinned": list
     }
 
 
@@ -294,3 +295,51 @@ class ExtraUserField(Document):
         "pinned": [],
         "themes": []
     }
+
+
+@connection.register
+class UserPosts(Document):
+    __collection__ = CollectionName.USER_POSTS
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "user_id": str,
+        "theme_id": str,
+        "post_id": str,
+        "_created": CustomDate()
+    }
+    required_fields = [
+        'user_id', 'theme_id', 'post_id'
+    ]
+
+
+@connection.register
+class UserComments(Document):
+    __collection__ = CollectionName.USER_COMMENTS
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "user_id": str,
+        "theme_id": str,
+        "comment_id": str,
+        "_created": CustomDate()
+    }
+    required_fields = [
+        'user_id', 'theme_id', 'comment_id'
+    ]
+
+
+@connection.register
+class UserStars(Document):
+    __collection__ = CollectionName.USER_STARS
+    __database__ = MongoConfig.DB
+    structure = {
+        "_id": CustomObjectId(),
+        "user_id": str,
+        "theme_id": str,
+        "post_id": str,
+        "_created": CustomDate()
+    }
+    required_fields = [
+        'user_id', 'theme_id', 'post_id'
+    ]
