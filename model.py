@@ -298,7 +298,7 @@ class ExtraUserFields(Document):
 
 
 @connection.register
-class UsersPostss(Document):
+class UserPosts(Document):
     __collection__ = CollectionName.USER_POSTS
     __database__ = MongoConfig.DB
     structure = {
@@ -314,7 +314,7 @@ class UsersPostss(Document):
 
 
 @connection.register
-class UsersCommentss(Document):
+class UserComments(Document):
     __collection__ = CollectionName.USER_COMMENTS
     __database__ = MongoConfig.DB
     structure = {

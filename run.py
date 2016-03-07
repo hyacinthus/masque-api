@@ -13,7 +13,7 @@ from resources.message import Messages, MessagesList
 from resources.parameter import Parameters, ParametersList
 from resources.post import Posts, PostsList
 from resources.theme import Themes, ThemesList
-from resources.user import Users, UsersList, UsersPostsList, UsersCommentsList
+from resources.user import Users, UsersList, UserPostsList, UserCommentsList
 from resources.user_level import UserLevels, UserLevelsList
 from resources.user_trace import UserTraces, UserTracesList
 
@@ -62,10 +62,10 @@ api.add_resource(UsersList, '/users', '/users/', endpoint='users')
 api.add_resource(Users, '/users/<string:user_id>',
                  endpoint='user')
 
-api.add_resource(UsersPostsList, '/user/<string:user_id>/posts',
+api.add_resource(UserPostsList, '/user/<string:user_id>/posts',
                  '/user/<string:user_id>/posts/',
                  endpoint='user_posts')
-api.add_resource(UsersCommentsList, '/user/<string:user_id>/comments',
+api.add_resource(UserCommentsList, '/user/<string:user_id>/comments',
                  '/user/<string:user_id>/comments/',
                  endpoint='user_comments')
 

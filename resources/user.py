@@ -53,7 +53,7 @@ class Users(Resource):
         return None, 204
 
 
-class UsersPostsList(Resource):
+class UserPostsList(Resource):
     def get(self, user_id):
         """get a user's posts
         add theme_id to each post
@@ -69,6 +69,6 @@ class UsersPostsList(Resource):
         return sorted(result, key=lambda k: k["_updated"], reverse=True)
 
 
-class UsersCommentsList(Resource):
+class UserCommentsList(Resource):
     def get(self, user_id):
         pass
