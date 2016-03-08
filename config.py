@@ -29,5 +29,3 @@ class CollectionName:
     DEVICE_TRACE = "device_trace"
     MESSAGES = "messages"
     USER_TRACE = "user_trace"
-
-

@@ -92,7 +92,8 @@ api.add_resource(BoardPostsList, '/board_posts', endpoint='board_posts')
 api.add_resource(BoardPosts, '/board_posts/<string:board_post_id>',
                  endpoint='board_post')
 
-api.add_resource(BoardCommentsList, '/board_comments', endpoint='board_comments')
+api.add_resource(BoardCommentsList, '/board_comments',
+                 endpoint='board_comments')
 api.add_resource(BoardComments, '/board_comments/<string:board_comment_id>',
                  endpoint='board_comment')
 
