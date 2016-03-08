@@ -69,6 +69,10 @@ class Root(Document):
         },
         "author": str
     }
+    default_values = {
+        "location.coordinates": [0, 0],
+        "location.type": "Point"
+    }
 
 
 @connection.register
@@ -86,9 +90,10 @@ class Posts(Root):
     # required_fields = [
     #     'mask_id', 'hearts.mask_id', 'hearts.user_id'
     # ]
-    # default_values = {
-    #     "location.type": "Point"
-    # }
+    default_values = {
+        "content.type": "text",
+        "comment_count": 0,
+    }
 
 
 @connection.register
@@ -114,7 +119,12 @@ class Users(Document):
         "_updated": CustomDate(),
         "masks": list,
         "home": str,
-        "pinned": list
+        "subscribed": list
+    }
+    default_values = {
+        "exp": 0,
+        "hearts_received": 0,
+        "hearts_owned": 0,
     }
 
 
@@ -157,7 +167,7 @@ class UserLevels(Document):
     __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
-        "exp": str,
+        "exp": int,
         "post_limit": int,
         "report_limit": int,
         "message_limit": int,
@@ -167,11 +177,17 @@ class UserLevels(Document):
         "colors": list,
         "heart_limit": int
     }
-    # default_values = {
-    #     "text_post": False,
-    #     "vote_post": False,
-    #     "photo_post": False
-    # }
+    default_values = {
+        "text_post": False,
+        "vote_post": False,
+        "photo_post": False,
+        "exp": 0,
+        "post_limit": 0,
+        "report_limit": 0,
+        "message_limit": 0,
+        "colors": [],
+        "heart_limit": 0
+    }
 
 
 @connection.register
@@ -237,6 +253,11 @@ class DeviceTrace(Document):
             "type": IS("Point")
         }
     }
+    default_values = {
+        "cellphone": 18000000000,
+        "location.coordinates": [0, 0],
+        "location.type": "Point"
+    }
 
 
 @connection.register
@@ -251,6 +272,9 @@ class Messages(Document):
         "_created": CustomDate(),
         "archived": bool
     }
+    default_values = {
+        "archived": False
+    }
 
 
 @connection.register
@@ -263,7 +287,7 @@ class UserTraces(Document):
         "_created": CustomDate(),
         "_updated": CustomDate(),
         "thanks": int,
-        "footprint": [
+        "footprint":
             {
                 "coordinates": [
                     OR(int, float),
@@ -271,7 +295,10 @@ class UserTraces(Document):
                 ],
                 "type": IS("Point")
             }
-        ]
+    }
+    default_values = {
+        "footprint.coordinates": [0, 0],
+        "footprint.type": "Point"
     }
 
 

@@ -53,9 +53,12 @@ api.add_resource(Posts, '/theme/<string:theme_id>/post/<string:post_id>',
                  '/theme/<string:theme_id>/post/<string:post_id>/',
                  endpoint='post')
 
-api.add_resource(CommentsList, '/comments_<string:theme_id>',
+api.add_resource(CommentsList, '/theme/<string:theme_id>/comments',
+                 '/theme/<string:theme_id>/comments/',
                  endpoint='comments')
-api.add_resource(Comments, '/comments_<string:theme_id>/<string:comment_id>',
+api.add_resource(Comments,
+                 '/theme/<string:theme_id>/comment/<string:comment_id>',
+                 '/theme/<string:theme_id>/comment/<string:comment_id>/',
                  endpoint='comment')
 
 api.add_resource(UsersList, '/users', '/users/', endpoint='users')
