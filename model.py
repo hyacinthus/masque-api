@@ -276,28 +276,6 @@ class UserTraces(Document):
 
 
 @connection.register
-class ExtraUserFields(Document):
-    __collection__ = CollectionName.EXTRA_USER_FIELDS
-    __database__ = MongoConfig.DB
-    structure = {
-        "_id": CustomObjectId(),
-        "posts": list,
-        "comments": list,
-        "pinned": list,
-        "themes": list
-    }
-    required_fields = [
-        '_id'
-    ]
-    default_values = {
-        "posts": [],
-        "comments": [],
-        "pinned": [],
-        "themes": []
-    }
-
-
-@connection.register
 class UserPosts(Document):
     __collection__ = CollectionName.USER_POSTS
     __database__ = MongoConfig.DB
