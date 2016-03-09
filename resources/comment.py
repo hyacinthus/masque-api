@@ -75,3 +75,26 @@ class Comments(Resource):
         collection.Comments.find_and_modify(
             {"_id": ObjectId(comment_id)}, remove=True)
         return None, 204
+
+
+class PostComments(Resource):
+    def get(self, theme_id, post_id):  # get a post's comments
+        parser = reqparse.RequestParser()
+        parser.add_argument('page',
+                            type=int,
+                            help='page number must be int')
+        args = parser.parse_args()
+        if args['page'] is None:
+            args['page'] = 1
+        index = args['page'] - 1
+        collection = connection[MongoConfig.DB]["comments_" + theme_id]
+        cursor = collection.Comments.find(
+            {
+                "post_id": post_id
+            },
+            skip=(index * APIConfig.PAGESIZE),
+            limit=APIConfig.PAGESIZE,
+            max_scan=APIConfig.MAX_SCAN,
+            sort=[("_created", -1)]
+        )  # sorted by create time in reversed order
+        return check_content(cursor)

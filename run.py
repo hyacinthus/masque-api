@@ -5,7 +5,7 @@ from flask_restful import Api
 from model import connection
 from resources.board_comment import BoardComments, BoardCommentsList
 from resources.board_post import BoardPosts, BoardPostsList
-from resources.comment import Comments, CommentsList
+from resources.comment import Comments, CommentsList, PostComments
 from resources.device import Devices, DevicesList
 from resources.device_trace import DeviceTrace, DeviceTraceList
 from resources.mask import Masks, MasksList
@@ -56,6 +56,10 @@ api.add_resource(Posts, '/theme/<string:theme_id>/post/<string:post_id>',
 api.add_resource(CommentsList, '/theme/<string:theme_id>/comments',
                  '/theme/<string:theme_id>/comments/',
                  endpoint='comments')
+api.add_resource(PostComments,
+                 '/theme/<string:theme_id>/post/<string:post_id>/comments',
+                 '/theme/<string:theme_id>/post/<string:post_id>/comments/',
+                 endpoint='post_comment')
 api.add_resource(Comments,
                  '/theme/<string:theme_id>/comment/<string:comment_id>',
                  '/theme/<string:theme_id>/comment/<string:comment_id>/',
