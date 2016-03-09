@@ -95,6 +95,6 @@ class PostComments(Resource):
             skip=(index * APIConfig.PAGESIZE),
             limit=APIConfig.PAGESIZE,
             max_scan=APIConfig.MAX_SCAN,
-            sort=[("_created", -1)]
-        )  # sorted by create time in reversed order
+            sort=[("_created", 1)]
+        )  # sort the result by ascending time
         return check_content(cursor)
