@@ -69,6 +69,9 @@ class Root(Document):
         },
         "author": str
     }
+    required_fields = [
+        "author"
+    ]
     default_values = {
         "location.coordinates": [0, 0],
         "location.type": "Point"
