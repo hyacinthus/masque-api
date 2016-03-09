@@ -1,9 +1,9 @@
 from datetime import datetime
 
 from bson.objectid import ObjectId
-from flask_restful import Resource, abort, request
+from flask_restful import Resource, abort, request, reqparse
 
-from config import MongoConfig
+from config import MongoConfig, APIConfig
 from model import connection
 
 
@@ -16,8 +16,21 @@ def check_content(obj):
 
 class CommentsList(Resource):
     def get(self, theme_id):  # get all comments
+        parser = reqparse.RequestParser()
+        parser.add_argument('page',
+                            type=int,
+                            help='page number must be int')
+        args = parser.parse_args()
+        if args['page'] is None:
+            args['page'] = 1
+        index = args['page'] - 1
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find()
+        cursor = collection.Comments.find(
+            skip=(index * APIConfig.PAGESIZE),
+            limit=APIConfig.PAGESIZE,
+            max_scan=APIConfig.MAX_SCAN,
+            sort=[("_created", -1)]
+        )  # sorted by create time in reversed order
         return check_content(cursor)
 
     def post(self, theme_id):  # add a new comment
