@@ -79,3 +79,19 @@ class UserCommentsList(Resource):
                 new_cur.append(item)
             result += list(new_cur)
         return sorted(result, key=lambda k: k["_created"], reverse=True)
+
+
+class UserStarsList(Resource):
+    def get(self, user_id):
+        """get user's favor posts"""
+        result = []
+        cursor = connection.UserStars.find({"user_id": user_id})
+        for doc in cursor:
+            collection = connection[MongoConfig.DB]["posts_" + doc['theme_id']]
+            cur = collection.Posts.find({"_id": ObjectId(doc['post_id'])})
+            new_cur = []
+            for item in cur:  # add an extra "theme_id" item
+                item['theme_id'] = doc['theme_id']
+                new_cur.append(item)
+            result += list(new_cur)
+        return sorted(result, key=lambda k: k["_updated"], reverse=True)
