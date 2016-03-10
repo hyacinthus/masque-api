@@ -78,3 +78,26 @@ class Posts(Resource):
         collection.Comments.find_and_modify(
             {"post_id": ObjectId(post_id)}, remove=True)
         return None, 204
+
+
+class FavorPost(Resource):
+    def post(self, post_id):
+        resp = request.get_json(force=True)
+        doc = connection.UserStars()
+        for item in resp:
+            doc[item] = resp[item]
+        doc.save()
+        # TODO: repeatedly submits bug
+        return None, 201
+
+    def delete(self, post_id):
+        resp = request.get_json(force=True)
+        connection.UserStars.find_and_modify(
+            {
+                "post_id": post_id,
+                "user_id": resp['user_id'],
+                "theme_id": resp['theme_id']
+            },
+            remove=True
+        )
+        return None, 204

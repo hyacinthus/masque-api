@@ -11,7 +11,7 @@ from resources.device_trace import DeviceTrace, DeviceTraceList
 from resources.mask import Masks, MasksList
 from resources.message import Messages, MessagesList
 from resources.parameter import Parameters, ParametersList
-from resources.post import Posts, PostsList
+from resources.post import Posts, PostsList, FavorPost
 from resources.theme import Themes, ThemesList
 from resources.user import Users, UsersList, UserPostsList, UserCommentsList, \
     UserStarsList
@@ -53,6 +53,9 @@ api.add_resource(PostsList, '/theme/<string:theme_id>/posts',
 api.add_resource(Posts, '/theme/<string:theme_id>/post/<string:post_id>',
                  '/theme/<string:theme_id>/post/<string:post_id>/',
                  endpoint='post')
+api.add_resource(FavorPost, '/post/<string:post_id>/star',
+                 '/post/<string:post_id>/star/',
+                 endpoint='post_star')
 
 api.add_resource(CommentsList, '/theme/<string:theme_id>/comments',
                  '/theme/<string:theme_id>/comments/',
