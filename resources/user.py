@@ -1,6 +1,7 @@
 from bson.objectid import ObjectId
 from flask_restful import Resource, abort, request
 
+from config import MongoConfig
 from model import connection
 
 
@@ -49,9 +50,32 @@ class Users(Resource):
 
 class UserPostsList(Resource):
     def get(self, user_id):
-        pass
+        """get user's posts"""
+        result = []
+        cursor = connection.UserPosts.find({"user_id": user_id})
+        for doc in cursor:
+            collection = connection[MongoConfig.DB]["posts_" + doc['theme_id']]
+            cur = collection.Posts.find({"author": user_id})
+            new_cur = []
+            for item in cur:  # add an extra "theme_id" item
+                item['theme_id'] = doc['theme_id']
+                new_cur.append(item)
+            result += list(new_cur)
+        return sorted(result, key=lambda k: k["_updated"], reverse=True)
 
 
 class UserCommentsList(Resource):
     def get(self, user_id):
-        pass
+        """get user's comments"""
+        result = []
+        cursor = connection.UserComments.find({"user_id": user_id})
+        for doc in cursor:
+            collection = connection[MongoConfig.DB][
+                "comments_" + doc['theme_id']]
+            cur = collection.Comments.find({"author": user_id})
+            new_cur = []
+            for item in cur:  # add an extra "theme_id" item
+                item['theme_id'] = doc['theme_id']
+                new_cur.append(item)
+            result += list(new_cur)
+        return sorted(result, key=lambda k: k["_created"], reverse=True)
