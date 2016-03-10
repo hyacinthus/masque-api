@@ -338,16 +338,6 @@ class UserComments(Document):
 
 
 @connection.register
-class UsersStars(Document):
+class UserStars(UserPosts):
     __collection__ = CollectionName.USER_STARS
     __database__ = MongoConfig.DB
-    structure = {
-        "_id": CustomObjectId(),
-        "user_id": str,
-        "theme_id": str,
-        "post_id": str,
-        "_created": CustomDate()
-    }
-    required_fields = [
-        'user_id', 'theme_id', 'post_id'
-    ]
