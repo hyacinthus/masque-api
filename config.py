@@ -1,6 +1,6 @@
 class FlaskConfig:
     DEBUG = False
-    PORT = 5000
+    SERVER_NAME = "127.0.0.1:5000"
 
 
 class MongoConfig:
@@ -15,6 +15,17 @@ class APIConfig:
 
 
 class CollectionName:
-    GEO_POSTS = "geo_posts"
-    GEO_COMMENTS = "geo_comments"
     USERS = "users"
+    USER_POSTS = "user_posts"
+    USER_COMMENTS = "user_comments"
+    USER_STARS = "user_stars"
+    THEMES = "themes"
+    DEVICES = "devices"
+    USER_LEVELS = "user_levels"
+    MASKS = "masks"
+    BOARD_POSTS = "board_posts"
+    BOARD_COMMENTS = "board_comments"
+    PARAMETERS = "parameters"
+    DEVICE_TRACE = "device_trace"
+    MESSAGES = "messages"
+    USER_TRACE = "user_trace"
