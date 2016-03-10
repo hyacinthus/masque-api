@@ -83,12 +83,22 @@ class Posts(Resource):
 class FavorPost(Resource):
     def post(self, post_id):
         resp = request.get_json(force=True)
-        doc = connection.UserStars()
-        for item in resp:
-            doc[item] = resp[item]
-        doc.save()
-        # TODO: repeatedly submits bug
-        return None, 201
+        count = connection.UserStars.find(
+            {
+                "post_id": post_id,
+                "user_id": resp['user_id'],
+                "theme_id": resp['theme_id']
+            }
+        ).count()
+        if count == 0:  # do nothing if repeatedly submits happened
+            doc = connection.UserStars()
+            for item in resp:
+                doc[item] = resp[item]
+            doc.save()
+            return None, 201
+        else:
+            return {'message': 'Record Exists!'}, 200
+
 
     def delete(self, post_id):
         resp = request.get_json(force=True)
