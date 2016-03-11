@@ -1,21 +1,33 @@
 from functools import reduce
 
 import requests
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 
 from model import connection
 
 
 class SchoolsList(Resource):
-    def get(self, lng, lat):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('lon',
+                            type=str,
+                            required=True,
+                            help='lon not found!')
+        parser.add_argument('lat',
+                            type=str,
+                            required=True,
+                            help='lat not found!')
+        args = parser.parse_args()
         url_address = 'http://restapi.amap.com/v3/geocode/regeo?key=2f9fd93a6d483072ae4379dd371a2425&' \
                       'location={0},{1}&poitype=141201|141202|141203|141206&' \
-                      'extensions=all&batch=true&roadlevel=1'.format(str(lng),
-                                                                     str(lat))
+                      'extensions=all&batch=true&roadlevel=1'.format(
+            args['lon'],
+            args['lat'])
         print(url_address)
         url = 'http://restapi.amap.com/v3/place/around?key=2f9fd93a6d483072ae4379dd371a2425&' \
               'location={0},{1}&radius=300&keywords=&types=141201|141202|141203|141206&' \
-              'offset=50&page=1&extensions=base'.format(str(lng), str(lat))
+              'offset=50&page=1&extensions=base'.format(args['lon'],
+                                                        args['lat'])
         address = requests.get(url_address).json()
         addr = {"name": address["regeocodes"][0]["formatted_address"]}
         try:

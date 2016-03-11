@@ -111,7 +111,7 @@ api.add_resource(UserTracesList, '/user_traces', endpoint='user_traces')
 api.add_resource(UserTrace, '/user_trace/<string:user_trace_id>',
                  endpoint='user_trace')
 
-api.add_resource(SchoolsList, '/location/<lng>/<lat>/schools',
+api.add_resource(SchoolsList, '/location/schools',
                  endpoint='schools')
 
 if __name__ == '__main__':
