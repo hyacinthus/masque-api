@@ -1,17 +1,10 @@
 from datetime import datetime
 
 from bson.objectid import ObjectId
-from flask_restful import Resource, abort, request, reqparse
+from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig, APIConfig
 from model import connection
-
-
-def check_content(obj):
-    """if no content found return 404, else return cursor."""
-    if obj.count() == 0:
-        abort(404)
-    return obj
 
 
 class PostsList(Resource):
@@ -30,7 +23,7 @@ class PostsList(Resource):
             limit=APIConfig.PAGESIZE,
             max_scan=APIConfig.MAX_SCAN,
             sort=[("_updated", -1)])  # sorted by update time in reversed order
-        return check_content(cursor)
+        return cursor
 
     def post(self, theme_id):  # add a new post
         utctime = datetime.timestamp(datetime.utcnow())
@@ -58,7 +51,7 @@ class Posts(Resource):
     def get(self, theme_id, post_id):  # get a post by its ID
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         cursor = collection.Posts.find({"_id": ObjectId(post_id)})
-        return check_content(cursor)
+        return cursor
 
     def put(self, theme_id, post_id):  # update a post by its ID
         resp = request.get_json(force=True)

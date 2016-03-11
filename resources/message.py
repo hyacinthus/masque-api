@@ -1,20 +1,13 @@
 from bson.objectid import ObjectId
-from flask_restful import Resource, abort, request
+from flask_restful import Resource, request
 
 from model import connection
-
-
-def check_content(obj):
-    """if no content found return 404, else return cursor."""
-    if obj.count() == 0:
-        abort(404)
-    return obj
 
 
 class MessagesList(Resource):
     def get(self):  # get all posts
         cursor = connection.Messages.find()
-        return check_content(cursor)
+        return cursor
 
     def post(self):  # add a new post
         resp = request.get_json(force=True)
@@ -30,7 +23,7 @@ class MessagesList(Resource):
 class Messages(Resource):
     def get(self, message_id):  # get a post by its ID
         cursor = connection.Messages.find({"_id": ObjectId(message_id)})
-        return check_content(cursor)
+        return cursor
 
     def put(self, message_id):  # update a post by its ID
         resp = request.get_json(force=True)

@@ -1,17 +1,10 @@
 from datetime import datetime
 
 from bson.objectid import ObjectId
-from flask_restful import Resource, abort, request, reqparse
+from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig, APIConfig
 from model import connection
-
-
-def check_content(obj):
-    """if no content found return 404, else return cursor."""
-    if obj.count() == 0:
-        abort(404)
-    return obj
 
 
 class CommentsList(Resource):
@@ -31,7 +24,7 @@ class CommentsList(Resource):
             max_scan=APIConfig.MAX_SCAN,
             sort=[("_created", -1)]
         )  # sorted by create time in reversed order
-        return check_content(cursor)
+        return cursor
 
     def post(self, theme_id):  # add a new comment
         utctime = datetime.timestamp(datetime.utcnow())
@@ -68,7 +61,7 @@ class Comments(Resource):
     def get(self, theme_id, comment_id):  # get a comment by its ID
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         cursor = collection.Comments.find({"_id": ObjectId(comment_id)})
-        return check_content(cursor)
+        return cursor
 
     def put(self, theme_id, comment_id):  # update a comment by its ID
         resp = request.get_json(force=True)
@@ -107,4 +100,4 @@ class PostComments(Resource):
             max_scan=APIConfig.MAX_SCAN,
             sort=[("_created", 1)]
         )  # sort the result by ascending time
-        return check_content(cursor)
+        return cursor
