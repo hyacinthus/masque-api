@@ -341,3 +341,9 @@ class UserComments(Document):
 class UserStars(UserPosts):
     __collection__ = CollectionName.USER_STARS
     __database__ = MongoConfig.DB
+
+
+@connection.register
+class Schools(Document):
+    __collection__ = CollectionName.SCHOOLS
+    __database__ = MongoConfig.DB

@@ -1,5 +1,5 @@
 from bson.json_util import dumps
-from flask import Flask, make_response, jsonify
+from flask import Flask, make_response, jsonify, url_for
 from flask_restful import Api
 
 from model import connection
@@ -17,6 +17,7 @@ from resources.user import Users, UsersList, UserPostsList, UserCommentsList, \
     UserStarsList
 from resources.user_level import UserLevels, UserLevelsList
 from resources.user_trace import UserTraces, UserTracesList
+from resources.location import SchoolsList
 
 
 def create_app():
@@ -123,6 +124,8 @@ api.add_resource(Messages, '/messages/<string:message_id>',
 api.add_resource(UserTracesList, '/user_traces', endpoint='user_traces')
 api.add_resource(UserTraces, '/user_traces/<string:user_trace_id>',
                  endpoint='user_trace')
+
+api.add_resource(SchoolsList, '/location/<lng>/<lat>/schools', endpoint='schools')
 
 if __name__ == '__main__':
     app.run()
