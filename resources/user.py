@@ -20,7 +20,7 @@ class UsersList(Resource):
         return {"_id": doc['_id']}, 201
 
 
-class Users(Resource):
+class User(Resource):
     def get(self, user_id):  # get a post by its ID
         cursor = connection.Users.find({"_id": ObjectId(user_id)})
         return cursor

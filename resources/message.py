@@ -20,7 +20,7 @@ class MessagesList(Resource):
         return None, 201
 
 
-class Messages(Resource):
+class Message(Resource):
     def get(self, message_id):  # get a post by its ID
         cursor = connection.Messages.find({"_id": ObjectId(message_id)})
         return cursor

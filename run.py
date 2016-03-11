@@ -37,7 +37,7 @@ def teardown_request(exception):  # close db connection after each api request
 api.add_resource(PostsList, '/theme/<string:theme_id>/posts',
                  '/theme/<string:theme_id>/posts/',
                  endpoint='posts')
-api.add_resource(Posts, '/theme/<string:theme_id>/post/<string:post_id>',
+api.add_resource(Post, '/theme/<string:theme_id>/post/<string:post_id>',
                  '/theme/<string:theme_id>/post/<string:post_id>/',
                  endpoint='post')
 api.add_resource(FavorPost, '/post/<string:post_id>/star',
@@ -51,13 +51,13 @@ api.add_resource(PostComments,
                  '/theme/<string:theme_id>/post/<string:post_id>/comments',
                  '/theme/<string:theme_id>/post/<string:post_id>/comments/',
                  endpoint='post_comment')
-api.add_resource(Comments,
+api.add_resource(Comment,
                  '/theme/<string:theme_id>/comment/<string:comment_id>',
                  '/theme/<string:theme_id>/comment/<string:comment_id>/',
                  endpoint='comment')
 
 api.add_resource(UsersList, '/users', '/users/', endpoint='users')
-api.add_resource(Users, '/users/<string:user_id>',
+api.add_resource(User, '/user/<string:user_id>',
                  endpoint='user')
 
 api.add_resource(UserPostsList, '/user/<string:user_id>/posts',
@@ -71,44 +71,44 @@ api.add_resource(UserStarsList, '/user/<string:user_id>/stars',
                  endpoint='user_stars')
 
 api.add_resource(ThemesList, '/themes', endpoint='themes')
-api.add_resource(Themes, '/themes/<string:theme_id>',
+api.add_resource(Theme, '/theme/<string:theme_id>',
                  endpoint='theme')
 
 api.add_resource(DevicesList, '/devices', endpoint='devices')
-api.add_resource(Devices, '/devices/<string:device_id>',
+api.add_resource(Device, '/device/<string:device_id>',
                  endpoint='device')
 
 api.add_resource(UserLevelsList, '/user_levels', endpoint='user_levels')
-api.add_resource(UserLevels, '/user_levels/<string:user_level_id>',
+api.add_resource(UserLevel, '/user_level/<string:user_level_id>',
                  endpoint='user_level')
 
 api.add_resource(MasksList, '/masks', endpoint='masks')
-api.add_resource(Masks, '/masks/<string:mask_id>',
+api.add_resource(Mask, '/mask/<string:mask_id>',
                  endpoint='mask')
 
 api.add_resource(BoardPostsList, '/board_posts', endpoint='board_posts')
-api.add_resource(BoardPosts, '/board_posts/<string:board_post_id>',
+api.add_resource(BoardPost, '/board_post/<string:board_post_id>',
                  endpoint='board_post')
 
 api.add_resource(BoardCommentsList, '/board_comments',
                  endpoint='board_comments')
-api.add_resource(BoardComments, '/board_comments/<string:board_comment_id>',
+api.add_resource(BoardComment, '/board_comment/<string:board_comment_id>',
                  endpoint='board_comment')
 
 api.add_resource(ParametersList, '/parameters', endpoint='parameters')
-api.add_resource(Parameters, '/parameters/<string:parameter_id>',
+api.add_resource(Parameter, '/parameter/<string:parameter_id>',
                  endpoint='parameter')
 
 api.add_resource(DeviceTraceList, '/device_traces', endpoint='device_traces')
-api.add_resource(DeviceTrace, '/device_traces/<string:device_trace_id>',
+api.add_resource(DeviceTrace, '/device_trace/<string:device_trace_id>',
                  endpoint='device_trace')
 
 api.add_resource(MessagesList, '/messages', endpoint='messages')
-api.add_resource(Messages, '/messages/<string:message_id>',
+api.add_resource(Message, '/message/<string:message_id>',
                  endpoint='message')
 
 api.add_resource(UserTracesList, '/user_traces', endpoint='user_traces')
-api.add_resource(UserTraces, '/user_traces/<string:user_trace_id>',
+api.add_resource(UserTrace, '/user_trace/<string:user_trace_id>',
                  endpoint='user_trace')
 
 if __name__ == '__main__':

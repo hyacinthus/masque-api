@@ -20,7 +20,7 @@ class ParametersList(Resource):
         return None, 201
 
 
-class Parameters(Resource):
+class Parameter(Resource):
     def get(self, parameter_id):  # get a post by its ID
         cursor = connection.Parameters.find({"_id": ObjectId(parameter_id)})
         return cursor

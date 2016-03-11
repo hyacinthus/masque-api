@@ -20,7 +20,7 @@ class UserTracesList(Resource):
         return None, 201
 
 
-class UserTraces(Resource):
+class UserTrace(Resource):
     def get(self, user_trace_id):  # get a post by its ID
         cursor = connection.UserTraces.find({"_id": ObjectId(user_trace_id)})
         return cursor

@@ -18,7 +18,7 @@ class DevicesList(Resource):
         return None, 201
 
 
-class Devices(Resource):
+class Device(Resource):
     def get(self, device_id):  # get a post by its ID
         cursor = connection.Devices.find({"_id": device_id})
         return cursor

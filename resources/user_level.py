@@ -20,7 +20,7 @@ class UserLevelsList(Resource):
         return None, 201
 
 
-class UserLevels(Resource):
+class UserLevel(Resource):
     def get(self, user_level_id):  # get a post by its ID
         cursor = connection.UserLevels.find({"_id": ObjectId(user_level_id)})
         return cursor

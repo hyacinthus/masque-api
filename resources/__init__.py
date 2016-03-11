@@ -1,14 +1,14 @@
-from resources.board_comment import BoardComments, BoardCommentsList
-from resources.board_post import BoardPosts, BoardPostsList
-from resources.comment import Comments, CommentsList, PostComments
-from resources.device import Devices, DevicesList
+from resources.board_comment import BoardComment, BoardCommentsList
+from resources.board_post import BoardPost, BoardPostsList
+from resources.comment import Comment, CommentsList, PostComments
+from resources.device import Device, DevicesList
 from resources.device_trace import DeviceTrace, DeviceTraceList
-from resources.mask import Masks, MasksList
-from resources.message import Messages, MessagesList
-from resources.parameter import Parameters, ParametersList
-from resources.post import Posts, PostsList, FavorPost
-from resources.theme import Themes, ThemesList
-from resources.user import Users, UsersList, UserPostsList, UserCommentsList, \
+from resources.mask import Mask, MasksList
+from resources.message import Message, MessagesList
+from resources.parameter import Parameter, ParametersList
+from resources.post import Post, PostsList, FavorPost
+from resources.theme import Theme, ThemesList
+from resources.user import User, UsersList, UserPostsList, UserCommentsList, \
     UserStarsList
-from resources.user_level import UserLevels, UserLevelsList
-from resources.user_trace import UserTraces, UserTracesList
+from resources.user_level import UserLevel, UserLevelsList
+from resources.user_trace import UserTrace, UserTracesList

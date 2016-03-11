@@ -20,7 +20,7 @@ class MasksList(Resource):
         return None, 201
 
 
-class Masks(Resource):
+class Mask(Resource):
     def get(self, mask_id):  # get a post by its ID
         cursor = connection.Masks.find({"_id": ObjectId(mask_id)})
         return cursor

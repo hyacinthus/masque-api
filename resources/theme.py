@@ -20,7 +20,7 @@ class ThemesList(Resource):
         return None, 201
 
 
-class Themes(Resource):
+class Theme(Resource):
     def get(self, theme_id):  # get a post by its ID
         cursor = connection.Themes.find({"_id": ObjectId(theme_id)})
         return cursor

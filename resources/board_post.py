@@ -20,7 +20,7 @@ class BoardPostsList(Resource):
         return None, 201
 
 
-class BoardPosts(Resource):
+class BoardPost(Resource):
     def get(self, board_post_id):  # get a post by its ID
         cursor = connection.BoardPosts.find({"_id": ObjectId(board_post_id)})
         return cursor

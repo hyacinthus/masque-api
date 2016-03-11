@@ -20,7 +20,7 @@ class BoardCommentsList(Resource):
         return None, 201
 
 
-class BoardComments(Resource):
+class BoardComment(Resource):
     def get(self, board_comment_id):  # get a post by its ID
         cursor = connection.BoardComments.find(
             {"_id": ObjectId(board_comment_id)})
