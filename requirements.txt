@@ -11,6 +11,8 @@ pytz
 flask-restful
 pymongo>2.8,<3.0
 requests
+redis
+Flask-OAuthlib
 
 # install the newest mongokit from github
 -e git+https://github.com/namlook/mongokit@development#egg=mongokit
