@@ -1,5 +1,5 @@
 from bson.objectid import ObjectId
-from flask_restful import Resource, request
+from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig
 from model import connection
@@ -22,10 +22,35 @@ class UsersList(Resource):
 
 class User(Resource):
     def get(self, user_id):  # get a post by its ID
-        cursor = connection.Users.find({"_id": ObjectId(user_id)})
-        if cursor.count() == 0:
-            return None, 404
-        return list(cursor)[0]  # 单个查询只返回字典
+        parser = reqparse.RequestParser()
+        parser.add_argument('device_id',
+                            type=str,
+                            help='page number must be a string')
+        args = parser.parse_args()
+        if args['device_id'] is None:
+            # 如果没有传参数, 则视为存在此用户, 返回 user_id 对应用户信息
+            result = connection.Users.find_one({"_id": ObjectId(user_id)})
+        else:
+            device_id = args['device_id']
+            # 有参数传入, 先在设备表里查询有无 device_id 对应信息
+            cursor = connection.Devices.find_one({"_id": device_id})
+            if cursor is None:
+                # 没有查到 device_id 对应信息, 视为新用户, 为其初始化devices/users信息
+                dev = connection.Devices()
+                user_id = str(ObjectId())
+                dev['_id'] = device_id
+                dev['user_id'] = user_id
+                dev['origin_user_id'] = user_id
+                dev.save()
+                user = connection.Users()
+                user['_id'] = user_id
+                user.save()
+                result = connection.Users.find_one({"_id": ObjectId(user_id)})
+            else:
+                # 查到 device_id 对应信息, 返回对应用户信息
+                result = connection.Users.find_one(
+                    {"_id": ObjectId(cursor['user_id'])})
+        return result
 
     def put(self, user_id):  # update a post by its ID
         resp = request.get_json(force=True)

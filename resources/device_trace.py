@@ -22,10 +22,9 @@ class DeviceTraceList(Resource):
 
 class DeviceTrace(Resource):
     def get(self, device_trace_id):  # get a post by its ID
-        cursor = connection.DeviceTrace.find({"_id": ObjectId(device_trace_id)})
-        if cursor.count() == 0:
-            return None, 404
-        return list(cursor)[0]  # 单个查询只返回字典
+        cursor = connection.DeviceTrace.find_one(
+            {"_id": ObjectId(device_trace_id)})
+        return cursor
 
     def put(self, device_trace_id):  # update a post by its ID
         resp = request.get_json(force=True)

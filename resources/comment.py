@@ -60,10 +60,8 @@ class CommentsList(Resource):
 class Comment(Resource):
     def get(self, theme_id, comment_id):  # get a comment by its ID
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find({"_id": ObjectId(comment_id)})
-        if cursor.count() == 0:
-            return None, 404
-        return list(cursor)[0]  # 单个查询只返回字典
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
+        return cursor
 
     def put(self, theme_id, comment_id):  # update a comment by its ID
         resp = request.get_json(force=True)

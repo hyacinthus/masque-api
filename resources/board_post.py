@@ -22,10 +22,9 @@ class BoardPostsList(Resource):
 
 class BoardPost(Resource):
     def get(self, board_post_id):  # get a post by its ID
-        cursor = connection.BoardPosts.find({"_id": ObjectId(board_post_id)})
-        if cursor.count() == 0:
-            return None, 404
-        return list(cursor)[0]  # 单个查询只返回字典
+        cursor = connection.BoardPosts.find_one(
+            {"_id": ObjectId(board_post_id)})
+        return cursor
 
     def put(self, board_post_id):  # update a post by its ID
         resp = request.get_json(force=True)

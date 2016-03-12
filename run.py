@@ -57,7 +57,8 @@ api.add_resource(Comment,
                  endpoint='comment')
 
 api.add_resource(UsersList, '/users', '/users/', endpoint='users')
-api.add_resource(User, '/user/<string:user_id>',
+api.add_resource(User, '/user/<string:user_id>', '/user/<string:user_id>/',
+                 '/user', '/user/',
                  endpoint='user')
 
 api.add_resource(UserPostsList, '/user/<string:user_id>/posts',
