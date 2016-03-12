@@ -58,8 +58,10 @@ api.add_resource(Comment,
 
 api.add_resource(UsersList, '/users', '/users/', endpoint='users')
 api.add_resource(User, '/user/<string:user_id>', '/user/<string:user_id>/',
-                 '/user', '/user/',
                  endpoint='user')
+api.add_resource(DeviceUser, '/device/<string:device_id>/user',
+                 '/device/<string:device_id>/user/',
+                 endpoint='device_user')
 
 api.add_resource(UserPostsList, '/user/<string:user_id>/posts',
                  '/user/<string:user_id>/posts/',

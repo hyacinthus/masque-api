@@ -9,7 +9,7 @@ from resources.message import Message, MessagesList
 from resources.parameter import Parameter, ParametersList
 from resources.post import Post, PostsList, FavorPost
 from resources.theme import Theme, ThemesList
-from resources.user import User, UsersList, UserPostsList, UserCommentsList, \
-    UserStarsList
+from resources.user import User, DeviceUser, UsersList, UserPostsList, \
+    UserCommentsList, UserStarsList
 from resources.user_level import UserLevel, UserLevelsList
 from resources.user_trace import UserTrace, UserTracesList
