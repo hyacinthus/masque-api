@@ -23,7 +23,9 @@ class UserLevelsList(Resource):
 class UserLevel(Resource):
     def get(self, user_level_id):  # get a post by its ID
         cursor = connection.UserLevels.find({"_id": ObjectId(user_level_id)})
-        return cursor
+        if cursor.count() == 0:
+            return None, 404
+        return list(cursor)[0]  # 单个查询只返回字典
 
     def put(self, user_level_id):  # update a post by its ID
         resp = request.get_json(force=True)

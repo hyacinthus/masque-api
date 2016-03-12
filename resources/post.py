@@ -51,7 +51,9 @@ class Post(Resource):
     def get(self, theme_id, post_id):  # get a post by its ID
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         cursor = collection.Posts.find({"_id": ObjectId(post_id)})
-        return cursor
+        if cursor.count() == 0:
+            return None, 404
+        return list(cursor)[0]  # 单个查询只返回字典
 
     def put(self, theme_id, post_id):  # update a post by its ID
         resp = request.get_json(force=True)

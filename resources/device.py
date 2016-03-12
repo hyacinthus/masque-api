@@ -21,7 +21,9 @@ class DevicesList(Resource):
 class Device(Resource):
     def get(self, device_id):  # get a post by its ID
         cursor = connection.Devices.find({"_id": device_id})
-        return cursor
+        if cursor.count() == 0:
+            return None, 404
+        return list(cursor)[0]  # 单个查询只返回字典
 
     def put(self, device_id):  # update a post by its ID
         resp = request.get_json(force=True)

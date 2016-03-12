@@ -23,7 +23,9 @@ class MessagesList(Resource):
 class Message(Resource):
     def get(self, message_id):  # get a post by its ID
         cursor = connection.Messages.find({"_id": ObjectId(message_id)})
-        return cursor
+        if cursor.count() == 0:
+            return None, 404
+        return list(cursor)[0]  # 单个查询只返回字典
 
     def put(self, message_id):  # update a post by its ID
         resp = request.get_json(force=True)

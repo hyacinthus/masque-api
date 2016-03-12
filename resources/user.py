@@ -23,7 +23,9 @@ class UsersList(Resource):
 class User(Resource):
     def get(self, user_id):  # get a post by its ID
         cursor = connection.Users.find({"_id": ObjectId(user_id)})
-        return cursor
+        if cursor.count() == 0:
+            return None, 404
+        return list(cursor)[0]  # 单个查询只返回字典
 
     def put(self, user_id):  # update a post by its ID
         resp = request.get_json(force=True)

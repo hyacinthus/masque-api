@@ -23,7 +23,9 @@ class ThemesList(Resource):
 class Theme(Resource):
     def get(self, theme_id):  # get a post by its ID
         cursor = connection.Themes.find({"_id": ObjectId(theme_id)})
-        return cursor
+        if cursor.count() == 0:
+            return None, 404
+        return list(cursor)[0]  # 单个查询只返回字典
 
     def put(self, theme_id):  # update a post by its ID
         resp = request.get_json(force=True)

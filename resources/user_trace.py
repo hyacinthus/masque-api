@@ -23,7 +23,9 @@ class UserTracesList(Resource):
 class UserTrace(Resource):
     def get(self, user_trace_id):  # get a post by its ID
         cursor = connection.UserTraces.find({"_id": ObjectId(user_trace_id)})
-        return cursor
+        if cursor.count() == 0:
+            return None, 404
+        return list(cursor)[0]  # 单个查询只返回字典
 
     def put(self, user_trace_id):  # update a post by its ID
         resp = request.get_json(force=True)
