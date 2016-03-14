@@ -73,12 +73,15 @@ class Post(Resource):
 
     def put(self, theme_id, post_id):  # update a post by its ID
         resp = request.get_json(force=True)
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
-        doc = collection.Posts()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = post_id
-        doc.save()
+        collection.Posts.find_and_modify(
+            {"_id": ObjectId(post_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, theme_id, post_id):  # delete a post by its ID

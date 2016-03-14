@@ -27,11 +27,14 @@ class Message(Resource):
 
     def put(self, message_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.Messages()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = message_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.Messages.find_and_modify(
+            {"_id": ObjectId(message_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, message_id):  # delete a post by its ID

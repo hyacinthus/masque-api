@@ -49,11 +49,14 @@ class User(Resource):
 
     def put(self, user_id):  # update user info by its ID
         resp = request.get_json(force=True)
-        doc = connection.Users()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = user_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.Users.find_and_modify(
+            {"_id": ObjectId(user_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, user_id):  # delete a post by its ID
