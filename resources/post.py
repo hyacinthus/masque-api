@@ -92,7 +92,6 @@ class FavorPost(Resource):
         else:
             return {'message': 'Record Exists!'}, 200
 
-
     def delete(self, post_id):
         resp = request.get_json(force=True)
         connection.UserStars.find_and_modify(
@@ -104,3 +103,36 @@ class FavorPost(Resource):
             remove=True
         )
         return None, 204
+
+
+class Hearts(Resource):
+    def post(self, theme_id, post_id):
+        resp = request.get_json(force=True)
+        collection = connection[MongoConfig.DB]["posts_" + theme_id]
+        cursor = collection.Posts.find_one({"_id": ObjectId(post_id)})
+        # 发帖人不能自己评论自己
+        if cursor['author'] == resp['user_id']:
+            return None, 204
+        # 查找用户是否已经感谢过这个帖子
+        for item in cursor['hearts']:
+            if item['user_id'] == resp['user_id']:
+                return None, 204
+        # 更新 hearts 列表
+        collection.Posts.find_and_modify(
+            {"_id": ObjectId(post_id)},
+            {
+                "$addToSet": {
+                    "hearts": resp
+                }
+            }
+        )
+        # 给帖子作者 hearts_received 加一
+        connection.Users.find_and_modify(
+            {"_id": ObjectId(cursor['author'])},
+            {
+                "$inc": {
+                    "hearts_received": 1
+                }
+            }
+        )
+        return None, 201
