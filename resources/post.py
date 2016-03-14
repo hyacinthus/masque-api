@@ -2,9 +2,23 @@ from datetime import datetime
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
+from marshmallow import Schema, fields, ValidationError
 
 from config import MongoConfig, APIConfig
 from model import connection
+
+
+# Custom validator
+def must_not_be_blank(data):
+    if not data:
+        raise ValidationError('Data not provided.')
+    if len(data) != 24:
+        raise ValidationError('Data is not a valid ObjectId')
+
+
+class HeartSchema(Schema):
+    mask_id = fields.Str(required=True, validate=must_not_be_blank)
+    user_id = fields.Str(required=True, validate=must_not_be_blank)
 
 
 class PostsList(Resource):
@@ -108,21 +122,27 @@ class FavorPost(Resource):
 class Hearts(Resource):
     def post(self, theme_id, post_id):
         resp = request.get_json(force=True)
+        # 输入验证
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        data, errors = HeartSchema().load(resp)
+        if errors:
+            return errors, 422
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         cursor = collection.Posts.find_one({"_id": ObjectId(post_id)})
         # 发帖人不能自己评论自己
-        if cursor['author'] == resp['user_id']:
+        if cursor['author'] == data['user_id']:
             return None, 204
         # 查找用户是否已经感谢过这个帖子
         for item in cursor['hearts']:
-            if item['user_id'] == resp['user_id']:
+            if item['user_id'] == data['user_id']:
                 return None, 204
         # 更新 hearts 列表
         collection.Posts.find_and_modify(
             {"_id": ObjectId(post_id)},
             {
                 "$addToSet": {
-                    "hearts": resp
+                    "hearts": data
                 }
             }
         )
