@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from bson.objectid import ObjectId
 from flask_restful import Resource, request
 
@@ -36,15 +38,29 @@ class DeviceUser(Resource):
             user.save()
             result = connection.Users.find_one({"_id": ObjectId(user_id)})
         else:
-            # 查到 device_id 对应信息, 返回对应用户信息
-            result = connection.Users.find_one(
-                {"_id": ObjectId(cursor['user_id'])})
+            # 查到 device_id 对应信息, 返回对应用户信息并刷新用户登录时间
+            result = connection.Users.find_and_modify(
+                {"_id": ObjectId(cursor['user_id'])},
+                {
+                    "$set": {
+                        "_updated": datetime.utcnow()
+                    }
+                }
+            )
         return result
 
 
 class User(Resource):
     def get(self, user_id):  # get user info by its ID
-        cursor = connection.Users.find_one({"_id": ObjectId(user_id)})
+        # 返回用户信息同时刷新登录时间记录
+        cursor = connection.Users.find_and_modify(
+            {"_id": ObjectId(user_id)},
+            {
+                "$set": {
+                    "_updated": datetime.utcnow()
+                }
+            }
+        )
         return cursor
 
     def put(self, user_id):  # update user info by its ID
