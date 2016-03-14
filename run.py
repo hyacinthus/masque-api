@@ -44,8 +44,9 @@ api.add_resource(Hearts,
                  '/theme/<string:theme_id>/post/<string:post_id>/hearts',
                  '/theme/<string:theme_id>/post/<string:post_id>/hearts/',
                  endpoint='hearts')
-api.add_resource(FavorPost, '/post/<string:post_id>/star',
-                 '/post/<string:post_id>/star/',
+api.add_resource(FavorPost,
+                 '/theme/<string:theme_id>/post/<string:post_id>/star',
+                 '/theme/<string:theme_id>/post/<string:post_id>/star/',
                  endpoint='post_star')
 
 api.add_resource(CommentsList, '/theme/<string:theme_id>/comments',

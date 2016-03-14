@@ -21,6 +21,10 @@ class HeartSchema(Schema):
     user_id = fields.Str(required=True, validate=must_not_be_blank)
 
 
+class FavorSchema(Schema):
+    user_id = fields.Str(required=True, validate=must_not_be_blank)
+
+
 class PostsList(Resource):
     def get(self, theme_id):  # get all posts
         parser = reqparse.RequestParser()
@@ -88,31 +92,52 @@ class Post(Resource):
 
 
 class FavorPost(Resource):
-    def post(self, post_id):
+    def post(self, theme_id, post_id):
         resp = request.get_json(force=True)
-        count = connection.UserStars.find(
+        # 输入验证
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        data, errors = FavorSchema().load(resp)
+        if errors:
+            return errors, 422
+        cursor = connection.UserStars.find_one(
             {
                 "post_id": post_id,
-                "user_id": resp['user_id'],
-                "theme_id": resp['theme_id']
+                "user_id": data['user_id'],
+                "theme_id": theme_id
             }
-        ).count()
-        if count == 0:  # do nothing if repeatedly submits happened
-            doc = connection.UserStars()
-            for item in resp:
-                doc[item] = resp[item]
-            doc.save()
+        )
+        if cursor is None:  # do nothing if repeatedly submits happened
+            connection.UserStars.find_and_modify(
+                {
+                    "post_id": post_id,
+                    "user_id": data['user_id'],
+                    "theme_id": theme_id
+                },
+                {
+                    "post_id": post_id,
+                    "user_id": data['user_id'],
+                    "theme_id": theme_id
+                },
+                upsert=True
+            )
             return None, 201
         else:
             return {'message': 'Record Exists!'}, 200
 
-    def delete(self, post_id):
+    def delete(self, theme_id, post_id):
         resp = request.get_json(force=True)
+        # 输入验证
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        data, errors = FavorSchema().load(resp)
+        if errors:
+            return errors, 422
         connection.UserStars.find_and_modify(
             {
                 "post_id": post_id,
-                "user_id": resp['user_id'],
-                "theme_id": resp['theme_id']
+                "user_id": data['user_id'],
+                "theme_id": theme_id
             },
             remove=True
         )
