@@ -22,11 +22,9 @@ class BoardCommentsList(Resource):
 
 class BoardComment(Resource):
     def get(self, board_comment_id):  # get a post by its ID
-        cursor = connection.BoardComments.find(
+        cursor = connection.BoardComments.find_one(
             {"_id": ObjectId(board_comment_id)})
-        if cursor.count() == 0:
-            return None, 404
-        return list(cursor)[0]  # 单个查询只返回字典
+        return cursor
 
     def put(self, board_comment_id):  # update a post by its ID
         resp = request.get_json(force=True)

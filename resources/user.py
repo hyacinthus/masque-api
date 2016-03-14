@@ -20,14 +20,34 @@ class UsersList(Resource):
         return {"_id": doc['_id']}, 201
 
 
-class User(Resource):
-    def get(self, user_id):  # get a post by its ID
-        cursor = connection.Users.find({"_id": ObjectId(user_id)})
-        if cursor.count() == 0:
-            return None, 404
-        return list(cursor)[0]  # 单个查询只返回字典
+class DeviceUser(Resource):
+    def get(self, device_id):
+        cursor = connection.Devices.find_one({"_id": device_id})
+        if cursor is None:
+            # 没有查到 device_id 对应信息, 视为新用户, 为其初始化devices/users信息
+            user_id = str(ObjectId())
+            dev = connection.Devices()
+            dev['_id'] = device_id
+            dev['user_id'] = user_id
+            dev['origin_user_id'] = user_id
+            dev.save()
+            user = connection.Users()
+            user['_id'] = user_id
+            user.save()
+            result = connection.Users.find_one({"_id": ObjectId(user_id)})
+        else:
+            # 查到 device_id 对应信息, 返回对应用户信息
+            result = connection.Users.find_one(
+                {"_id": ObjectId(cursor['user_id'])})
+        return result
 
-    def put(self, user_id):  # update a post by its ID
+
+class User(Resource):
+    def get(self, user_id):  # get user info by its ID
+        cursor = connection.Users.find_one({"_id": ObjectId(user_id)})
+        return cursor
+
+    def put(self, user_id):  # update user info by its ID
         resp = request.get_json(force=True)
         doc = connection.Users()
         for item in resp:

@@ -40,6 +40,10 @@ api.add_resource(PostsList, '/theme/<string:theme_id>/posts',
 api.add_resource(Post, '/theme/<string:theme_id>/post/<string:post_id>',
                  '/theme/<string:theme_id>/post/<string:post_id>/',
                  endpoint='post')
+api.add_resource(Hearts,
+                 '/theme/<string:theme_id>/post/<string:post_id>/hearts',
+                 '/theme/<string:theme_id>/post/<string:post_id>/hearts/',
+                 endpoint='hearts')
 api.add_resource(FavorPost, '/post/<string:post_id>/star',
                  '/post/<string:post_id>/star/',
                  endpoint='post_star')
@@ -57,8 +61,11 @@ api.add_resource(Comment,
                  endpoint='comment')
 
 api.add_resource(UsersList, '/users', '/users/', endpoint='users')
-api.add_resource(User, '/user/<string:user_id>',
+api.add_resource(User, '/user/<string:user_id>', '/user/<string:user_id>/',
                  endpoint='user')
+api.add_resource(DeviceUser, '/device/<string:device_id>/user',
+                 '/device/<string:device_id>/user/',
+                 endpoint='device_user')
 
 api.add_resource(UserPostsList, '/user/<string:user_id>/posts',
                  '/user/<string:user_id>/posts/',
