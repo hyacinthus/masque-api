@@ -67,6 +67,8 @@ class User(Resource):
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
+        # 更新登录时间记录
+        resp["_updated"] = datetime.utcnow()
         connection.Users.find_and_modify(
             {"_id": ObjectId(user_id)},
             {
