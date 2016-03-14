@@ -28,11 +28,14 @@ class BoardComment(Resource):
 
     def put(self, board_comment_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.BoardComments()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = board_comment_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.BoardComments.find_and_modify(
+            {"_id": ObjectId(board_comment_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, board_comment_id):  # delete a post by its ID

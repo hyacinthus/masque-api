@@ -28,11 +28,14 @@ class DeviceTrace(Resource):
 
     def put(self, device_trace_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.DeviceTrace()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = device_trace_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.DeviceTrace.find_and_modify(
+            {"_id": ObjectId(device_trace_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, device_trace_id):  # delete a post by its ID

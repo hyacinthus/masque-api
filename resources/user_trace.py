@@ -28,11 +28,14 @@ class UserTrace(Resource):
 
     def put(self, user_trace_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.UserTraces()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = user_trace_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.UserTraces.find_and_modify(
+            {"_id": ObjectId(user_trace_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, user_trace_id):  # delete a post by its ID

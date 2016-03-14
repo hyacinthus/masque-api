@@ -2,9 +2,27 @@ from datetime import datetime
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
+from marshmallow import Schema, fields, ValidationError
 
 from config import MongoConfig, APIConfig
 from model import connection
+
+
+# Custom validator
+def must_not_be_blank(data):
+    if not data:
+        raise ValidationError('Data not provided.')
+    if len(data) != 24:
+        raise ValidationError('Data is not a valid ObjectId')
+
+
+class HeartSchema(Schema):
+    mask_id = fields.Str(required=True, validate=must_not_be_blank)
+    user_id = fields.Str(required=True, validate=must_not_be_blank)
+
+
+class FavorSchema(Schema):
+    user_id = fields.Str(required=True, validate=must_not_be_blank)
 
 
 class PostsList(Resource):
@@ -55,12 +73,15 @@ class Post(Resource):
 
     def put(self, theme_id, post_id):  # update a post by its ID
         resp = request.get_json(force=True)
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
-        doc = collection.Posts()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = post_id
-        doc.save()
+        collection.Posts.find_and_modify(
+            {"_id": ObjectId(post_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, theme_id, post_id):  # delete a post by its ID
@@ -74,31 +95,52 @@ class Post(Resource):
 
 
 class FavorPost(Resource):
-    def post(self, post_id):
+    def post(self, theme_id, post_id):
         resp = request.get_json(force=True)
-        count = connection.UserStars.find(
+        # 输入验证
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        data, errors = FavorSchema().load(resp)
+        if errors:
+            return errors, 422
+        cursor = connection.UserStars.find_one(
             {
                 "post_id": post_id,
-                "user_id": resp['user_id'],
-                "theme_id": resp['theme_id']
+                "user_id": data['user_id'],
+                "theme_id": theme_id
             }
-        ).count()
-        if count == 0:  # do nothing if repeatedly submits happened
-            doc = connection.UserStars()
-            for item in resp:
-                doc[item] = resp[item]
-            doc.save()
+        )
+        if cursor is None:  # do nothing if repeatedly submits happened
+            connection.UserStars.find_and_modify(
+                {
+                    "post_id": post_id,
+                    "user_id": data['user_id'],
+                    "theme_id": theme_id
+                },
+                {
+                    "post_id": post_id,
+                    "user_id": data['user_id'],
+                    "theme_id": theme_id
+                },
+                upsert=True
+            )
             return None, 201
         else:
             return {'message': 'Record Exists!'}, 200
 
-    def delete(self, post_id):
+    def delete(self, theme_id, post_id):
         resp = request.get_json(force=True)
+        # 输入验证
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        data, errors = FavorSchema().load(resp)
+        if errors:
+            return errors, 422
         connection.UserStars.find_and_modify(
             {
                 "post_id": post_id,
-                "user_id": resp['user_id'],
-                "theme_id": resp['theme_id']
+                "user_id": data['user_id'],
+                "theme_id": theme_id
             },
             remove=True
         )
@@ -108,21 +150,27 @@ class FavorPost(Resource):
 class Hearts(Resource):
     def post(self, theme_id, post_id):
         resp = request.get_json(force=True)
+        # 输入验证
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        data, errors = HeartSchema().load(resp)
+        if errors:
+            return errors, 422
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         cursor = collection.Posts.find_one({"_id": ObjectId(post_id)})
         # 发帖人不能自己评论自己
-        if cursor['author'] == resp['user_id']:
+        if cursor['author'] == data['user_id']:
             return None, 204
         # 查找用户是否已经感谢过这个帖子
         for item in cursor['hearts']:
-            if item['user_id'] == resp['user_id']:
+            if item['user_id'] == data['user_id']:
                 return None, 204
         # 更新 hearts 列表
         collection.Posts.find_and_modify(
             {"_id": ObjectId(post_id)},
             {
                 "$addToSet": {
-                    "hearts": resp
+                    "hearts": data
                 }
             }
         )
