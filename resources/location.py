@@ -43,68 +43,45 @@ class SchoolsList(Resource):
                      'key=ab158f36829f810346ef3526727f1aa4&' \
                      'location={0},{1}&' \
                      'radius=300&' \
-                     'keywords=&' \
                      'types=141201|141202|141203&' \
-                     'offset=50&' \
-                     'page=1&' \
                      'extensions=base'.format(args['lon'], args['lat'])
         address = requests.get(regeo_url).json()
-        addr = {}
+        if not address:
+            return {'message': 'Amap API Server No Response!'}, 504
         if address['status'] == "1":
-            for element in ["province", "city", "district"]:
-                try:
-                    addr[element] = address["regeocode"]["addressComponent"][
-                        element]
-                except IndexError or KeyError:
-                    addr[element] = []
-            try:
-                addr["keyword"] = address["regeocode"]["aois"][0]["name"]
-            except IndexError or KeyError:
-                addr["keyword"] = None
-            if addr['city'] == []:  # 直辖市会有city为空list的情况,用省填充
-                addr['city'] = addr['province']
+            ac = address["regeocode"]["addressComponent"]
+            addr = {
+                "province": ac["province"],
+                "district": ac["district"],
+                "city": ac["province"] if not ac["city"] else ac["city"],
+                "keyword": address["regeocode"]["aois"][0]["name"] if
+                address["regeocode"]["aois"] else None
+            }
         else:
-            raise Exception(address['info'])
-        get_school = []
-        if addr["keyword"] is not None:
-            get_school.append(addr["keyword"])
+            return {'message': 'Amap API Server Error!'}, 500
+        get_school = (addr["keyword"],) if addr["keyword"] else ()
+        # 获取附近地点
         school_name = requests.get(around_url).json()
-
-        if school_name['status'] == "1":
-            try:
-                pois = school_name["pois"]
-            except IndexError or KeyError:
-                pois = None
+        if not school_name:
+            return {'message': 'Amap API Server No Response!'}, 504
+        if school_name['count'] != "0" and school_name['status'] == "1":
+            pois = school_name["pois"] if school_name["pois"] else None
         else:
-            raise Exception(school_name['info'])
-        if pois == [] or pois is None:
-            pass
-        else:
-            for s in pois:
-                get_school.append(s['name'].replace('-', ''))
+            pois = None
+        if pois:
+            get_school += tuple(item['name'].replace('-', '') for item in pois)
         result = connection.Schools.find(
             {"city": addr["city"]},
             {"name": 1, "_id": 0}
         )
-        data = []
-        schools = []
-        for element in result:
-            data.append(element['name'])
+        data = tuple(item['name'] for item in result)
+        schools = ()
         for element in get_school:
-            match_list = []
-            for i in data:
-                if element.startswith(i) or (
-                            i.endswith(element) and i[0:2] == "上海"):
-                    match_list.append(i)
-                else:
-                    continue
-            if len(match_list) > 0:
-                schools.append(match_list[0])
-            else:
-                pass
-
+            match_list = tuple(i for i in data if element.startswith(i) or (
+                i[0:2] == "上海" and i.endswith(element)))
+            schools += match_list if match_list else ()
         # 以下为Themes collection初始化处理过程
-        if len(schools) != 0:
+        if schools:
             schools = rm_duplicates(schools)
             for item in schools:
                 cursor = connection.Themes.find_one({"full_name": item})
@@ -119,7 +96,7 @@ class SchoolsList(Resource):
                 doc.save()  # 新建不存在的主题(学校)
         else:
             # 如果附近没有学校, 返回地区
-            schools.append(addr["district"])
+            schools = (addr["district"],)
             cursor = connection.Themes.find_one({"full_name": addr["district"]})
             if cursor is not None:
                 pass  # 忽略已有
@@ -132,6 +109,5 @@ class SchoolsList(Resource):
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
                 doc.save()  # 新建不存在的主题
-        result = map(lambda i: connection.Themes.find_one({"full_name": i}),
-                     schools)
+        result = (connection.Themes.find_one({"full_name": i}) for i in schools)
         return result
