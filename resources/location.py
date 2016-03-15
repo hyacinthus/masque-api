@@ -4,6 +4,22 @@ from flask_restful import Resource, reqparse
 from model import connection
 
 
+def rm_duplicates(data=None):
+    """列表去重, 保持顺序"""
+    data = sorted(data)
+    tmp = data[0]
+    index = 0
+    for i, v in enumerate(data):
+        if tmp == v:
+            continue
+        else:
+            data[index] = tmp
+            tmp = v
+            index += 1
+    data[index] = tmp  # 最后一次的tmp值赋给data
+    return data[:index + 1]
+
+
 class SchoolsList(Resource):
     def get(self):
         parser = reqparse.RequestParser()
@@ -77,7 +93,7 @@ class SchoolsList(Resource):
                 schools.append(match_list[0])
             else:
                 pass
-        schools = list({}.fromkeys(schools).keys())
+        schools = rm_duplicates(schools)
         if schools == []:
             schools.append(addr['district'])
         return schools
