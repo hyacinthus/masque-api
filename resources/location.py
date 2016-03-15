@@ -17,12 +17,12 @@ class SchoolsList(Resource):
                             help='lat not found!')
         args = parser.parse_args()
         url_address = 'http://restapi.amap.com/v3/geocode/regeo?key=8734a771f5a4a097a43e96d42f1cc393&' \
-                      'location={0},{1}&poitype=141201|141202|141203|141206&' \
+                      'location={0},{1}&poitype=141201|141202|141203&' \
                       'extensions=all&batch=false&roadlevel=1'.format(
             args['lon'],
             args['lat'])
         url = 'http://restapi.amap.com/v3/place/around?key=8734a771f5a4a097a43e96d42f1cc393&' \
-              'location={0},{1}&radius=300&keywords=&types=141201|141202|141203|141206&' \
+              'location={0},{1}&radius=300&keywords=&types=141201|141202|141203&' \
               'offset=50&page=1&extensions=base'.format(args['lon'],
                                                         args['lat'])
         address = requests.get(url_address).json()
@@ -53,14 +53,11 @@ class SchoolsList(Resource):
                 pois = None
         else:
             raise Exception(school_name['info'])
-        if pois is None or pois == []:
+        if pois == [] or pois is None:
             pass
         else:
             for s in pois:
-                if '网络教育' in s['name'] or '继续教育' in s['name'] or '远程教育' in s['name']:
-                    continue
-                else:
-                    get_school.append(s['name'].replace('-', ''))
+                get_school.append(s['name'].replace('-', ''))
         result = connection.Schools.find({
             "city": addr["city"]
         }, {"name": 1, "_id": 0})
