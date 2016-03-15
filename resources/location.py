@@ -44,6 +44,7 @@ class SchoolsList(Resource):
         if addr["keyword"] is not None:
             get_school.append(addr["keyword"])
         school_name = requests.get(url).json()
+
         if int(school_name['status']) == 1:
             try:
                 pois = school_name["pois"]
@@ -55,7 +56,10 @@ class SchoolsList(Resource):
             pass
         else:
             for s in pois:
-                get_school.append(s['name'].replace('-', ''))
+                if '网络教育' in s['name'] or '继续教育' in s['name'] or '远程教育' in s['name']:
+                    continue
+                else:
+                    get_school.append(s['name'].replace('-', ''))
         result = connection.Schools.find({}, {"name": 1, "_id": 0})
         data = []
         schools = []
@@ -64,7 +68,7 @@ class SchoolsList(Resource):
         for element in get_school:
             match_list = []
             for i in data:
-                if i in element:
+                if element.startswith(i) or (i.endswith(element) and i[0:2] == "上海"):
                     match_list.append(i)
                 else:
                     continue
