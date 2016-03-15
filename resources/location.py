@@ -118,20 +118,22 @@ class SchoolsList(Resource):
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
                 doc.save()  # 新建不存在的主题
-                cursor = connection.Themes.find_one({"full_name": item})
-                result.append(cursor)  # 返回新建学校记录
+                cur = connection.Themes.find_one({"full_name": item})
+                result.append(cur)  # 返回新建学校记录
         else:
             # 如果附近没有学校, 返回地区
             cursor = connection.Themes.find_one({"full_name": addr["district"]})
             if cursor is not None:
-                return result.append(cursor)  # 返回已有记录
-            doc["category"] = "district"
-            doc["short_name"] = addr["district"]
-            doc["full_name"] = addr["district"]
-            doc["locale"]["province"] = addr["province"]
-            doc["locale"]["city"] = addr["city"]
-            doc["locale"]["district"] = addr["district"]
-            doc.save()  # 新建不存在的主题
-            cursor = connection.Themes.find_one({"full_name": addr["district"]})
-            result.append(cursor)  # 返回新建地区记录
+                result.append(cursor)  # 返回已有记录
+            else:
+                doc["category"] = "district"
+                doc["short_name"] = addr["district"]
+                doc["full_name"] = addr["district"]
+                doc["locale"]["province"] = addr["province"]
+                doc["locale"]["city"] = addr["city"]
+                doc["locale"]["district"] = addr["district"]
+                doc.save()  # 新建不存在的主题
+                cursor = connection.Themes.find_one(
+                    {"full_name": addr["district"]})
+                result.append(cursor)  # 返回新建地区记录
         return result
