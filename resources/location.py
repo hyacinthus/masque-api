@@ -32,23 +32,23 @@ class SchoolsList(Resource):
                             required=True,
                             help='lat not found!')
         args = parser.parse_args()
-        url_address = 'http://restapi.amap.com/v3/geocode/regeo?' \
-                      'key=ab158f36829f810346ef3526727f1aa4&' \
-                      'location={0},{1}&' \
-                      'poitype=141201|141202|141203&' \
-                      'extensions=all&' \
-                      'batch=false&' \
-                      'roadlevel=1'.format(args['lon'], args['lat'])
-        url = 'http://restapi.amap.com/v3/place/around?' \
-              'key=ab158f36829f810346ef3526727f1aa4&' \
-              'location={0},{1}&' \
-              'radius=300&' \
-              'keywords=&' \
-              'types=141201|141202|141203&' \
-              'offset=50&' \
-              'page=1&' \
-              'extensions=base'.format(args['lon'], args['lat'])
-        address = requests.get(url_address).json()
+        regeo_url = 'http://restapi.amap.com/v3/geocode/regeo?' \
+                    'key=ab158f36829f810346ef3526727f1aa4&' \
+                    'location={0},{1}&' \
+                    'poitype=141201|141202|141203&' \
+                    'extensions=all&' \
+                    'batch=false&' \
+                    'roadlevel=1'.format(args['lon'], args['lat'])
+        around_url = 'http://restapi.amap.com/v3/place/around?' \
+                     'key=ab158f36829f810346ef3526727f1aa4&' \
+                     'location={0},{1}&' \
+                     'radius=300&' \
+                     'keywords=&' \
+                     'types=141201|141202|141203&' \
+                     'offset=50&' \
+                     'page=1&' \
+                     'extensions=base'.format(args['lon'], args['lat'])
+        address = requests.get(regeo_url).json()
         addr = {}
         if address['status'] == "1":
             for element in ["province", "city", "district"]:
@@ -68,7 +68,7 @@ class SchoolsList(Resource):
         get_school = []
         if addr["keyword"] is not None:
             get_school.append(addr["keyword"])
-        school_name = requests.get(url).json()
+        school_name = requests.get(around_url).json()
 
         if school_name['status'] == "1":
             try:
@@ -102,30 +102,29 @@ class SchoolsList(Resource):
                 schools.append(match_list[0])
             else:
                 pass
+
         # 以下为Themes collection初始化处理过程
-        doc = connection.Themes()
-        result = []
         if len(schools) != 0:
             schools = rm_duplicates(schools)
             for item in schools:
                 cursor = connection.Themes.find_one({"full_name": item})
-                if cursor is not None:  # 返回已有记录
-                    result.append(cursor)
+                if cursor is not None:  # 忽略已有记录
                     continue
+                doc = connection.Themes()
                 doc["short_name"] = item
                 doc["full_name"] = item
                 doc["locale"]["province"] = addr["province"]
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
-                doc.save()  # 新建不存在的主题
-                cur = connection.Themes.find_one({"full_name": item})
-                result.append(cur)  # 返回新建学校记录
+                doc.save()  # 新建不存在的主题(学校)
         else:
             # 如果附近没有学校, 返回地区
+            schools.append(addr["district"])
             cursor = connection.Themes.find_one({"full_name": addr["district"]})
             if cursor is not None:
-                result.append(cursor)  # 返回已有记录
+                pass  # 忽略已有
             else:
+                doc = connection.Themes()
                 doc["category"] = "district"
                 doc["short_name"] = addr["district"]
                 doc["full_name"] = addr["district"]
@@ -133,7 +132,6 @@ class SchoolsList(Resource):
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
                 doc.save()  # 新建不存在的主题
-                cursor = connection.Themes.find_one(
-                    {"full_name": addr["district"]})
-                result.append(cursor)  # 返回新建地区记录
+        result = map(lambda i: connection.Themes.find_one({"full_name": i}),
+                     schools)
         return result
