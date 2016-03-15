@@ -144,10 +144,18 @@ class Themes(Document):
             "nation": str,
             "province": str,
             "city": str,
-            "county": str
+            "district": str
         }
     }
-
+    default_values = {
+        "category": "school",
+        "short_name": "",
+        "full_name": "",
+        "locale.nation": "中国",
+        "locale.province": "",
+        "locale.city": "",
+        "locale.district": ""
+    }
 
 @connection.register
 class Devices(Document):

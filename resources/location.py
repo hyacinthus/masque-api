@@ -32,28 +32,36 @@ class SchoolsList(Resource):
                             required=True,
                             help='lat not found!')
         args = parser.parse_args()
-        url_address = 'http://restapi.amap.com/v3/geocode/regeo?key=8734a771f5a4a097a43e96d42f1cc393&' \
-                      'location={0},{1}&poitype=141201|141202|141203&' \
-                      'extensions=all&batch=false&roadlevel=1'.format(
-            args['lon'],
-            args['lat'])
-        url = 'http://restapi.amap.com/v3/place/around?key=8734a771f5a4a097a43e96d42f1cc393&' \
-              'location={0},{1}&radius=300&keywords=&types=141201|141202|141203&' \
-              'offset=50&page=1&extensions=base'.format(args['lon'],
-                                                        args['lat'])
+        url_address = 'http://restapi.amap.com/v3/geocode/regeo?' \
+                      'key=ab158f36829f810346ef3526727f1aa4&' \
+                      'location={0},{1}&' \
+                      'poitype=141201|141202|141203&' \
+                      'extensions=all&' \
+                      'batch=false&' \
+                      'roadlevel=1'.format(args['lon'], args['lat'])
+        url = 'http://restapi.amap.com/v3/place/around?' \
+              'key=ab158f36829f810346ef3526727f1aa4&' \
+              'location={0},{1}&' \
+              'radius=300&' \
+              'keywords=&' \
+              'types=141201|141202|141203&' \
+              'offset=50&' \
+              'page=1&' \
+              'extensions=base'.format(args['lon'], args['lat'])
         address = requests.get(url_address).json()
         addr = {}
         if address['status'] == "1":
             for element in ["province", "city", "district"]:
                 try:
-                    addr[element] = address["regeocode"]["addressComponent"][element]
+                    addr[element] = address["regeocode"]["addressComponent"][
+                        element]
                 except IndexError or KeyError:
                     addr[element] = []
             try:
                 addr["keyword"] = address["regeocode"]["aois"][0]["name"]
             except IndexError or KeyError:
                 addr["keyword"] = None
-            if addr['city'] == []:
+            if addr['city'] == []:  # 直辖市会有city为空list的情况,用省填充
                 addr['city'] = addr['province']
         else:
             raise Exception(address['info'])
@@ -74,10 +82,10 @@ class SchoolsList(Resource):
         else:
             for s in pois:
                 get_school.append(s['name'].replace('-', ''))
-        result = connection.Schools.find({
-            "city": addr["city"]
-        }, {"name": 1, "_id": 0})
-
+        result = connection.Schools.find(
+            {"city": addr["city"]},
+            {"name": 1, "_id": 0}
+        )
         data = []
         schools = []
         for element in result:
@@ -85,7 +93,8 @@ class SchoolsList(Resource):
         for element in get_school:
             match_list = []
             for i in data:
-                if element.startswith(i) or (i.endswith(element) and i[0:2] == "上海"):
+                if element.startswith(i) or (
+                            i.endswith(element) and i[0:2] == "上海"):
                     match_list.append(i)
                 else:
                     continue
@@ -93,7 +102,36 @@ class SchoolsList(Resource):
                 schools.append(match_list[0])
             else:
                 pass
-        schools = rm_duplicates(schools)
-        if schools == []:
-            schools.append(addr['district'])
-        return schools
+        # 以下为Themes collection初始化处理过程
+        doc = connection.Themes()
+        result = []
+        if len(schools) != 0:
+            schools = rm_duplicates(schools)
+            for item in schools:
+                cursor = connection.Themes.find_one({"full_name": item})
+                if cursor is not None:  # 返回已有记录
+                    result.append(cursor)
+                    continue
+                doc["short_name"] = item
+                doc["full_name"] = item
+                doc["locale"]["province"] = addr["province"]
+                doc["locale"]["city"] = addr["city"]
+                doc["locale"]["district"] = addr["district"]
+                doc.save()  # 新建不存在的主题
+                cursor = connection.Themes.find_one({"full_name": item})
+                result.append(cursor)  # 返回新建学校记录
+        else:
+            # 如果附近没有学校, 返回地区
+            cursor = connection.Themes.find_one({"full_name": addr["district"]})
+            if cursor is not None:
+                return result.append(cursor)  # 返回已有记录
+            doc["category"] = "district"
+            doc["short_name"] = addr["district"]
+            doc["full_name"] = addr["district"]
+            doc["locale"]["province"] = addr["province"]
+            doc["locale"]["city"] = addr["city"]
+            doc["locale"]["district"] = addr["district"]
+            doc.save()  # 新建不存在的主题
+            cursor = connection.Themes.find_one({"full_name": addr["district"]})
+            result.append(cursor)  # 返回新建地区记录
+        return result
