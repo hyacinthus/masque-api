@@ -20,7 +20,7 @@ class SchoolsList(Resource):
         args = parser.parse_args()
         url_address = 'http://restapi.amap.com/v3/geocode/regeo?key=8734a771f5a4a097a43e96d42f1cc393&' \
                       'location={0},{1}&poitype=141201|141202|141203|141206&' \
-                      'extensions=all&batch=true&roadlevel=1'.format(
+                      'extensions=all&batch=false&roadlevel=1'.format(
             args['lon'],
             args['lat'])
         url = 'http://restapi.amap.com/v3/place/around?key=8734a771f5a4a097a43e96d42f1cc393&' \
@@ -29,15 +29,18 @@ class SchoolsList(Resource):
                                                         args['lat'])
         address = requests.get(url_address).json()
         addr = {}
-        if int(address['status']) == 1:
+        if address['status'] == "1":
+            for element in ["province", "city", "district"]:
+                try:
+                    addr[element] = address["regeocode"]["addressComponent"][element]
+                except IndexError or KeyError:
+                    addr[element] = []
             try:
-                addr["name"] = address["regeocodes"][0]["formatted_address"]
-            except IndexError or KeyError:
-                addr["name"] = None
-            try:
-                addr["keyword"] = address["regeocodes"][0]["aois"][0]["name"]
+                addr["keyword"] = address["regeocode"]["aois"][0]["name"]
             except IndexError or KeyError:
                 addr["keyword"] = None
+            if addr['city'] == []:
+                addr['city'] = addr['province']
         else:
             raise Exception(address['info'])
         get_school = []
@@ -45,7 +48,7 @@ class SchoolsList(Resource):
             get_school.append(addr["keyword"])
         school_name = requests.get(url).json()
 
-        if int(school_name['status']) == 1:
+        if school_name['status'] == "1":
             try:
                 pois = school_name["pois"]
             except IndexError or KeyError:
@@ -60,11 +63,16 @@ class SchoolsList(Resource):
                     continue
                 else:
                     get_school.append(s['name'].replace('-', ''))
-        result = connection.Schools.find({}, {"name": 1, "_id": 0})
+        result = connection.Schools.find({
+            "city": addr["city"]
+        }, {"name": 1, "_id": 0})
+        print(result.count())
+
         data = []
         schools = []
-        for r in result:
-            data.append(r['name'])
+        for element in result:
+            data.append(element['name'])
+        print(data)
         for element in get_school:
             match_list = []
             for i in data:
@@ -76,6 +84,9 @@ class SchoolsList(Resource):
                 schools.append(match_list[0])
             else:
                 pass
+        print(len(schools))
         f = lambda x, y: x if y in x else x + [y]
         schools = reduce(f, [[], ] + schools)
+        if schools == []:
+            schools.append(addr['district'])
         return schools
