@@ -1,5 +1,3 @@
-from functools import reduce
-
 import requests
 from flask_restful import Resource, reqparse
 
@@ -66,13 +64,11 @@ class SchoolsList(Resource):
         result = connection.Schools.find({
             "city": addr["city"]
         }, {"name": 1, "_id": 0})
-        print(result.count())
 
         data = []
         schools = []
         for element in result:
             data.append(element['name'])
-        print(data)
         for element in get_school:
             match_list = []
             for i in data:
@@ -84,9 +80,7 @@ class SchoolsList(Resource):
                 schools.append(match_list[0])
             else:
                 pass
-        print(len(schools))
-        f = lambda x, y: x if y in x else x + [y]
-        schools = reduce(f, [[], ] + schools)
+        schools = list({}.fromkeys(schools).keys())
         if schools == []:
             schools.append(addr['district'])
         return schools
