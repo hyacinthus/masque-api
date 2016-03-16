@@ -1,9 +1,23 @@
-from functools import reduce
-
 import requests
 from flask_restful import Resource, reqparse
 
 from model import connection
+
+
+def rm_duplicates(data=None):
+    """列表去重, 保持顺序"""
+    data = sorted(data)
+    tmp = data[0]
+    index = 0
+    for i, v in enumerate(data):
+        if tmp == v:
+            continue
+        else:
+            data[index] = tmp
+            tmp = v
+            index += 1
+    data[index] = tmp  # 最后一次的tmp值赋给data
+    return data[:index + 1]
 
 
 class SchoolsList(Resource):
@@ -18,64 +32,82 @@ class SchoolsList(Resource):
                             required=True,
                             help='lat not found!')
         args = parser.parse_args()
-        url_address = 'http://restapi.amap.com/v3/geocode/regeo?key=8734a771f5a4a097a43e96d42f1cc393&' \
-                      'location={0},{1}&poitype=141201|141202|141203|141206&' \
-                      'extensions=all&batch=true&roadlevel=1'.format(
-            args['lon'],
-            args['lat'])
-        url = 'http://restapi.amap.com/v3/place/around?key=8734a771f5a4a097a43e96d42f1cc393&' \
-              'location={0},{1}&radius=300&keywords=&types=141201|141202|141203|141206&' \
-              'offset=50&page=1&extensions=base'.format(args['lon'],
-                                                        args['lat'])
-        address = requests.get(url_address).json()
-        addr = {}
-        if int(address['status']) == 1:
-            try:
-                addr["name"] = address["regeocodes"][0]["formatted_address"]
-            except IndexError or KeyError:
-                addr["name"] = None
-            try:
-                addr["keyword"] = address["regeocodes"][0]["aois"][0]["name"]
-            except IndexError or KeyError:
-                addr["keyword"] = None
+        regeo_url = 'http://restapi.amap.com/v3/geocode/regeo?' \
+                    'key=ab158f36829f810346ef3526727f1aa4&' \
+                    'location={0},{1}&' \
+                    'poitype=141201|141202|141203&' \
+                    'extensions=all&' \
+                    'batch=false&' \
+                    'roadlevel=1'.format(args['lon'], args['lat'])
+        around_url = 'http://restapi.amap.com/v3/place/around?' \
+                     'key=ab158f36829f810346ef3526727f1aa4&' \
+                     'location={0},{1}&' \
+                     'radius=300&' \
+                     'types=141201|141202|141203&' \
+                     'extensions=base'.format(args['lon'], args['lat'])
+        address = requests.get(regeo_url).json()
+        if not address:
+            return {'message': 'Amap API Server No Response!'}, 504
+        if address['status'] == "1":
+            ac = address["regeocode"]["addressComponent"]
+            addr = {
+                "province": ac["province"],
+                "district": ac["district"],
+                "city": ac["province"] if not ac["city"] else ac["city"],
+                "keyword": address["regeocode"]["aois"][0]["name"] if
+                address["regeocode"]["aois"] else None
+            }
         else:
-            raise Exception(address['info'])
-        get_school = []
-        if addr["keyword"] is not None:
-            get_school.append(addr["keyword"])
-        school_name = requests.get(url).json()
-
-        if int(school_name['status']) == 1:
-            try:
-                pois = school_name["pois"]
-            except IndexError or KeyError:
-                pois = None
+            return {'message': 'Amap API Server Error!'}, 500
+        get_school = (addr["keyword"],) if addr["keyword"] else ()
+        # 获取附近地点
+        school_name = requests.get(around_url).json()
+        if not school_name:
+            return {'message': 'Amap API Server No Response!'}, 504
+        if school_name['count'] != "0" and school_name['status'] == "1":
+            pois = school_name["pois"] if school_name["pois"] else None
         else:
-            raise Exception(school_name['info'])
-        if pois is None or pois == []:
-            pass
-        else:
-            for s in pois:
-                if '网络教育' in s['name'] or '继续教育' in s['name'] or '远程教育' in s['name']:
-                    continue
-                else:
-                    get_school.append(s['name'].replace('-', ''))
-        result = connection.Schools.find({}, {"name": 1, "_id": 0})
-        data = []
-        schools = []
-        for r in result:
-            data.append(r['name'])
+            pois = None
+        if pois:
+            get_school += tuple(item['name'].replace('-', '') for item in pois)
+        result = connection.Schools.find(
+            {"city": addr["city"]},
+            {"name": 1, "_id": 0}
+        )
+        data = tuple(item['name'] for item in result)
+        schools = ()
         for element in get_school:
-            match_list = []
-            for i in data:
-                if element.startswith(i) or (i.endswith(element) and i[0:2] == "上海"):
-                    match_list.append(i)
-                else:
+            match_list = tuple(i for i in data if element.startswith(i) or (
+                i[0:2] == "上海" and i.endswith(element)))
+            schools += match_list if match_list else ()
+        # 以下为Themes collection初始化处理过程
+        if schools:
+            schools = rm_duplicates(schools)
+            for item in schools:
+                cursor = connection.Themes.find_one({"full_name": item})
+                if cursor is not None:  # 忽略已有记录
                     continue
-            if len(match_list) > 0:
-                schools.append(match_list[0])
+                doc = connection.Themes()
+                doc["short_name"] = item
+                doc["full_name"] = item
+                doc["locale"]["province"] = addr["province"]
+                doc["locale"]["city"] = addr["city"]
+                doc["locale"]["district"] = addr["district"]
+                doc.save()  # 新建不存在的主题(学校)
+        else:
+            # 如果附近没有学校, 返回地区
+            schools = (addr["district"],)
+            cursor = connection.Themes.find_one({"full_name": addr["district"]})
+            if cursor is not None:
+                pass  # 忽略已有
             else:
-                pass
-        f = lambda x, y: x if y in x else x + [y]
-        schools = reduce(f, [[], ] + schools)
-        return schools
+                doc = connection.Themes()
+                doc["category"] = "district"
+                doc["short_name"] = addr["district"]
+                doc["full_name"] = addr["district"]
+                doc["locale"]["province"] = addr["province"]
+                doc["locale"]["city"] = addr["city"]
+                doc["locale"]["district"] = addr["district"]
+                doc.save()  # 新建不存在的主题
+        result = (connection.Themes.find_one({"full_name": i}) for i in schools)
+        return result

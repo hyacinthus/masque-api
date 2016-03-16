@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib.parse import urlparse
 
 from bson.objectid import ObjectId
 from mongokit import IS, OR, Document, Connection
@@ -6,7 +7,17 @@ from mongokit.schema_document import CustomType
 
 from config import MongoConfig, CollectionName
 
-connection = Connection(host=MongoConfig.HOST, port=MongoConfig.PORT)
+# If password contains special characters (e.g. ‘/’, ‘ ‘, or ‘@’)
+# must use %xx escape them for fit the MongoDB URI
+password = urlparse(MongoConfig.PASS)
+connection = Connection(
+    host='mongodb://{}:{}@{}'.format(
+        MongoConfig.USER,
+        password.geturl(),
+        MongoConfig.HOST
+    ),
+    port=MongoConfig.PORT
+)
 
 
 class CustomDate(CustomType):
@@ -144,8 +155,17 @@ class Themes(Document):
             "nation": str,
             "province": str,
             "city": str,
-            "county": str
+            "district": str
         }
+    }
+    default_values = {
+        "category": "school",
+        "short_name": "",
+        "full_name": "",
+        "locale.nation": "中国",
+        "locale.province": "",
+        "locale.city": "",
+        "locale.district": ""
     }
 
 
