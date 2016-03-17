@@ -27,11 +27,14 @@ class Mask(Resource):
 
     def put(self, mask_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.Masks()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = mask_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.Masks.find_and_modify(
+            {"_id": ObjectId(mask_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, mask_id):  # delete a post by its ID

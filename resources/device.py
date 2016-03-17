@@ -25,11 +25,14 @@ class Device(Resource):
 
     def put(self, device_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.Devices()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = device_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.Devices.find_and_modify(
+            {"_id": ObjectId(device_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, device_id):  # delete a post by its ID

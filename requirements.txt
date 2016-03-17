@@ -12,6 +12,7 @@ flask-restful
 pymongo>2.8,<3.0
 requests
 redis
+marshmallow
 Flask-OAuthlib
 
 # install the newest mongokit from github

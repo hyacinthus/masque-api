@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib.parse import urlparse
 
 from bson.objectid import ObjectId
 from mongokit import IS, OR, Document, Connection
@@ -7,7 +8,22 @@ from redis import StrictRedis
 
 from config import MongoConfig, CollectionName, RedisConfig
 
-connection = Connection(host=MongoConfig.HOST, port=MongoConfig.PORT)
+
+def get_host():
+    if MongoConfig.USER and MongoConfig.PASS:
+        _user = urlparse(MongoConfig.USER)
+        _pass = urlparse(MongoConfig.PASS)
+        _host = 'mongodb://{}:{}@{}'.format(
+            _user.geturl(),  # 处理用户/密码中的特殊字符
+            _pass.geturl(),  # 使其能被MongoDB正确识别
+            MongoConfig.HOST
+        )
+    else:
+        _host = MongoConfig.HOST
+    return _host
+
+
+connection = Connection(host=get_host(), port=MongoConfig.PORT)
 mongodb = connection[MongoConfig.DB]
 redisdb = StrictRedis(host=RedisConfig.HOST,
                       port=RedisConfig.PORT,
@@ -150,7 +166,6 @@ class Grant():
             self._del("expires")
             self.saved = False
 
-    # TODO user
     @property
     def user(self):
         if self.user_id:
@@ -370,8 +385,17 @@ class Themes(Document):
             "nation": str,
             "province": str,
             "city": str,
-            "county": str
+            "district": str
         }
+    }
+    default_values = {
+        "category": "school",
+        "short_name": "",
+        "full_name": "",
+        "locale.nation": "中国",
+        "locale.province": "",
+        "locale.city": "",
+        "locale.district": ""
     }
 
 

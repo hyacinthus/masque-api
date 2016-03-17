@@ -28,11 +28,14 @@ class UserLevel(Resource):
 
     def put(self, user_level_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.UserLevels()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = user_level_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.UserLevels.find_and_modify(
+            {"_id": ObjectId(user_level_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, user_level_id):  # delete a post by its ID

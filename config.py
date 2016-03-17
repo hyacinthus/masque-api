@@ -1,6 +1,5 @@
 import os
 
-
 class FlaskConfig:
     _host = os.getenv("FLASK_HOST", "localhost")
     _port = os.getenv("FLASK_PORT", "5000")
@@ -12,6 +11,8 @@ class MongoConfig:
     HOST = os.getenv("MONGO_HOST", "localhost")
     PORT = int(os.getenv("MONGO_PORT", "27017"))
     DB = os.getenv("MONGO_DB", "test")
+    USER = os.getenv("MONGO_USER", None)
+    PASS = os.getenv("MONGO_PASS", None)
 
 
 class RedisConfig:

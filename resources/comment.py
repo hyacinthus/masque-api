@@ -65,12 +65,15 @@ class Comment(Resource):
 
     def put(self, theme_id, comment_id):  # update a comment by its ID
         resp = request.get_json(force=True)
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        doc = collection.Comments()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = comment_id
-        doc.save()
+        collection.Comments.find_and_modify(
+            {"_id": ObjectId(comment_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, theme_id, comment_id):  # delete a comment by its ID

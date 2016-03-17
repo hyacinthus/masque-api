@@ -28,11 +28,14 @@ class BoardPost(Resource):
 
     def put(self, board_post_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.BoardPosts()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = board_post_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.BoardPosts.find_and_modify(
+            {"_id": ObjectId(board_post_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, board_post_id):  # delete a post by its ID

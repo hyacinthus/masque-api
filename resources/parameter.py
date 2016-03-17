@@ -27,11 +27,14 @@ class Parameter(Resource):
 
     def put(self, parameter_id):  # update a post by its ID
         resp = request.get_json(force=True)
-        doc = connection.Parameters()
-        for item in resp:
-            doc[item] = resp[item]
-        doc["_id"] = parameter_id
-        doc.save()
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        connection.Parameters.find_and_modify(
+            {"_id": ObjectId(parameter_id)},
+            {
+                "$set": resp
+            }
+        )
         return None, 204
 
     def delete(self, parameter_id):  # delete a post by its ID
