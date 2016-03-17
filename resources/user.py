@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from bson.objectid import ObjectId
@@ -5,6 +6,8 @@ from flask_restful import Resource, request
 
 from config import MongoConfig
 from model import connection
+
+log = logging.getLogger("masque.user")
 
 
 class UsersList(Resource):
@@ -80,7 +83,7 @@ class User(Resource):
     def delete(self, user_id):  # delete a post by its ID
         connection.Users.find_and_modify(
             {"_id": ObjectId(user_id)}, remove=True)
-        # TODO: delete related data 
+        # TODO: delete related data
         return None, 204
 
 
@@ -91,12 +94,10 @@ class UserPostsList(Resource):
         cursor = connection.UserPosts.find({"user_id": user_id})
         for doc in cursor:
             collection = connection[MongoConfig.DB]["posts_" + doc['theme_id']]
-            cur = collection.Posts.find({"author": user_id})
-            new_cur = []
-            for item in cur:  # add an extra "theme_id" item
-                item['theme_id'] = doc['theme_id']
-                new_cur.append(item)
-            result += list(new_cur)
+            cur = collection.Posts.find_one({"_id": ObjectId(doc["post_id"])})
+            if cur:
+                cur["theme_id"] = doc["theme_id"]
+                result.append(cur)
         return sorted(result, key=lambda k: k["_updated"], reverse=True)
 
 
@@ -105,15 +106,15 @@ class UserCommentsList(Resource):
         """get user's comments"""
         result = []
         cursor = connection.UserComments.find({"user_id": user_id})
+        if cursor.count() == 0:
+            return {'message': 'Not found'}, 404
         for doc in cursor:
             collection = connection[MongoConfig.DB][
                 "comments_" + doc['theme_id']]
-            cur = collection.Comments.find({"author": user_id})
-            new_cur = []
-            for item in cur:  # add an extra "theme_id" item
-                item['theme_id'] = doc['theme_id']
-                new_cur.append(item)
-            result += list(new_cur)
+            cur = collection.Comments.find({"_id": ObjectId(doc["comment_id"])})
+            if cur:
+                cur["theme_id"] = doc["theme_id"]
+                result.append(cur)
         return sorted(result, key=lambda k: k["_created"], reverse=True)
 
 
@@ -124,10 +125,8 @@ class UserStarsList(Resource):
         cursor = connection.UserStars.find({"user_id": user_id})
         for doc in cursor:
             collection = connection[MongoConfig.DB]["posts_" + doc['theme_id']]
-            cur = collection.Posts.find({"_id": ObjectId(doc['post_id'])})
-            new_cur = []
-            for item in cur:  # add an extra "theme_id" item
-                item['theme_id'] = doc['theme_id']
-                new_cur.append(item)
-            result += list(new_cur)
+            cur = collection.Posts.find_one({"_id": ObjectId(doc["post_id"])})
+            if cur:
+                cur["theme_id"] = doc["theme_id"]
+                result.append(cur)
         return sorted(result, key=lambda k: k["_updated"], reverse=True)
