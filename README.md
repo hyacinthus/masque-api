@@ -25,6 +25,7 @@
   
   ```
 ### virtualenvwrapper
+
 ```
 sudo apt-get install virtualenvwrapper
 sudo vi ~/.zshrc
