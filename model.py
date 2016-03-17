@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib.parse import urlparse
 
 from bson.objectid import ObjectId
 from mongokit import IS, OR, Document, Connection
@@ -6,7 +7,20 @@ from mongokit.schema_document import CustomType
 
 from config import MongoConfig, CollectionName
 
-connection = Connection(host=MongoConfig.HOST, port=MongoConfig.PORT)
+
+def get_host():
+    if MongoConfig.USER and MongoConfig.PASS:
+        _host = 'mongodb://{}:{}@{}'.format(
+            urlparse(MongoConfig.USER),  # 处理用户/密码中的特殊字符
+            urlparse(MongoConfig.PASS),  # 使其能被MongoDB正确识别
+            MongoConfig.HOST
+        )
+    else:
+        _host = MongoConfig.HOST
+    return _host
+
+
+connection = Connection(host=get_host(), port=MongoConfig.PORT)
 
 
 class CustomDate(CustomType):
@@ -156,6 +170,7 @@ class Themes(Document):
         "locale.city": "",
         "locale.district": ""
     }
+
 
 @connection.register
 class Devices(Document):
