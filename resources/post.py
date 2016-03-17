@@ -129,17 +129,16 @@ class FavorPost(Resource):
             return {'message': 'Record Exists!'}, 200
 
     def delete(self, theme_id, post_id):
-        resp = request.get_json(force=True)
-        # 输入验证
-        if not resp:
-            return {'message': 'No input data provided!'}, 400
-        data, errors = FavorSchema().load(resp)
-        if errors:
-            return errors, 422
+        parser = reqparse.RequestParser()
+        parser.add_argument('user_id',
+                            type=str,
+                            required=True,
+                            help='user_id not found')
+        args = parser.parse_args()
         connection.UserStars.find_and_modify(
             {
                 "post_id": post_id,
-                "user_id": data['user_id'],
+                "user_id": args['user_id'],
                 "theme_id": theme_id
             },
             remove=True
