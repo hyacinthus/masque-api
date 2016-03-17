@@ -5,7 +5,6 @@ import bcrypt
 
 from model import Client, Grant, Token, connection
 
-logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger("masque.oauth")
 oauth = OAuth2Provider()
 

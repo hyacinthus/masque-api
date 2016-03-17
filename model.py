@@ -1,5 +1,6 @@
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import quote
+import logging
 
 from bson.objectid import ObjectId
 from mongokit import IS, OR, Document, Connection
@@ -9,26 +10,31 @@ from redis import StrictRedis
 from config import MongoConfig, CollectionName, RedisConfig
 
 
-def get_host():
-    if MongoConfig.USER and MongoConfig.PASS:
-        _user = urlparse(MongoConfig.USER)
-        _pass = urlparse(MongoConfig.PASS)
-        _host = 'mongodb://{}:{}@{}'.format(
-            _user.geturl(),  # 处理用户/密码中的特殊字符
-            _pass.geturl(),  # 使其能被MongoDB正确识别
-            MongoConfig.HOST
-        )
-    else:
-        _host = MongoConfig.HOST
-    return _host
-
-
-connection = Connection(host=get_host(), port=MongoConfig.PORT)
-mongodb = connection[MongoConfig.DB]
 redisdb = StrictRedis(host=RedisConfig.HOST,
                       port=RedisConfig.PORT,
                       db=RedisConfig.DB,
                       decode_responses=True)
+log = logging.getLogger("masque.model")
+
+
+def get_host():
+    if MongoConfig.USER and MongoConfig.PASS:
+        _user = quote(MongoConfig.USER)
+        _pass = quote(MongoConfig.PASS)
+        _auth = '{}:{}@'.format(_user, _pass)
+    else:
+        _auth = ''
+    _port = MongoConfig.PORT
+    _host = 'mongodb://{}{}:{}/{}'.format(
+            _auth,
+            MongoConfig.HOST,
+            MongoConfig.PORT,
+            MongoConfig.DB,
+    )
+    log.debug(_host)
+    return _host
+
+connection = Connection(host=get_host(), port=MongoConfig.PORT)
 
 
 class CustomDate(CustomType):
@@ -79,8 +85,7 @@ class Client():
     def __init__(self, client_id):
         self.client_id = None
         if client_id:
-            device = mongodb[CollectionName.DEVICES].find_one(
-                    {"client_id": client_id})
+            device = connection.Devices.find_one({"_id": client_id})
             if device:
                 self.client_id = client_id
 

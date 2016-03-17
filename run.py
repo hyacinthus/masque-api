@@ -1,10 +1,12 @@
 from bson.json_util import dumps
 from flask import Flask, make_response, jsonify
 from flask_restful import Api
+import logging
 
 from model import connection
 from resources import *
 
+logging.basicConfig(level=logging.DEBUG)
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
