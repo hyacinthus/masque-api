@@ -10,9 +10,11 @@ from config import MongoConfig, CollectionName
 
 def get_host():
     if MongoConfig.USER and MongoConfig.PASS:
+        _user = urlparse(MongoConfig.USER)
+        _pass = urlparse(MongoConfig.PASS)
         _host = 'mongodb://{}:{}@{}'.format(
-            urlparse(MongoConfig.USER),  # 处理用户/密码中的特殊字符
-            urlparse(MongoConfig.PASS),  # 使其能被MongoDB正确识别
+            _user.geturl(),  # 处理用户/密码中的特殊字符
+            _pass.geturl(),  # 使其能被MongoDB正确识别
             MongoConfig.HOST
         )
     else:
