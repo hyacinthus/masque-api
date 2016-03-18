@@ -105,10 +105,6 @@ class FavorPost(Resource):
         data, errors = FavorSchema().load(resp)
         if errors:
             return errors, 422
-        # 不能收藏自己发的帖子
-        collection = connection[MongoConfig.DB]["posts_" + theme_id]
-        if collection.find_one({"author": data['user_id']}):
-            return {'message': 'Can not mark your own post!'}, 400
         cursor = connection.UserStars.find_one(
             {
                 "post_id": post_id,
