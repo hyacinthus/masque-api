@@ -34,7 +34,7 @@ def get_host():
     log.debug(_host)
     return _host
 
-connection = Connection(host=get_host(), port=MongoConfig.PORT)
+connection = Connection(host=get_host())
 
 
 class CustomDate(CustomType):
@@ -81,13 +81,16 @@ class CustomObjectId(CustomType):
 class Client():
     """A client is the app which want to use the resource of a user.
     It is suggested that the client is registered by a user on your site,
-    but it is not required."""
+    but it is not required.
+    If client exists, get it, if not, create it."""
     def __init__(self, client_id):
-        self.client_id = None
         if client_id:
+            self.client_id = client_id
             device = connection.Devices.find_one({"_id": client_id})
-            if device:
-                self.client_id = client_id
+            if not device:
+                new_device = connection.Devices()
+                new_device._id = client_id
+                new_device.save()
 
     @property
     def client_secret(self):
@@ -296,6 +299,7 @@ class Token():
 
 
 class Root(Document):
+    use_dot_notation = True
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -355,6 +359,7 @@ class Comments(Root):
 
 @connection.register
 class Users(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.USERS
     __database__ = MongoConfig.DB
     structure = {
@@ -379,6 +384,7 @@ class Users(Document):
 
 @connection.register
 class Themes(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.THEMES
     __database__ = MongoConfig.DB
     structure = {
@@ -406,6 +412,7 @@ class Themes(Document):
 
 @connection.register
 class Devices(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.DEVICES
     __database__ = MongoConfig.DB
     structure = {
@@ -421,6 +428,7 @@ class Devices(Document):
 
 @connection.register
 class UserLevels(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.USER_LEVELS
     __database__ = MongoConfig.DB
     structure = {
@@ -450,6 +458,7 @@ class UserLevels(Document):
 
 @connection.register
 class Masks(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.MASKS
     __database__ = MongoConfig.DB
     structure = {
@@ -461,6 +470,7 @@ class Masks(Document):
 
 @connection.register
 class BoardPosts(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.BOARD_POSTS
     __database__ = MongoConfig.DB
     structure = {
@@ -486,6 +496,7 @@ class BoardComments(BoardPosts):
 
 @connection.register
 class Parameters(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.PARAMETERS
     __database__ = MongoConfig.DB
     structure = {
@@ -496,6 +507,7 @@ class Parameters(Document):
 
 @connection.register
 class DeviceTrace(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.DEVICE_TRACE
     __database__ = MongoConfig.DB
     structure = {
@@ -520,6 +532,7 @@ class DeviceTrace(Document):
 
 @connection.register
 class Messages(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.MESSAGES
     __database__ = MongoConfig.DB
     structure = {
@@ -537,6 +550,7 @@ class Messages(Document):
 
 @connection.register
 class UserTraces(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.USER_TRACE
     __database__ = MongoConfig.DB
     structure = {
@@ -562,6 +576,7 @@ class UserTraces(Document):
 
 @connection.register
 class UserPosts(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.USER_POSTS
     __database__ = MongoConfig.DB
     structure = {
@@ -578,6 +593,7 @@ class UserPosts(Document):
 
 @connection.register
 class UserComments(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.USER_COMMENTS
     __database__ = MongoConfig.DB
     structure = {
@@ -600,5 +616,6 @@ class UserStars(UserPosts):
 
 @connection.register
 class Schools(Document):
+    use_dot_notation = True
     __collection__ = CollectionName.SCHOOLS
     __database__ = MongoConfig.DB

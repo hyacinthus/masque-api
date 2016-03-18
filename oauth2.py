@@ -1,7 +1,9 @@
-from datetime import datetime, timedelta
-from flask_oauthlib.provider import OAuth2Provider
 import logging
+from datetime import datetime, timedelta
+
+from flask_oauthlib.provider import OAuth2Provider
 import bcrypt
+from bson.objectid import ObjectId
 
 from model import Client, Grant, Token, connection
 
@@ -12,11 +14,9 @@ oauth = OAuth2Provider()
 # 注册认证函数
 @oauth.clientgetter
 def load_client(client_id):
+    """Find client_id in devices, regedit it if not exists"""
     client = Client(client_id)
-    if client.client_id:
-        return client
-    else:
-        return None
+    return client
 
 
 @oauth.grantgetter
@@ -70,8 +70,29 @@ def save_token(token, request, *args, **kwargs):
 
 @oauth.usergetter
 def get_user(username, password, *args, **kwargs):
-    """username is Users _id, password is crypt _id by
+    """username is Device _id, password is crypt _id by
     bcrypt.hashpw in client"""
-    user = connection.User.find_one({"_id": username})
-    if user and bcrypt.hashpw(username, password) == password:
+    _source = username.encode()
+    _hashed = password.encode()
+    if bcrypt.hashpw(_source, _hashed) != _hashed:
+        return None
+    device = connection.Devices.find_one({"_id": username})
+    if device:
+        if device.user_id:
+            user = connection.Users.find_one({"_id": ObjectId(device.user_id)})
+            if not user:
+                log.error("Device user %s is not exists in Users" %
+                          device.user_id)
+                return None
+        # new device, create user
+        else:
+            user = connection.Users()
+            user_id = str(ObjectId())
+            user._id = user_id
+            user.save()
+            device.user_id = user_id
+            device.origin_user_id = user_id
+            device.save()
         return user
+    else:
+        log.error("Create device %s failed." % username)

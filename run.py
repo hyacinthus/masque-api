@@ -1,12 +1,12 @@
 from bson.json_util import dumps
 from flask import Flask, make_response, jsonify
 from flask_restful import Api
-import logging
 
+from log import app_log
 from model import connection
+from oauth2 import oauth
 from resources import *
 
-logging.basicConfig(level=logging.DEBUG)
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -16,6 +16,8 @@ def create_app():
 
 
 app = create_app()
+app.logger.addHandler(app_log)
+oauth.init_app(app)
 api = Api(app)
 
 
@@ -34,6 +36,12 @@ def not_found(error):
 @app.teardown_request
 def teardown_request(exception):  # close db connection after each api request
     connection.close()
+
+
+@app.route('/token', methods=['POST'])
+@oauth.token_handler
+def access_token():
+    return None
 
 
 api.add_resource(PostsList, '/theme/<string:theme_id>/posts',
