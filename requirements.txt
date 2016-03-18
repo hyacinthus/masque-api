@@ -12,6 +12,7 @@ flask-restful
 pymongo>2.8,<3.0
 requests
 redis
+bcrypt
 marshmallow
 Flask-OAuthlib
 

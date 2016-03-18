@@ -12,7 +12,7 @@ from model import connection
 def must_not_be_blank(data):
     if not data:
         raise ValidationError('Data not provided.')
-    if len(data) != 24:
+    if not ObjectId(data):
         raise ValidationError('Data is not a valid ObjectId')
 
 
@@ -75,6 +75,8 @@ class Post(Resource):
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
+        elif ("_id" or "_created") in resp:
+            resp = {i: resp[i] for i in resp if i not in ("_id", "_created")}
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         collection.Posts.find_and_modify(
             {"_id": ObjectId(post_id)},
@@ -110,6 +112,7 @@ class FavorPost(Resource):
                 "theme_id": theme_id
             }
         )
+        # 检测帖子是否已被收藏
         if cursor is None:  # do nothing if repeatedly submits happened
             connection.UserStars.find_and_modify(
                 {
@@ -129,17 +132,16 @@ class FavorPost(Resource):
             return {'message': 'Record Exists!'}, 200
 
     def delete(self, theme_id, post_id):
-        resp = request.get_json(force=True)
-        # 输入验证
-        if not resp:
-            return {'message': 'No input data provided!'}, 400
-        data, errors = FavorSchema().load(resp)
-        if errors:
-            return errors, 422
+        parser = reqparse.RequestParser()
+        parser.add_argument('user_id',
+                            type=str,
+                            required=True,
+                            help='user_id not found')
+        args = parser.parse_args()
         connection.UserStars.find_and_modify(
             {
                 "post_id": post_id,
-                "user_id": data['user_id'],
+                "user_id": args['user_id'],
                 "theme_id": theme_id
             },
             remove=True

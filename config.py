@@ -1,18 +1,19 @@
 import os
 
+
 class FlaskConfig:
     _host = os.getenv("FLASK_HOST", "localhost")
     _port = os.getenv("FLASK_PORT", "5000")
     SERVER_NAME = "%s:%s" % (_host, _port)
-    DEBUG = os.getenv("FLASK_DEBUG","0") in ("True","TRUE","true","1")
+    DEBUG = os.getenv("FLASK_DEBUG", "0") in ("True", "TRUE", "true", "1")
 
 
 class MongoConfig:
     HOST = os.getenv("MONGO_HOST", "localhost")
     PORT = int(os.getenv("MONGO_PORT", "27017"))
     DB = os.getenv("MONGO_DB", "test")
-    USER = os.getenv("MONGO_USER", "marvin")
-    PASS = os.getenv("MONGO_PASS", "tarsbot.702")
+    USER = os.getenv("MONGO_USER", None)
+    PASS = os.getenv("MONGO_PASS", None)
 
 
 class RedisConfig:
@@ -22,6 +23,7 @@ class RedisConfig:
 
 
 class APIConfig:
+    AMAP_AKEY = os.getenv("AMAP_AKEY", "ab158f36829f810346ef3526727f1aa4")
     MAX_SCAN = 100  # set int(0) to query all
     PAGESIZE = 10  # set int(0) to return all query results
 
