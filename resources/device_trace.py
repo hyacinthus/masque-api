@@ -30,6 +30,8 @@ class DeviceTrace(Resource):
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
+        elif ("_id" or "_created") in resp:
+            resp = {i: resp[i] for i in resp if i not in ("_id", "_created")}
         connection.DeviceTrace.find_and_modify(
             {"_id": ObjectId(device_trace_id)},
             {

@@ -67,6 +67,8 @@ class Comment(Resource):
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
+        elif ("_id" or "_created") in resp:
+            resp = {i: resp[i] for i in resp if i not in ("_id", "_created")}
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         collection.Comments.find_and_modify(
             {"_id": ObjectId(comment_id)},

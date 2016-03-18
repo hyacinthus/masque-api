@@ -12,7 +12,7 @@ from model import connection
 def must_not_be_blank(data):
     if not data:
         raise ValidationError('Data not provided.')
-    if len(data) != 24:
+    if not ObjectId(data):
         raise ValidationError('Data is not a valid ObjectId')
 
 
@@ -75,6 +75,8 @@ class Post(Resource):
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
+        elif ("_id" or "_created") in resp:
+            resp = {i: resp[i] for i in resp if i not in ("_id", "_created")}
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         collection.Posts.find_and_modify(
             {"_id": ObjectId(post_id)},

@@ -28,7 +28,7 @@ class UsersList(Resource):
 class DeviceUser(Resource):
     def get(self, device_id):
         cursor = connection.Devices.find_one({"_id": device_id})
-        if cursor is None:
+        if not cursor:
             # 没有查到 device_id 对应信息, 视为新用户, 为其初始化devices/users信息
             user_id = str(ObjectId())
             dev = connection.Devices()
@@ -70,6 +70,8 @@ class User(Resource):
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
+        elif ("_id" or "_created") in resp:
+            resp = {i: resp[i] for i in resp if i not in ("_id", "_created")}
         # 更新登录时间记录
         resp["_updated"] = datetime.utcnow()
         connection.Users.find_and_modify(
@@ -111,7 +113,8 @@ class UserCommentsList(Resource):
         for doc in cursor:
             collection = connection[MongoConfig.DB][
                 "comments_" + doc['theme_id']]
-            cur = collection.Comments.find({"_id": ObjectId(doc["comment_id"])})
+            cur = collection.Comments.find_one(
+                {"_id": ObjectId(doc["comment_id"])})
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
