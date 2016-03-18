@@ -7,6 +7,14 @@ class FlaskConfig:
     DEBUG = os.getenv("FLASK_DEBUG","0") in ("True","TRUE","true","1")
 
 
+class LogConfig:
+    PATH = os.getenv("LOG_PATH", None)
+    ROOT_LEVEL = os.getenv("LOG_ROOT_LEVEL", "INFO")
+    SCREEN_LEVEL = os.getenv("LOG_SCREEN_LEVEL", None)
+    FILE_LEVEL = os.getenv("LOG_FILE_LEVEL", None)
+    DB_LEVEL = os.getenv("LOG_DB_LEVEL", "INFO")
+    PUBU_LEVEL = os.getenv("LOG_PUBU_LEVEL", "WARN")
+
 class MongoConfig:
     HOST = os.getenv("MONGO_HOST", "localhost")
     PORT = int(os.getenv("MONGO_PORT", "27017"))
