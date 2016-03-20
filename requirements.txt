@@ -15,6 +15,7 @@ redis
 bcrypt
 marshmallow
 Flask-OAuthlib
+uwsgi
 
 # install the newest mongokit from github
 -e git+https://github.com/namlook/mongokit@development#egg=mongokit
