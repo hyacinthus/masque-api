@@ -1,6 +1,7 @@
 import requests
 from flask_restful import Resource, reqparse
 
+from config import APIConfig
 from model import connection
 
 
@@ -32,19 +33,20 @@ class SchoolsList(Resource):
                             required=True,
                             help='lat not found!')
         args = parser.parse_args()
+        key = APIConfig.AMAP_AKEY
         regeo_url = 'http://restapi.amap.com/v3/geocode/regeo?' \
-                    'key=ab158f36829f810346ef3526727f1aa4&' \
-                    'location={0},{1}&' \
+                    'key={}&' \
+                    'location={},{}&' \
                     'poitype=141201|141202|141203&' \
                     'extensions=all&' \
                     'batch=false&' \
-                    'roadlevel=1'.format(args['lon'], args['lat'])
+                    'roadlevel=1'.format(key, args['lon'], args['lat'])
         around_url = 'http://restapi.amap.com/v3/place/around?' \
-                     'key=ab158f36829f810346ef3526727f1aa4&' \
-                     'location={0},{1}&' \
+                     'key={}&' \
+                     'location={},{}&' \
                      'radius=300&' \
                      'types=141201|141202|141203&' \
-                     'extensions=base'.format(args['lon'], args['lat'])
+                     'extensions=base'.format(key, args['lon'], args['lat'])
         address = requests.get(regeo_url).json()
         if not address:
             return {'message': 'Amap API Server No Response!'}, 504
