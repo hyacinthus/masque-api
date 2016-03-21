@@ -88,9 +88,8 @@ def get_user(username, password, *args, **kwargs):
         else:
             user = connection.Users()
             user.save()
-            user_id = user._id
-            device.user_id = user_id
-            device.origin_user_id = user_id
+            device.user_id = user._id
+            device.origin_user_id = user._id
             device.save()
         return user
     else:
