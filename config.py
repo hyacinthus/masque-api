@@ -6,6 +6,7 @@ class FlaskConfig:
     _port = os.getenv("FLASK_PORT", "5000")
     SERVER_NAME = "%s:%s" % (_host, _port)
     DEBUG = os.getenv("FLASK_DEBUG", "0") in ("True", "TRUE", "true", "1")
+    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 864000
 
 
 class LogConfig:
