@@ -24,7 +24,6 @@ def get_host():
         _auth = '{}:{}@'.format(_user, _pass)
     else:
         _auth = ''
-    _port = MongoConfig.PORT
     _host = 'mongodb://{}{}:{}/{}'.format(
             _auth,
             MongoConfig.HOST,
@@ -177,7 +176,7 @@ class Grant():
     @property
     def user(self):
         if self.user_id:
-            return connection.User.find_one({"_id": ObjectId(self.user_id)})
+            return connection.Users.find_one({"_id": ObjectId(self.user_id)})
 
 
 class Token():
@@ -203,7 +202,8 @@ class Token():
                 self.client_id = self._geta("client_id")
                 self.scopes = self._geta("scopes")
                 self.user_id = self._geta("user_id")
-                self.expires = self._geta("expires")
+                self.expires = datetime.strptime(self._geta("expires"),
+                                                 "%Y-%m-%d %H:%M:%S.%f")
                 self.saved = True
         elif refresh_token:
             if redisdb.exists("oauth:refresh_token:%s:access_token" %
@@ -213,7 +213,8 @@ class Token():
                 self.client_id = self._getr("client_id")
                 self.scopes = self._getr("scopes")
                 self.user_id = self._getr("user_id")
-                self.expires = self._getr("expires")
+                self.expires = datetime.strptime(self._getr("expires"),
+                                                 "%Y-%m-%d %H:%M:%S.%f")
                 self.saved = True
 
     def _geta(self, key):
@@ -296,6 +297,16 @@ class Token():
         redisdb.delete("oauth:user:%s:%s" %
                        (self.user_id, self.client_id))
         self.saved = False
+
+    @property
+    def user(self):
+        if self.user_id:
+            return connection.Users.find_one({"_id": ObjectId(self.user_id)})
+
+    @property
+    def client(self):
+        if self.client_id:
+            return Client(self.client_id)
 
 
 class Root(Document):

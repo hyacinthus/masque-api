@@ -18,7 +18,7 @@ def create_app():
 app = create_app()
 app.logger.addHandler(app_log)
 oauth.init_app(app)
-api = Api(app)
+api = Api(app, decorators=[oauth.require_oauth(), ])
 
 
 @api.representation('application/json')
