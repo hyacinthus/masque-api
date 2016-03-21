@@ -34,7 +34,6 @@ class CommentsList(Resource):
         doc = collection.Comments()
         for item in resp:
             doc[item] = resp[item]
-        doc['_id'] = str(ObjectId())
         doc['_created'] = utctime
         doc.save()
         # save a record
