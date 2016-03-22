@@ -6,6 +6,7 @@ from log import app_log
 from model import connection
 from oauth2 import oauth
 from resources import *
+from config import DebugConfig
 
 
 def create_app():
@@ -133,4 +134,4 @@ api.add_resource(SchoolsList, '/location/schools',
                  endpoint='schools')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host=DebugConfig.HOST, port=DebugConfig.PORT)
