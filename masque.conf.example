@@ -1,0 +1,11 @@
+description "uWSGI server instance configured to serve masque"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+setuid masque
+setgid www-data
+
+env PATH=/home/masque/venv/product/bin
+chdir /home/masque/masque-api
+exec uwsgi --ini wsgi.ini
