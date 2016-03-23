@@ -5,6 +5,18 @@ from config import APIConfig
 from model import connection
 
 
+# 需要过滤的黑名单
+black_list = ('网络教育', '继续教育', '远程教育', '仙桃学院', '纺织服装学院', '教学部', '分部')
+
+
+def guolv(t):
+    """过滤黑名单中关键字"""
+    if list(filter(lambda x: True if x in t else False, black_list)):
+        return False
+    else:
+        return True
+
+
 def rm_duplicates(data=None):
     """列表去重, 保持顺序"""
     data = sorted(data)
@@ -38,15 +50,10 @@ class SchoolsList(Resource):
                     'key={}&' \
                     'location={},{}&' \
                     'poitype=141201|141202|141203&' \
+                    'radius=300&' \
                     'extensions=all&' \
                     'batch=false&' \
                     'roadlevel=1'.format(key, args['lon'], args['lat'])
-        around_url = 'http://restapi.amap.com/v3/place/around?' \
-                     'key={}&' \
-                     'location={},{}&' \
-                     'radius=300&' \
-                     'types=141201|141202|141203&' \
-                     'extensions=base'.format(key, args['lon'], args['lat'])
         address = requests.get(regeo_url).json()
         if not address:
             return {'message': 'Amap API Server No Response!'}, 504
@@ -59,19 +66,15 @@ class SchoolsList(Resource):
                 "keyword": address["regeocode"]["aois"][0]["name"] if
                 address["regeocode"]["aois"] else None
             }
+            pois = address["regeocode"]["pois"]
+
         else:
             return {'message': 'Amap API Server Error!'}, 500
         get_school = (addr["keyword"],) if addr["keyword"] else ()
         # 获取附近地点
-        school_name = requests.get(around_url).json()
-        if not school_name:
-            return {'message': 'Amap API Server No Response!'}, 504
-        if school_name['count'] != "0" and school_name['status'] == "1":
-            pois = school_name["pois"] if school_name["pois"] else None
-        else:
-            pois = None
         if pois:
-            get_school += tuple(item['name'].replace('-', '') for item in pois)
+            get_school += tuple(filter(guolv, (i['name'] for i in pois)))
+            get_school = tuple(i.replace('-', '') for i in get_school)
         result = connection.Schools.find(
             {"city": addr["city"]},
             {"name": 1, "_id": 0}
