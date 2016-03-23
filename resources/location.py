@@ -86,8 +86,13 @@ class SchoolsList(Resource):
         if schools:
             schools = rm_duplicates(schools)
             for item in schools:
-                cursor = connection.Themes.find_one({"full_name": item})
-                if cursor is not None:  # 忽略已有记录
+                cursor = connection.Themes.find_one(
+                    {
+                        "full_name": item,
+                        "category": "school"
+                    }
+                )
+                if cursor:  # 忽略已有记录
                     continue
                 doc = connection.Themes()
                 doc["short_name"] = item
@@ -96,11 +101,24 @@ class SchoolsList(Resource):
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
                 doc.save()  # 新建不存在的主题(学校)
+                doc = connection.Themes()
+                doc["short_name"] = item
+                doc["full_name"] = item
+                doc["locale"]["province"] = addr["province"]
+                doc["locale"]["city"] = addr["city"]
+                doc["locale"]["district"] = addr["district"]
+                doc["category"] = "system"
+                doc.save()  # 新建对应的反馈区
         else:
             # 如果附近没有学校, 返回地区
             schools = (addr["district"],)
-            cursor = connection.Themes.find_one({"full_name": addr["district"]})
-            if cursor is not None:
+            cursor = connection.Themes.find_one(
+                {
+                    "full_name": addr["district"],
+                    "category": "district"
+                }
+            )
+            if cursor:
                 pass  # 忽略已有
             else:
                 doc = connection.Themes()
@@ -111,5 +129,20 @@ class SchoolsList(Resource):
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
                 doc.save()  # 新建不存在的主题
-        result = (connection.Themes.find_one({"full_name": i}) for i in schools)
+                doc = connection.Themes()
+                doc["category"] = "system"
+                doc["short_name"] = addr["district"]
+                doc["full_name"] = addr["district"]
+                doc["locale"]["province"] = addr["province"]
+                doc["locale"]["city"] = addr["city"]
+                doc["locale"]["district"] = addr["district"]
+                doc.save()  # 新建对应的反馈区
+        result = (connection.Themes.find_one(
+            {
+                "full_name": i,
+                "category": {
+                    "$nin": ["virtual", "private", "system"]
+                }
+            }
+        ) for i in schools)
         return result
