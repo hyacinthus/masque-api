@@ -41,7 +41,7 @@ workon test
 # 退出运行环境
 deactivate
 ```
-### 启动应用
+### 调试启动应用
 克隆项目到本地, 进入虚拟python运行环境, 在项目根目录执行
 ```
 pip install -r requirements.txt
@@ -57,3 +57,15 @@ python run.py
    * Debugger pin code: 446-423-189
    
    ```
+
+### 生产部署
+Ubuntu  
+* 在/run新建masque目录，并修改用户组`chown masque:www-data masque`，若要自定wsgi的socket路径，需要响应修改wsgi.ini文件
+* 如有必要，修改wsgi.ini文件的并行数等参数。
+* 将masque.conf.example复制到/etc/init目录，重命名为masque.conf，并修改其中的参数。
+* masque.conf中，env为python venv的bin目录位置，chdir为项目目录。
+* 使用`service masque start`即可启动wsgi服务
+* 将nginx.example复制到/etc/nginx/sites-available，重命名为域名，并修改参数。比如证书位置。
+* 在/etc/nginx/sites-enabled建立链接。
+* `nginx -t`检查配置
+* `service nginx reload`
