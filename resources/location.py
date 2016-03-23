@@ -101,14 +101,6 @@ class SchoolsList(Resource):
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
                 doc.save()  # 新建不存在的主题(学校)
-                doc = connection.Themes()
-                doc["short_name"] = item
-                doc["full_name"] = item
-                doc["locale"]["province"] = addr["province"]
-                doc["locale"]["city"] = addr["city"]
-                doc["locale"]["district"] = addr["district"]
-                doc["category"] = "system"
-                doc.save()  # 新建对应的反馈区
         else:
             # 如果附近没有学校, 返回地区
             schools = (addr["district"],)
@@ -129,14 +121,6 @@ class SchoolsList(Resource):
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
                 doc.save()  # 新建不存在的主题
-                doc = connection.Themes()
-                doc["category"] = "system"
-                doc["short_name"] = addr["district"]
-                doc["full_name"] = addr["district"]
-                doc["locale"]["province"] = addr["province"]
-                doc["locale"]["city"] = addr["city"]
-                doc["locale"]["district"] = addr["district"]
-                doc.save()  # 新建对应的反馈区
         result = (connection.Themes.find_one(
             {
                 "full_name": i,

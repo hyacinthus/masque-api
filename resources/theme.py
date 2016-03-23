@@ -33,6 +33,17 @@ class Theme(Resource):
                     theme_id)}, 400
         elif args['category'] in ("school", "district", "virtual",
                                   "private", "system"):
+            # 如果没有用户反馈记录, 新建一个
+            if theme_id == "用户反馈":
+                if not connection.Themes.find_one({"full_name": theme_id}):
+                    doc = connection.Themes()
+                    doc["category"] = "system"
+                    doc["short_name"] = theme_id
+                    doc["full_name"] = theme_id
+                    doc["locale"]["province"] = "陕西省"
+                    doc["locale"]["city"] = "西安市"
+                    doc["locale"]["district"] = "雁塔区"
+                    doc.save()
             cursor = connection.Themes.find_one(
                 {
                     "full_name": theme_id,
