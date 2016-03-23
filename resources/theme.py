@@ -1,5 +1,5 @@
 from bson.objectid import ObjectId
-from flask_restful import Resource, request
+from flask_restful import Resource, request, reqparse
 
 from model import connection
 
@@ -22,7 +22,25 @@ class ThemesList(Resource):
 
 class Theme(Resource):
     def get(self, theme_id):  # get a theme by its ID
-        cursor = connection.Themes.find_one({"_id": ObjectId(theme_id)})
+        parser = reqparse.RequestParser()
+        parser.add_argument('category', type=str)
+        args = parser.parse_args()
+        if not args['category']:
+            if ObjectId.is_valid(theme_id):
+                cursor = connection.Themes.find_one({"_id": ObjectId(theme_id)})
+            else:
+                return {'message': '{} is not a valid ObjectId'.format(
+                    theme_id)}, 400
+        elif args['category'] in ("school", "district", "virtual",
+                                  "private", "system"):
+            cursor = connection.Themes.find_one(
+                {
+                    "full_name": theme_id,
+                    "category": args['category']
+                }
+            )
+        else:
+            return {'message': 'A invalid category provided!'}, 400
         return cursor
 
     def put(self, theme_id):  # update a theme by its ID

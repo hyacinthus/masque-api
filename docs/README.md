@@ -516,11 +516,38 @@ endpoint
 return
   均返回 204 状态码
 
-## GET 获取主题列表
+## GET 获取某一主题
 
 - 方法 **GET**
 
-- URI `/themes`
+- URI `/theme/西北大学?category=school`
+
+默认endpoint
+
+```
+/theme/<theme_id>
+```
+
+不加参数接受一个ObjectId, 返回对应id的主题信息
+
+- 参数
+
+category表示主题类型, 可以取的值只有
+```
+"school", "district", "virtual", "private", "system"
+```
+带参数的情况下, 上面的theme_id被当做是fullname传入, 根据fullname和category可以得到一个对应的主题信息并返回
+
+- 例子
+
+```
+theme/西北大学?category=shool
+```
+即返回西北大学的主题
+
+- 注意
+
+指定category为system时, 表示对区域的反馈主题
 
 ## GET 获取某用户发的帖子
 
@@ -763,11 +790,11 @@ endpoint
 
 - URI `/devices/asdfsg`
 
-## GET 读取某一主题
+## GET 读取主题列表
 
 - 方法 **GET**
 
-- URI `/theme/56e830947fe9e37a1365e0e6`
+- URI `/themes`
 
 ## GET 获取某用户收藏的帖子
 
@@ -955,3 +982,4 @@ structure = {
 }
 
 ```
+
