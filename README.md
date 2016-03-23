@@ -65,7 +65,7 @@ Ubuntu
 * 将masque.conf.example复制到/etc/init目录，重命名为masque.conf，并修改其中的参数。
 * masque.conf中，env为python venv的bin目录位置，chdir为项目目录。
 * 使用`service masque start`即可启动wsgi服务
-* 将nginx.example复制到/etc/nginx/sites-available，重命名为域名，并修改参数。
+* 将nginx.example复制到/etc/nginx/sites-available，重命名为域名，并修改参数。比如证书位置。
 * 在/etc/nginx/sites-enabled建立链接。
 * `nginx -t`检查配置
 * `service nginx reload`
