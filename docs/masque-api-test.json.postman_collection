@@ -9,14 +9,14 @@
 			"name": "主题",
 			"description": "```\n_id\n分类：category （school，district，virtual，private，system）\n名称：short_name\n全名：full_name\n密码：password\n地点：locale\n国家\n省\n市\n区县\n```",
 			"order": [
-				"96b3f4a0-ef03-6e2d-9e49-5ae4431f04bc",
-				"6cc41806-3480-0737-4c7c-84e4989e0c73",
 				"d84019c3-a4df-21b6-9326-ead1e2aecf59",
+				"6cc41806-3480-0737-4c7c-84e4989e0c73",
+				"96b3f4a0-ef03-6e2d-9e49-5ae4431f04bc",
 				"519175b9-21ee-2310-d49f-7ff78f05ec8c",
 				"1cec31d3-943a-d50a-0645-d310bb6738b7"
 			],
 			"owner": "349297",
-			"collectionId": "d2922d48-9ede-3e42-5811-25a1809a948b"
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c"
 		},
 		{
 			"id": "ffae5b29-3659-5557-2d23-68eddc4563bb",
@@ -512,24 +512,22 @@
 		},
 		{
 			"id": "74c0b37e-0b75-efa2-4463-01a5d41b260d",
-			"headers": "",
+			"headers": "Authorization: Bearer fvzc7tYXI4aC4yApfX2lBb6FPkigfH\n",
 			"url": "http://127.0.0.1:5000/location/schools?lon=108.92983&lat=34.246592",
-			"pathVariables": {},
 			"preRequestScript": null,
+			"pathVariables": {},
 			"method": "GET",
-			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"data": null,
 			"dataMode": "params",
-			"name": "GET 根据坐标获取附近学校/地区信息",
-			"description": "输入\n  参数分别是经度和纬度, 最多允许不超过6位小数点\n输出\n  附近学校/地区信息, 列表形式",
-			"descriptionFormat": "html",
-			"time": 1458060359498,
 			"version": 2,
-			"responses": [],
 			"tests": null,
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"folder": "7b1c7798-e393-c1a7-9590-d5f0330e5611"
+			"time": 1458704017718,
+			"name": "GET 根据坐标获取附近学校/地区信息",
+			"description": "输入\n  参数分别是经度和纬度, 最多允许不超过6位小数点\n输出\n  附近学校/地区信息, 列表形式",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"responses": []
 		},
 		{
 			"id": "77ecfff9-f992-465a-6f50-a224d07c3848",
@@ -638,8 +636,8 @@
 		},
 		{
 			"id": "96b3f4a0-ef03-6e2d-9e49-5ae4431f04bc",
-			"headers": "",
-			"url": "http://127.0.0.1:5000/themes",
+			"headers": "Authorization: Bearer fvzc7tYXI4aC4yApfX2lBb6FPkigfH\n",
+			"url": "http://127.0.0.1:5000/theme/西北大学?category=school",
 			"preRequestScript": "",
 			"pathVariables": {},
 			"method": "GET",
@@ -649,12 +647,11 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1457072257976,
-			"name": "GET 获取主题列表",
-			"description": "",
+			"time": 1458703573082,
+			"name": "GET 获取某一主题",
+			"description": "默认endpoint\n\n```\n/theme/<theme_id>\n```\n\n不加参数接受一个ObjectId, 返回对应id的主题信息\n\n- 参数\n\ncategory表示主题类型, 可以取的值只有\n```\n\"school\", \"district\", \"virtual\", \"private\", \"system\"\n```\n带参数的情况下, 上面的theme_id被当做是fullname传入, 根据fullname和category可以得到一个对应的主题信息并返回\n\n- 例子\n\n```\ntheme/西北大学?category=shool\n```\n即返回西北大学的主题\n\n- 注意\n\n指定category为system时, 表示对区域的反馈主题",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
-			"responses": [],
-			"folder": "33891296-490a-e109-04c4-ad4e41a625cb"
+			"responses": []
 		},
 		{
 			"id": "9add3cb8-f1ab-8160-10ee-b84581ead539",
@@ -988,8 +985,8 @@
 		},
 		{
 			"id": "d84019c3-a4df-21b6-9326-ead1e2aecf59",
-			"headers": "Content-Type: application/json\n",
-			"url": "http://127.0.0.1:5000/theme/56e830947fe9e37a1365e0e6",
+			"headers": "Authorization: Bearer fvzc7tYXI4aC4yApfX2lBb6FPkigfH\n",
+			"url": "http://127.0.0.1:5000/themes",
 			"preRequestScript": "",
 			"pathVariables": {},
 			"method": "GET",
@@ -999,12 +996,11 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1458246060826,
-			"name": "GET 读取某一主题",
+			"time": 1458704777153,
+			"name": "GET 读取主题列表",
 			"description": "",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
-			"responses": [],
-			"folder": "33891296-490a-e109-04c4-ad4e41a625cb"
+			"responses": []
 		},
 		{
 			"id": "d9318f6c-40f1-8f6c-4be1-c82325ea9a64",
