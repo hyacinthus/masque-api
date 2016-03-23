@@ -56,6 +56,18 @@ value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个�
 
 ```
 
+## GET 获取反馈页面信息
+
+- 方法 **GET**
+
+- URI `/theme/用户反馈?category=system`
+
+默认endpoint
+
+```
+/theme/用户反馈?category=system
+```
+
 ## DEL 删除主题
 
 - 方法 **DELETE**
@@ -129,9 +141,9 @@ endpoint
 POST /token HTTP/1.1
 Host: 127.0.0.1:5000
 Content-Type: application/x-www-form-urlencoded
-
+# 受限于框架, client_id 和 username 必须一致且必须为设备id
 grant_type=password&
-client_id=hello_world&
+client_id=super&
 username=super&
 password=%242b%2412%24q3UwMyIw4OBo5SPMgbGqqeNOAa5Hyq4FhgScW5Qf8%2FjK41ALoj1yK
 ```
@@ -141,16 +153,10 @@ password=%242b%2412%24q3UwMyIw4OBo5SPMgbGqqeNOAa5Hyq4FhgScW5Qf8%2FjK41ALoj1yK
 password 为 username 加密后的值
 
 ```
->>> import bcrypt
->>> password = b"super secret password"
->>> # Hash a password for the first time, with a randomly-generated salt
->>> hashed = bcrypt.hashpw(password, bcrypt.gensalt())
->>> # Check that a unhashed password matches one that has previously been
->>> #   hashed
->>> if bcrypt.hashpw(password, hashed) == hashed:
-...     print("It Matches!")
-... else:
-...     print("It Does not Match :(")
+import bcrypt
+password = b"username"
+bcrypt.hashpw(password, bcrypt.gensalt())
+# 结果就可以当成是与username对应的密码
 ```
 
 - 返回结果
@@ -520,7 +526,7 @@ return
 
 - 方法 **GET**
 
-- URI `/theme/西北大学?category=school`
+- URI `/theme/用户反馈?category=system`
 
 默认endpoint
 
@@ -538,16 +544,6 @@ category表示主题类型, 可以取的值只有
 ```
 带参数的情况下, 上面的theme_id被当做是fullname传入, 根据fullname和category可以得到一个对应的主题信息并返回
 
-- 例子
-
-```
-theme/西北大学?category=shool
-```
-即返回西北大学的主题
-
-- 注意
-
-指定category为system时, 表示对区域的反馈主题
 
 ## GET 获取某用户发的帖子
 

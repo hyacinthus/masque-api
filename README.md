@@ -69,3 +69,8 @@ Ubuntu
 * 在/etc/nginx/sites-enabled建立链接。
 * `nginx -t`检查配置
 * `service nginx reload`
+
+升级部署流程:
+
+1. `git checkout product && git pull`
+2. `sudo service masque restart`

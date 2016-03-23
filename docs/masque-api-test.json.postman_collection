@@ -56,6 +56,15 @@
 			"collectionId": "d2922d48-9ede-3e42-5811-25a1809a948b"
 		},
 		{
+			"id": "328deb5b-d9d0-2c1b-ae4f-e67d27aaf4d9",
+			"name": "反馈",
+			"description": "",
+			"order": [
+				"1994d58c-c2cd-50d1-9afc-c81f1927d89e"
+			],
+			"owner": "349297"
+		},
+		{
 			"id": "7b1c7798-e393-c1a7-9590-d5f0330e5611",
 			"name": "学校",
 			"description": "",
@@ -217,6 +226,25 @@
 			"rawModeData": "{}"
 		},
 		{
+			"id": "1994d58c-c2cd-50d1-9afc-c81f1927d89e",
+			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\n",
+			"url": "http://127.0.0.1:5000/theme/用户反馈?category=system",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "GET",
+			"data": [],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1458724470100,
+			"name": "GET 获取反馈页面信息",
+			"description": "默认endpoint\n\n```\n/theme/用户反馈?category=system\n```",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"responses": []
+		},
+		{
 			"id": "1cec31d3-943a-d50a-0645-d310bb6738b7",
 			"headers": "Content-Type: application/json\n",
 			"url": "http://127.0.0.1:5000/themes/56d922da7fe9e30ec00a52d2",
@@ -319,7 +347,7 @@
 			"helperAttributes": {},
 			"time": 1458555099646,
 			"name": "POST 获取授权码",
-			"description": "- http测试样例\n\n```\nPOST /token HTTP/1.1\nHost: 127.0.0.1:5000\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=password&\nclient_id=hello_world&\nusername=super&\npassword=%242b%2412%24q3UwMyIw4OBo5SPMgbGqqeNOAa5Hyq4FhgScW5Qf8%2FjK41ALoj1yK\n```\n\n- password生成方式\n\npassword 为 username 加密后的值\n\n```\n>>> import bcrypt\n>>> password = b\"super secret password\"\n>>> # Hash a password for the first time, with a randomly-generated salt\n>>> hashed = bcrypt.hashpw(password, bcrypt.gensalt())\n>>> # Check that a unhashed password matches one that has previously been\n>>> #   hashed\n>>> if bcrypt.hashpw(password, hashed) == hashed:\n...     print(\"It Matches!\")\n... else:\n...     print(\"It Does not Match :(\")\n```\n\n- 返回结果\n\n```\n{\n    \"token_type\": \"Bearer\", \n    \"scope\": \"\", \n    \"expires_in\": 864000, \n    \"access_token\": \"fvzc7tYXI4aC4yApfX2lBb6FPkigfH\",\n    \"refresh_token\": \"LWpMcVXrsFb6AnmMZfqTQOxUt1NHCX\"\n}\n```",
+			"description": "- http测试样例\n\n```\nPOST /token HTTP/1.1\nHost: 127.0.0.1:5000\nContent-Type: application/x-www-form-urlencoded\n# 受限于框架, client_id 和 username 必须一致且必须为设备id\ngrant_type=password&\nclient_id=super&\nusername=super&\npassword=%242b%2412%24q3UwMyIw4OBo5SPMgbGqqeNOAa5Hyq4FhgScW5Qf8%2FjK41ALoj1yK\n```\n\n- password生成方式\n\npassword 为 username 加密后的值\n\n```\nimport bcrypt\npassword = b\"username\"\nbcrypt.hashpw(password, bcrypt.gensalt())\n# 结果就可以当成是与username对应的密码\n```\n\n- 返回结果\n\n```\n{\n    \"token_type\": \"Bearer\", \n    \"scope\": \"\", \n    \"expires_in\": 864000, \n    \"access_token\": \"fvzc7tYXI4aC4yApfX2lBb6FPkigfH\",\n    \"refresh_token\": \"LWpMcVXrsFb6AnmMZfqTQOxUt1NHCX\"\n}\n```",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"responses": []
 		},
@@ -512,7 +540,7 @@
 		},
 		{
 			"id": "74c0b37e-0b75-efa2-4463-01a5d41b260d",
-			"headers": "Authorization: Bearer fvzc7tYXI4aC4yApfX2lBb6FPkigfH\n",
+			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\n",
 			"url": "http://127.0.0.1:5000/location/schools?lon=108.92983&lat=34.246592",
 			"preRequestScript": null,
 			"pathVariables": {},
@@ -523,7 +551,7 @@
 			"tests": null,
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1458704017718,
+			"time": 1458724210722,
 			"name": "GET 根据坐标获取附近学校/地区信息",
 			"description": "输入\n  参数分别是经度和纬度, 最多允许不超过6位小数点\n输出\n  附近学校/地区信息, 列表形式",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
@@ -636,8 +664,8 @@
 		},
 		{
 			"id": "96b3f4a0-ef03-6e2d-9e49-5ae4431f04bc",
-			"headers": "Authorization: Bearer fvzc7tYXI4aC4yApfX2lBb6FPkigfH\n",
-			"url": "http://127.0.0.1:5000/theme/西北大学?category=school",
+			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\n",
+			"url": "http://127.0.0.1:5000/theme/用户反馈?category=system",
 			"preRequestScript": "",
 			"pathVariables": {},
 			"method": "GET",
@@ -647,9 +675,9 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1458703573082,
+			"time": 1458723757026,
 			"name": "GET 获取某一主题",
-			"description": "默认endpoint\n\n```\n/theme/<theme_id>\n```\n\n不加参数接受一个ObjectId, 返回对应id的主题信息\n\n- 参数\n\ncategory表示主题类型, 可以取的值只有\n```\n\"school\", \"district\", \"virtual\", \"private\", \"system\"\n```\n带参数的情况下, 上面的theme_id被当做是fullname传入, 根据fullname和category可以得到一个对应的主题信息并返回\n\n- 例子\n\n```\ntheme/西北大学?category=shool\n```\n即返回西北大学的主题\n\n- 注意\n\n指定category为system时, 表示对区域的反馈主题",
+			"description": "默认endpoint\n\n```\n/theme/<theme_id>\n```\n\n不加参数接受一个ObjectId, 返回对应id的主题信息\n\n- 参数\n\ncategory表示主题类型, 可以取的值只有\n```\n\"school\", \"district\", \"virtual\", \"private\", \"system\"\n```\n带参数的情况下, 上面的theme_id被当做是fullname传入, 根据fullname和category可以得到一个对应的主题信息并返回\n",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"responses": []
 		},
@@ -985,7 +1013,7 @@
 		},
 		{
 			"id": "d84019c3-a4df-21b6-9326-ead1e2aecf59",
-			"headers": "Authorization: Bearer fvzc7tYXI4aC4yApfX2lBb6FPkigfH\n",
+			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\n",
 			"url": "http://127.0.0.1:5000/themes",
 			"preRequestScript": "",
 			"pathVariables": {},
@@ -996,7 +1024,7 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1458704777153,
+			"time": 1458724155286,
 			"name": "GET 读取主题列表",
 			"description": "",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
