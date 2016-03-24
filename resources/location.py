@@ -76,7 +76,7 @@ class SchoolsList(Resource):
             get_school += tuple(filter(guolv, (i['name'] for i in pois)))
             get_school = tuple(i.replace('-', '') for i in get_school)
         result = connection.Schools.find(
-            {"province": addr["province"], "district": addr["district"],
+            {"city": addr["city"],
              "type": {'$in': ['中学', '高等院校']}},
             {"name": 1, "_id": 0}
         )
