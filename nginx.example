@@ -1,0 +1,12 @@
+server {
+    #listen 80;
+    listen 443 ssl;
+    server_name api.jiamian.im;
+    ssl_certificate /etc/ssl/private/api.jiamian.im.csr;
+    ssl_certificate_key /etc/ssl/private/api.jiamian.im.key;
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass unix:/run/masque/masque.sock;
+    }
+}

@@ -1,6 +1,6 @@
+import logging
 from datetime import datetime
 from urllib.parse import quote
-import logging
 
 from bson.objectid import ObjectId
 from mongokit import IS, OR, Document, Connection
@@ -8,7 +8,6 @@ from mongokit.schema_document import CustomType
 from redis import StrictRedis
 
 from config import MongoConfig, CollectionName, RedisConfig
-
 
 redisdb = StrictRedis(host=RedisConfig.HOST,
                       port=RedisConfig.PORT,
@@ -24,15 +23,15 @@ def get_host():
         _auth = '{}:{}@'.format(_user, _pass)
     else:
         _auth = ''
-    _port = MongoConfig.PORT
     _host = 'mongodb://{}{}:{}/{}'.format(
-            _auth,
-            MongoConfig.HOST,
-            MongoConfig.PORT,
-            MongoConfig.DB,
+        _auth,
+        MongoConfig.HOST,
+        MongoConfig.PORT,
+        MongoConfig.DB,
     )
     log.debug(_host)
     return _host
+
 
 connection = Connection(host=get_host())
 
@@ -83,6 +82,7 @@ class Client():
     It is suggested that the client is registered by a user on your site,
     but it is not required.
     If client exists, get it, if not, create it."""
+
     def __init__(self, client_id):
         if client_id:
             self.client_id = client_id
@@ -134,7 +134,7 @@ class Grant():
     def __init__(self, client_id=None, code=None):
         if client_id and code:
             if redisdb.exists("oauth:grant:%s:%s:user_id" %
-                              (client_id, code)):
+                                      (client_id, code)):
                 self.client_id = client_id
                 self.code = code
                 self.redirect_uri = self._get("redirect_uri")
@@ -177,7 +177,7 @@ class Grant():
     @property
     def user(self):
         if self.user_id:
-            return connection.User.find_one({"_id": ObjectId(self.user_id)})
+            return connection.Users.find_one({"_id": ObjectId(self.user_id)})
 
 
 class Token():
@@ -197,23 +197,25 @@ class Token():
     def __init__(self, access_token=None, refresh_token=None):
         if access_token:
             if redisdb.exists("oauth:access_token:%s:user_id" %
-                              access_token):
+                                      access_token):
                 self.access_token = access_token
                 self.refresh_token = self._geta("refresh_token")
                 self.client_id = self._geta("client_id")
                 self.scopes = self._geta("scopes")
                 self.user_id = self._geta("user_id")
-                self.expires = self._geta("expires")
+                self.expires = datetime.strptime(self._geta("expires"),
+                                                 "%Y-%m-%d %H:%M:%S.%f")
                 self.saved = True
         elif refresh_token:
             if redisdb.exists("oauth:refresh_token:%s:access_token" %
-                              refresh_token):
+                                      refresh_token):
                 self.refresh_token = refresh_token
                 self.access_token = self._getr("access_token")
                 self.client_id = self._getr("client_id")
                 self.scopes = self._getr("scopes")
                 self.user_id = self._getr("user_id")
-                self.expires = self._getr("expires")
+                self.expires = datetime.strptime(self._getr("expires"),
+                                                 "%Y-%m-%d %H:%M:%S.%f")
                 self.saved = True
 
     def _geta(self, key):
@@ -297,9 +299,25 @@ class Token():
                        (self.user_id, self.client_id))
         self.saved = False
 
+    @property
+    def user(self):
+        if self.user_id:
+            return connection.Users.find_one({"_id": ObjectId(self.user_id)})
 
-class Root(Document):
+    @property
+    def client(self):
+        if self.client_id:
+            return Client(self.client_id)
+
+
+class RootDocument(Document):
+    __database__ = MongoConfig.DB
+    structure = {}
+    skip_validation = True
     use_dot_notation = True
+
+
+class Common(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -329,7 +347,7 @@ class Root(Document):
 
 
 @connection.register
-class Posts(Root):
+class Posts(Common):
     structure = {
         "content": {
             "type": IS("text", "vote", "photo"),
@@ -350,18 +368,20 @@ class Posts(Root):
 
 
 @connection.register
-class Comments(Root):
+class Comments(Common):
     structure = {
         "content": str,
         "post_id": str,
     }
+    required_fields = [
+        "post_id"
+    ]
 
 
 @connection.register
-class Users(Document):
-    use_dot_notation = True
+class Users(RootDocument):
     __collection__ = CollectionName.USERS
-    __database__ = MongoConfig.DB
+
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -383,10 +403,9 @@ class Users(Document):
 
 
 @connection.register
-class Themes(Document):
-    use_dot_notation = True
+class Themes(RootDocument):
     __collection__ = CollectionName.THEMES
-    __database__ = MongoConfig.DB
+
     structure = {
         "_id": CustomObjectId(),
         "category": IS("school", "district", "virtual", "private", "system"),
@@ -411,10 +430,8 @@ class Themes(Document):
 
 
 @connection.register
-class Devices(Document):
-    use_dot_notation = True
+class Devices(RootDocument):
     __collection__ = CollectionName.DEVICES
-    __database__ = MongoConfig.DB
     structure = {
         "_id": str,
         "name": str,
@@ -427,10 +444,8 @@ class Devices(Document):
 
 
 @connection.register
-class UserLevels(Document):
-    use_dot_notation = True
+class UserLevels(RootDocument):
     __collection__ = CollectionName.USER_LEVELS
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "exp": int,
@@ -457,10 +472,8 @@ class UserLevels(Document):
 
 
 @connection.register
-class Masks(Document):
-    use_dot_notation = True
+class Masks(RootDocument):
     __collection__ = CollectionName.MASKS
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "name": str,
@@ -469,10 +482,8 @@ class Masks(Document):
 
 
 @connection.register
-class BoardPosts(Document):
-    use_dot_notation = True
+class BoardPosts(RootDocument):
     __collection__ = CollectionName.BOARD_POSTS
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -491,14 +502,11 @@ class BoardPosts(Document):
 @connection.register
 class BoardComments(BoardPosts):
     __collection__ = CollectionName.BOARD_COMMENTS
-    __database__ = MongoConfig.DB
 
 
 @connection.register
-class Parameters(Document):
-    use_dot_notation = True
+class Parameters(RootDocument):
     __collection__ = CollectionName.PARAMETERS
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "default_masks": list
@@ -506,10 +514,8 @@ class Parameters(Document):
 
 
 @connection.register
-class DeviceTrace(Document):
-    use_dot_notation = True
+class DeviceTrace(RootDocument):
     __collection__ = CollectionName.DEVICE_TRACE
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "serial": str,
@@ -531,10 +537,8 @@ class DeviceTrace(Document):
 
 
 @connection.register
-class Messages(Document):
-    use_dot_notation = True
+class Messages(RootDocument):
     __collection__ = CollectionName.MESSAGES
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "to": str,
@@ -549,10 +553,8 @@ class Messages(Document):
 
 
 @connection.register
-class UserTraces(Document):
-    use_dot_notation = True
+class UserTraces(RootDocument):
     __collection__ = CollectionName.USER_TRACE
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "user_id": str,
@@ -575,10 +577,8 @@ class UserTraces(Document):
 
 
 @connection.register
-class UserPosts(Document):
-    use_dot_notation = True
+class UserPosts(RootDocument):
     __collection__ = CollectionName.USER_POSTS
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "user_id": str,
@@ -592,10 +592,8 @@ class UserPosts(Document):
 
 
 @connection.register
-class UserComments(Document):
-    use_dot_notation = True
+class UserComments(RootDocument):
     __collection__ = CollectionName.USER_COMMENTS
-    __database__ = MongoConfig.DB
     structure = {
         "_id": CustomObjectId(),
         "user_id": str,
@@ -611,11 +609,8 @@ class UserComments(Document):
 @connection.register
 class UserStars(UserPosts):
     __collection__ = CollectionName.USER_STARS
-    __database__ = MongoConfig.DB
 
 
 @connection.register
-class Schools(Document):
-    use_dot_notation = True
+class Schools(RootDocument):
     __collection__ = CollectionName.SCHOOLS
-    __database__ = MongoConfig.DB

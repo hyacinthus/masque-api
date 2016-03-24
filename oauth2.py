@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime, timedelta
 
-from flask_oauthlib.provider import OAuth2Provider
 import bcrypt
 from bson.objectid import ObjectId
+from flask_oauthlib.provider import OAuth2Provider
 
 from model import Client, Grant, Token, connection
 
@@ -87,11 +87,9 @@ def get_user(username, password, *args, **kwargs):
         # new device, create user
         else:
             user = connection.Users()
-            user_id = str(ObjectId())
-            user._id = user_id
             user.save()
-            device.user_id = user_id
-            device.origin_user_id = user_id
+            device.user_id = user._id
+            device.origin_user_id = user._id
             device.save()
         return user
     else:

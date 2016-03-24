@@ -1,9 +1,8 @@
-import sys
-import os
 import logging
+import os
+import sys
 
 from config import LogConfig, FlaskConfig
-
 
 # debug mode
 if FlaskConfig.DEBUG:
@@ -13,6 +12,7 @@ if FlaskConfig.DEBUG:
 else:
     _screen_level = LogConfig.SCREEN_LEVEL
     _file_level = LogConfig.FILE_LEVEL
+    _root_level = LogConfig.ROOT_LEVEL
 
 # root log handler
 root_log = logging.getLogger('masque')

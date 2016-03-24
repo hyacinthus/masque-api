@@ -14,10 +14,9 @@ requests
 redis
 bcrypt
 marshmallow
+flask
 Flask-OAuthlib
+uwsgi
 
 # install the newest mongokit from github
 -e git+https://github.com/namlook/mongokit@development#egg=mongokit
-
-# install the newest flask from github
--e git+https://github.com/ferstar/flask.git@patch-1#egg=flask

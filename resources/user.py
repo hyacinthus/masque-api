@@ -19,8 +19,9 @@ class UsersList(Resource):
         resp = request.get_json(force=True)
         doc = connection.Users()
         for item in resp:
+            if item == "_id":
+                continue
             doc[item] = resp[item]
-        doc['_id'] = str(ObjectId())
         doc.save()
         return {"_id": doc['_id']}, 201
 
@@ -30,15 +31,14 @@ class DeviceUser(Resource):
         cursor = connection.Devices.find_one({"_id": device_id})
         if not cursor:
             # 没有查到 device_id 对应信息, 视为新用户, 为其初始化devices/users信息
-            user_id = str(ObjectId())
+            user = connection.Users()
+            user.save()
+            user_id = user['_id']
             dev = connection.Devices()
             dev['_id'] = device_id
             dev['user_id'] = user_id
             dev['origin_user_id'] = user_id
             dev.save()
-            user = connection.Users()
-            user['_id'] = user_id
-            user.save()
             result = connection.Users.find_one({"_id": ObjectId(user_id)})
         else:
             # 查到 device_id 对应信息, 返回对应用户信息并刷新用户登录时间
