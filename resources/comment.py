@@ -35,6 +35,15 @@ class CommentsList(Resource):
         for item in resp:
             doc[item] = resp[item]
         doc['_created'] = utctime
+        # 如果之前回复过该贴, 头像保持原状
+        cursor = collection.find_one(
+            {
+                "post_id": resp["post_id"],
+                "author": resp["author"]
+            }
+        )
+        if cursor:
+            doc["mask_id"] = resp["mask_id"]
         doc.save()
         # save a record
         user_comments = connection.UserComments()

@@ -373,6 +373,9 @@ class Comments(Common):
         "content": str,
         "post_id": str,
     }
+    required_fields = [
+        "post_id"
+    ]
 
 
 @connection.register
