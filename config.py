@@ -1,6 +1,13 @@
 import os
 
 
+class AliConfig:
+    IKEY = os.getenv("ALI_IKEY", "")
+    AKEY = os.getenv("ALI_AKEY", "")
+    HOST = os.getenv("STS_SERVER", "sts.aliyuncs.com")
+    API_VERSION = os.getenv("API_VERSION", "2015-04-01")
+
+
 class FlaskConfig:
     DEBUG = os.getenv("FLASK_DEBUG", "0") in ("True", "TRUE", "true", "1")
     OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 864000

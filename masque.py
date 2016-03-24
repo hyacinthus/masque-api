@@ -2,11 +2,11 @@ from bson.json_util import dumps
 from flask import Flask, make_response, jsonify
 from flask_restful import Api
 
+from config import DebugConfig
 from log import app_log
 from model import connection
 from oauth2 import oauth
 from resources import *
-from config import DebugConfig
 
 
 def create_app():
@@ -132,6 +132,8 @@ api.add_resource(UserTrace, '/user_trace/<string:user_trace_id>',
 
 api.add_resource(SchoolsList, '/location/schools',
                  endpoint='schools')
+
+api.add_resource(GetToken, '/image_token', endpoint='image_token')
 
 if __name__ == '__main__':
     app.run(host=DebugConfig.HOST, port=DebugConfig.PORT)
