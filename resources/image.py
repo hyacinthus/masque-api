@@ -20,6 +20,7 @@ if AliConfig:
     access_key_secret = AliConfig.AKEY
     host = AliConfig.HOST
     api_version = AliConfig.API_VERSION
+    rolearn = AliConfig.ROLEARN
 
 
 def percent_encode(str):
@@ -63,7 +64,7 @@ def compose_url(RoleSessionName):
         'SignatureNonce': str(uuid.uuid1()),
         'Timestamp': utctime,
         'Action': 'AssumeRole',
-        'RoleArn': 'marvint',
+        'RoleArn': rolearn,
         'RoleSessionName': RoleSessionName
     }
     signature = compute_signature(parameters, access_key_secret)

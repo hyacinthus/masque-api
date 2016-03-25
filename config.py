@@ -6,6 +6,10 @@ class AliConfig:
     AKEY = os.getenv("ALI_AKEY", "")
     HOST = os.getenv("STS_SERVER", "sts.aliyuncs.com")
     API_VERSION = os.getenv("API_VERSION", "2015-04-01")
+    ROLEARN = os.getenv(
+        "ALI_ROLEARN",
+        'acs:ram::1521619666563483:role/aliyunosstokengeneratorrole'
+    )
 
 
 class FlaskConfig:
