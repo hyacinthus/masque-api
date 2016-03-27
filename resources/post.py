@@ -185,3 +185,8 @@ class Hearts(Resource):
             }
         )
         return None, 201
+
+
+class Feedback(Resource):
+    def get(self):
+        pass

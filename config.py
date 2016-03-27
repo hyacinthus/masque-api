@@ -10,6 +10,15 @@ class AliConfig:
         "ALI_ROLEARN",
         'acs:ram::1521619666563483:role/aliyunosstokengeneratorrole'
     )
+    # 阿里大鱼参数
+    SMS_IKEY = os.getenv("SMS_IKEY", "")
+    SMS_AKEY = os.getenv("SMS_AKEY", "")
+    SMS_AKEY = os.getenv("SMS_AKEY", "")
+    SMS_TTL = os.getenv("SMS_TTL", 10)
+    SMS_TEMPLATE_CODE = os.getenv("SMS_TEMPLATE_CODE", "SMS_6775282")
+    SMS_FREE_SIGN_NAME = os.getenv("SMS_FREE_SIGN_NAME", "注册验证")
+    SMS_TYPE = os.getenv("SMS_TYPE", "normal")
+    APP_NAME = os.getenv("APP_NAME", "假面")
 
 
 class FlaskConfig:

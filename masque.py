@@ -135,5 +135,12 @@ api.add_resource(SchoolsList, '/location/schools',
 
 api.add_resource(GetToken, '/image_token', endpoint='image_token')
 
+api.add_resource(Feedback, '/feedback', endpoint='feedback')
+# 短信验证
+api.add_resource(RequestSmsCode, '/request_sms_code/<string:cellphone>',
+                 endpoint='request_sms_code')
+api.add_resource(VerifySmsCode, '/verify_sms_code/<string:cellphone>',
+                 endpoint='verify_sms_code')
+
 if __name__ == '__main__':
     app.run(host=DebugConfig.HOST, port=DebugConfig.PORT)
