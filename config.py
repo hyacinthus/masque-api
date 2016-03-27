@@ -13,7 +13,6 @@ class AliConfig:
     # 阿里大鱼参数
     SMS_IKEY = os.getenv("SMS_IKEY", "")
     SMS_AKEY = os.getenv("SMS_AKEY", "")
-    SMS_AKEY = os.getenv("SMS_AKEY", "")
     SMS_TTL = os.getenv("SMS_TTL", 10)
     SMS_TEMPLATE_CODE = os.getenv("SMS_TEMPLATE_CODE", "SMS_6775282")
     SMS_FREE_SIGN_NAME = os.getenv("SMS_FREE_SIGN_NAME", "注册验证")
@@ -30,6 +29,7 @@ class DebugConfig:
     HOST = os.getenv("DEBUG_HOST", "0.0.0.0")
     PORT = int(os.getenv("DEBUG_PORT", "5000"))
 
+
 class LogConfig:
     PATH = os.getenv("LOG_PATH", None)
     ROOT_LEVEL = os.getenv("LOG_ROOT_LEVEL", "INFO")
@@ -37,6 +37,7 @@ class LogConfig:
     FILE_LEVEL = os.getenv("LOG_FILE_LEVEL", None)
     DB_LEVEL = os.getenv("LOG_DB_LEVEL", "INFO")
     PUBU_LEVEL = os.getenv("LOG_PUBU_LEVEL", "WARN")
+
 
 class MongoConfig:
     HOST = os.getenv("MONGO_HOST", "localhost")
