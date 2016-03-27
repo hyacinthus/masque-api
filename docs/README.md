@@ -171,6 +171,37 @@ bcrypt.hashpw(password, bcrypt.gensalt())
 }
 ```
 
+## GET 验证手机验证码
+
+- 方法 **GET**
+
+- URI `/verify_sms_code/15399481600?code=327145`
+
+- endpoint
+
+```
+/verify_sms_code/<cellphone>?code=xxxxxx
+```
+
+- 返回值
+
+正常
+
+```
+{
+    "statu": "ok"
+}
+```
+
+异常(不匹配或者超时)
+
+```
+{
+    "statu": "error",
+    "message": "xxx"
+}
+```
+
 ## GET 获取一个普通帖
 
 - 方法 **GET**
@@ -590,6 +621,38 @@ endpoint:
 }
 
 ```
+
+## GET 发送手机验证码
+
+- 方法 **GET**
+
+- URI `/request_sms_code/15399481600`
+
+- endpoint
+
+```
+/request_sms_code/<cellphone>
+```
+
+- 返回值
+
+正常
+
+```
+{
+    "statu": "ok"
+}
+```
+
+异常
+
+```
+{
+    "statu": "error",
+    "message": "xxx"
+}
+```
+
 
 ## PUT 更新公告帖
 

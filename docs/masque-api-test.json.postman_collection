@@ -138,6 +138,16 @@
 			"owner": "349297"
 		},
 		{
+			"id": "f0587805-d4a5-351d-2ef1-8c2f3d8553b7",
+			"name": "短信验证",
+			"description": "",
+			"order": [
+				"a52b3365-1d9f-9748-e1e4-372d871204ea",
+				"402c5df3-8adf-d146-cd7b-719afbe60e79"
+			],
+			"owner": "349297"
+		},
+		{
 			"id": "1cbe8fa0-8776-85ce-e62d-f6ee4d972ffe",
 			"name": "获取授权",
 			"description": "",
@@ -323,7 +333,7 @@
 				},
 				{
 					"key": "client_id",
-					"value": "hello_world",
+					"value": "super",
 					"type": "text",
 					"enabled": true
 				},
@@ -345,11 +355,32 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1458555099646,
+			"time": 1458805201998,
 			"name": "POST 获取授权码",
 			"description": "- http测试样例\n\n```\nPOST /token HTTP/1.1\nHost: 127.0.0.1:5000\nContent-Type: application/x-www-form-urlencoded\n# 受限于框架, client_id 和 username 必须一致且必须为设备id\ngrant_type=password&\nclient_id=super&\nusername=super&\npassword=%242b%2412%24q3UwMyIw4OBo5SPMgbGqqeNOAa5Hyq4FhgScW5Qf8%2FjK41ALoj1yK\n```\n\n- password生成方式\n\npassword 为 username 加密后的值\n\n```\nimport bcrypt\npassword = b\"username\"\nbcrypt.hashpw(password, bcrypt.gensalt())\n# 结果就可以当成是与username对应的密码\n```\n\n- 返回结果\n\n```\n{\n    \"token_type\": \"Bearer\", \n    \"scope\": \"\", \n    \"expires_in\": 864000, \n    \"access_token\": \"fvzc7tYXI4aC4yApfX2lBb6FPkigfH\",\n    \"refresh_token\": \"LWpMcVXrsFb6AnmMZfqTQOxUt1NHCX\"\n}\n```",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"responses": []
+		},
+		{
+			"id": "402c5df3-8adf-d146-cd7b-719afbe60e79",
+			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\n",
+			"url": "http://127.0.0.1:5000/verify_sms_code/15399481600?code=327145",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "GET",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"data": [],
+			"dataMode": "params",
+			"name": "GET 验证手机验证码",
+			"description": "- endpoint\n\n```\n/verify_sms_code/<cellphone>?code=xxxxxx\n```\n\n- 返回值\n\n正常\n\n```\n{\n    \"statu\": \"ok\"\n}\n```\n\n异常(不匹配或者超时)\n\n```\n{\n    \"statu\": \"error\",\n    \"message\": \"xxx\"\n}\n```",
+			"descriptionFormat": "html",
+			"time": 1459090942749,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": "f0587805-d4a5-351d-2ef1-8c2f3d8553b7"
 		},
 		{
 			"id": "43799aac-a7aa-dffe-553f-b8b153eb0960",
@@ -741,6 +772,27 @@
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"rawModeData": "{\n  \"author\": null,\n  \"post_id\": null,\n  \"content\": null,\n  \"_created\": 1457383254.126,\n  \"location\": {\n    \"type\": \"Point\",\n    \"coordinates\": [\n      100,\n      0\n    ]\n  },\n  \"hearts\": [],\n  \"mask_id\": null,\n  \"_id\": \"56de57d67fe9e316bba45c6d\"\n}",
 			"folder": "9fa659ec-11bd-8ec1-2a9d-8a521bc7b12b"
+		},
+		{
+			"id": "a52b3365-1d9f-9748-e1e4-372d871204ea",
+			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\n",
+			"url": "http://127.0.0.1:5000/request_sms_code/15399481600",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "GET",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"data": [],
+			"dataMode": "params",
+			"name": "GET 发送手机验证码",
+			"description": "- endpoint\n\n```\n/request_sms_code/<cellphone>\n```\n\n- 返回值\n\n正常\n\n```\n{\n    \"statu\": \"ok\"\n}\n```\n\n异常\n\n```\n{\n    \"statu\": \"error\",\n    \"message\": \"xxx\"\n}\n```\n",
+			"descriptionFormat": "html",
+			"time": 1459090910588,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": "f0587805-d4a5-351d-2ef1-8c2f3d8553b7"
 		},
 		{
 			"id": "acf9ed2c-e94c-e4b1-756a-7cdb76ccbb98",
