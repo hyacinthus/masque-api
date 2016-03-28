@@ -1,5 +1,5 @@
-import re
 import random
+import re
 
 from flask_restful import Resource, reqparse
 
@@ -47,11 +47,14 @@ class RequestSmsCode(Resource):
         resp = send_sms(cellphone, verify_code)
         if resp and resp["alibaba_aliqin_fc_sms_num_send_response"]["result"][
                 "err_code"] == "0":
-            if redisdb.setex(
-                "sms_verify:{}".format(cellphone),
-                AliConfig.SMS_TTL * 60,
-                verify_code
+            if redisdb.lpush(
+                    "sms_verify:{}".format(cellphone),
+                    verify_code
             ):
+                if redisdb.ttl("sms_verify:{}".format(cellphone)) == -1:
+                    # 设置超时时间
+                    redisdb.expire("sms_verify:{}".format(cellphone),
+                                   AliConfig.SMS_TTL * 60)
                 return {"status": "ok"}
             else:
                 return {
@@ -79,8 +82,8 @@ class VerifySmsCode(Resource):
                 "status": "error",
                 "message": "sms code out of date"
             }
-        sys_code = redisdb.get("sms_verify:{}".format(cellphone))
-        if sys_code == user_code:
+        sys_code = redisdb.lrange("sms_verify:{}".format(cellphone), 0, -1)
+        if user_code in sys_code:
             return {
                 "status": "ok"
             }
