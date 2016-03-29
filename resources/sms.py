@@ -3,7 +3,7 @@ import random
 import re
 
 from bson.objectid import ObjectId
-from flask_restful import Resource, reqparse, request
+from flask_restful import Resource, reqparse
 
 import top.api
 from config import AliConfig
@@ -45,7 +45,7 @@ def verify_phone(phone):
 
 
 class RequestSmsCode(Resource):
-    def get(self, cellphone):
+    def post(self, cellphone):
         if not verify_phone(cellphone):
             return {
                        "status": "error",
@@ -66,7 +66,7 @@ class RequestSmsCode(Resource):
                 return {
                     "status": "ok",
                     "message": "验证码已发送"
-                }
+                       }, 201
             else:
                 return {
                            "status": "error",
@@ -78,7 +78,7 @@ class RequestSmsCode(Resource):
                        "message": "短信验证服务出错"
                    }, 500
 
-    def post(self, cellphone):
+    def get(self, cellphone):
         """绑定手机号码/更换号码/注销设备
         - op = "bound"  # 绑定
         - op = "change"  # 更换
@@ -89,6 +89,12 @@ class RequestSmsCode(Resource):
             'authorization',
             type=str,
             location='headers'
+        )
+        parser.add_argument(
+            'option',
+            type=str,
+            required=True,
+            help='option not found'
         )
         args = parser.parse_args()
         token = args["authorization"]
@@ -109,19 +115,13 @@ class RequestSmsCode(Resource):
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
                    }, 400
-        resp = request.get_json(force=True)
-        if not resp:
-            return {'message': 'No input data provided!'}, 400
-        elif "op" not in resp:
-            return {'message': 'missing [op] key'}, 400
-        log.debug(resp)
         # 根据device_id查找对应user_id
         cursor = connection.Devices.find_one({"_id": device_id})
         if cursor:
             current_user_id = cursor.user_id
         else:
             return {'message': 'user_id not found'}, 404
-        if resp["op"] == "bound":
+        if args["option"] == "bound":
             # 绑定手机
             cursor = connection.Users.find_one(
                 {"cellphone": cellphone}
@@ -157,7 +157,7 @@ class RequestSmsCode(Resource):
                 )
                 return connection.Users.find_one(
                     {"_id": ObjectId(current_user_id)})
-        elif resp["op"] == "change":
+        elif args["option"] == "change":
             # 更换手机
             cursor = connection.Users.find_one({"cellphone": cellphone})
             if cursor:
@@ -176,7 +176,7 @@ class RequestSmsCode(Resource):
                 )
                 return connection.Users.find_one(
                     {"_id": ObjectId(current_user_id)})
-        elif resp["op"] == "deregister":
+        elif args["option"] == "deregister":
             # 注销设备(不需要验证手机)
             cursor = connection.Devices.find_one(
                 {
@@ -211,7 +211,7 @@ class RequestSmsCode(Resource):
 
 
 class VerifySmsCode(Resource):
-    def get(self, cellphone):
+    def post(self, cellphone):
         if not verify_phone(cellphone):
             return {
                        'message': '号码输入有误，请重新输入',
@@ -228,13 +228,13 @@ class VerifySmsCode(Resource):
             return {
                 "status": "error",
                 "message": "验证码已过期"
-            }
+                   }, 400
         sys_code = redisdb.lrange("sms_verify:{}".format(cellphone), 0, -1)
         if user_code in sys_code:
             return {
                 "status": "ok",
                 "message": "验证码匹配正确"
-            }
+                   }, 201
         else:
             return {
                        "status": "error",
