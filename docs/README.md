@@ -101,32 +101,18 @@ value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个�
 
 - 方法 **POST**
 
-- URI `/request_sms_code/15399481600`
+- URI `/change_phone/15399481600`
 
 ```
-POST /request_sms_code/15399481600 HTTP/1.1
+POST /change_phone/15399481601 HTTP/1.1
 Host: 127.0.0.1:5000
 Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u
 Content-Type: application/json
 
-{
-    "code": "123456",
-    "op": "change"
-}
 ```
 返回
 
 更换号码后的用户信息
-
-- Body: 
-
-```
-{
-    "code": "123456",
-    "op": "change"
-}
-
-```
 
 ## POST 收藏/标记一个普通帖子
 
@@ -202,9 +188,9 @@ bcrypt.hashpw(password, bcrypt.gensalt())
 }
 ```
 
-## GET 验证手机验证码
+## POST 验证手机验证码
 
-- 方法 **GET**
+- 方法 **POST**
 
 - URI `/verify_sms_code/15399481600?code=327145`
 
@@ -575,27 +561,13 @@ structure = {
 
 - 方法 **POST**
 
-- URI `/request_sms_code/15399481601`
+- URI `/deregister/15399481600`
 
 ```
-POST /request_sms_code/15399481601 HTTP/1.1
+POST /deregister/15399481600 HTTP/1.1
 Host: 127.0.0.1:5000
 Content-Type: application/json
-Authorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq
-
-{
-    "code": "123456",
-    "op": "deregister"
-}
-```
-
-- Body: 
-
-```
-{
-    "code": "123456",
-    "op": "deregister"
-}
+Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u
 
 ```
 
@@ -647,6 +619,12 @@ endpoint:
 /user/<suer_id>/posts/
 ```
 
+## GET 图片上传临时token
+
+- 方法 **GET**
+
+- URI `/image_token`
+
 ## GET 列出所有用户
 
 - 方法 **GET**
@@ -681,9 +659,9 @@ endpoint:
 
 ```
 
-## GET 发送手机验证码
+## POST 发送手机验证码
 
-- 方法 **GET**
+- 方法 **POST**
 
 - URI `/request_sms_code/15399481600`
 
@@ -699,23 +677,16 @@ endpoint:
 
 - 返回值
 
-正常
+正常 201
 
 ```
 {
-  "message": "",
-  "data": {
-    "code": [
-      "573804",
-      "182457",
-      "123456"
-    ]
-  },
+  "message": "验证码发送成功",
   "status": "ok"
 }
 ```
 
-异常
+异常 4xx
 
 ```
 {
@@ -980,27 +951,13 @@ endpoints
 
 - 方法 **POST**
 
-- URI `/request_sms_code/15399481601`
+- URI `/bound_phone/15399481601`
 
 ```
-POST /request_sms_code/15399481601 HTTP/1.1
+POST /bound_phone/15399481601 HTTP/1.1
 Host: 127.0.0.1:5000
 Content-Type: application/json
 Authorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq
-
-{
-    "code": "123456",
-    "op": "bound"
-}
-```
-
-- Body: 
-
-```
-{
-    "code": "123456",
-    "op": "bound"
-}
 
 ```
 
