@@ -24,7 +24,7 @@ api = Api(app, decorators=[oauth.require_oauth(), ])
 
 @api.representation('application/json')
 def output_json(data, code, headers=None):
-    resp = make_response(dumps(data), code)
+    resp = make_response(dumps(data, ensure_ascii=False), code)
     resp.headers.extend(headers or {})
     return resp
 
@@ -134,7 +134,7 @@ api.add_resource(SchoolsList, '/location/schools',
                  endpoint='schools')
 
 api.add_resource(GetToken, '/image_token', endpoint='image_token')
-
+# 用户反馈
 api.add_resource(Feedback, '/feedback', endpoint='feedback')
 # 发送短信验证码
 api.add_resource(RequestSmsCode, '/request_sms_code/<string:cellphone>',
