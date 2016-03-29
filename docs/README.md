@@ -114,6 +114,27 @@ Content-Type: application/json
 
 更换号码后的用户信息
 
+## GET 用户反馈
+
+- 方法 **POST**
+
+- URI `/feedback`
+
+默认endpoint
+
+```
+/feedback
+```
+
+- Body: 
+
+```
+{
+    "name": "湘潭大学"
+}
+
+```
+
 ## POST 收藏/标记一个普通帖子
 
 - 方法 **POST**

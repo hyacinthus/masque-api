@@ -60,7 +60,8 @@
 			"name": "反馈",
 			"description": "",
 			"order": [
-				"1994d58c-c2cd-50d1-9afc-c81f1927d89e"
+				"1994d58c-c2cd-50d1-9afc-c81f1927d89e",
+				"27071161-3138-fe0f-292e-c2db41d7c9fd"
 			],
 			"owner": "349297"
 		},
@@ -328,6 +329,26 @@
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"responses": [],
 			"rawModeData": ""
+		},
+		{
+			"id": "27071161-3138-fe0f-292e-c2db41d7c9fd",
+			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\nContent-Type: application/json\n",
+			"url": "http://127.0.0.1:5000/feedback",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1459258143977,
+			"name": "GET 用户反馈",
+			"description": "默认endpoint\n\n```\n/feedback\n```",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"responses": [],
+			"rawModeData": "{\n    \"name\": \"湘潭大学\"\n}"
 		},
 		{
 			"id": "356feea3-fc59-a844-6aa4-a1904c6d62e4",
