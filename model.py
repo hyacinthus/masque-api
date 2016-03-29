@@ -1,4 +1,5 @@
 import logging
+import uuid
 from datetime import datetime
 from urllib.parse import quote
 
@@ -69,6 +70,25 @@ class CustomObjectId(CustomType):
     def to_python(self, value):
         """convert type to a python type"""
         return str(value)
+
+    def validate(self, value, path):
+        """OPTIONAL : useful to add a validation layer"""
+        if value is not None:
+            pass  # ... do something here
+
+
+class CustomUUID(CustomType):
+    mongo_type = uuid.UUID  # optional, just for more validation
+    python_type = str
+    init_type = None  # optional, fill the first empty value
+
+    def to_bson(self, value):
+        """convert type to a mongodb type"""
+        return uuid.UUID(value)
+
+    def to_python(self, value):
+        """convert type to a python type"""
+        return value.hex
 
     def validate(self, value, path):
         """OPTIONAL : useful to add a validation layer"""
@@ -475,9 +495,12 @@ class UserLevels(RootDocument):
 class Masks(RootDocument):
     __collection__ = CollectionName.MASKS
     structure = {
-        "_id": CustomObjectId(),
-        "name": str,
-        "mask_url": str,
+        "_id": CustomUUID(),
+        "category": IS("system", "user")
+    }
+    default_values = {
+        "_id": uuid.uuid1().hex,
+        "category": "system"
     }
 
 
