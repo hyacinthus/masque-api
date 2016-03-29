@@ -71,6 +71,11 @@ class RequestSmsCode(Resource):
             }
 
     def post(self, cellphone):
+        """绑定手机号码/更换号码/注销设备
+        - op = "bound"  # 绑定
+        - op = "change"  # 更换
+        - op = "deregister"  # 注销(不需要短信验证)
+        """
         parser = reqparse.RequestParser()
         parser.add_argument(
             'authorization',
@@ -87,7 +92,10 @@ class RequestSmsCode(Resource):
                 "oauth:access_token:{}:client_id".format(access_token)
             )
         else:
-            return {'message': 'Device not found'}, 404
+            return {
+                'status': "error",
+                'message': 'Device not found'
+            }, 404
         if not verify_phone(cellphone):
             return {'message': 'not a valid phone number'}, 400
         resp = request.get_json(force=True)
@@ -113,7 +121,7 @@ class RequestSmsCode(Resource):
             if not redisdb.exists("sms_verify:{}".format(cellphone)):
                 return {
                     "status": "error",
-                    "message": "sms code out of date"
+                    "message": "验证码已过期"
                 }
             sys_code = redisdb.lrange("sms_verify:{}".format(cellphone), 0, -1)
             user_code = resp["code"] if "code" in resp else None
@@ -127,34 +135,22 @@ class RequestSmsCode(Resource):
                     if current_user_id == cursor._id:
                         # 号码未变, 不做处理
                         return {'message': 'same phone number uploaded'}, 400
-                    doc = connection.Users.find_one(
-                        {"_id": ObjectId(cursor._id)})
-                    doc._id = current_user_id
-                    doc.save()
-                    connection.Users.find_and_modify(
-                        {"_id": ObjectId(cursor._id)},
-                        remove=True
-                    )
+                    # 把先前绑定手机用户id赋给当前设备
                     connection.Devices.find_and_modify(
                         {"_id": device_id},
-                        remove=True
-                    )
-                    connection.Devices.find_and_modify(
-                        {"user_id": cursor._id},
                         {
                             "$set": {
-                                "_id": device_id,
-                                "user_id": current_user_id
+                                "user_id": cursor._id
                             }
                         }
                     )
                     return connection.Users.find_one(
-                        {"_id": ObjectId(current_user_id)})
+                        {"_id": ObjectId(cursor._id)})
                 else:
                     return {
                         "status": "error",
-                        "message": "sms code doesn't match"
-                    }
+                        "message": "验证码不正确"
+                    }, 400
             else:
                 # 没有绑定过手机, 将cellphone填入当前user_id.cellphone字段
                 if user_code in sys_code:
@@ -169,9 +165,9 @@ class RequestSmsCode(Resource):
                         {"_id": ObjectId(current_user_id)})
                 else:
                     return {
-                        "status": "error",
-                        "message": "sms code doesn't match"
-                    }
+                               "status": "error",
+                               "message": "验证码不正确"
+                    }, 400
         elif resp["op"] == "change":
             # 更换手机
             cursor = connection.Users.find_one({"cellphone": cellphone})
@@ -179,21 +175,24 @@ class RequestSmsCode(Resource):
             if not redisdb.exists("sms_verify:{}".format(cellphone)):
                 return {
                     "status": "error",
-                    "message": "sms code out of date"
+                    "message": "验证码已过期"
                 }
             sys_code = redisdb.lrange("sms_verify:{}".format(cellphone), 0, -1)
             user_code = resp["code"] if "code" in resp else None
             if not user_code:
                 return {'message': 'missing "code" key'}, 400
             if cursor:
-                # 号码之前有使用过, 让其登录
+                # 号码之前有使用过, 提示该手机号码已被使用
                 if user_code in sys_code:
-                    return cursor
+                    return {
+                        "status": "error",
+                        "message": "该手机号码已经被使用"
+                    }, 400
                 else:
                     return {
                         "status": "error",
-                        "message": "sms code doesn't match"
-                    }
+                        "message": "验证码不正确"
+                    }, 400
             else:
                 # 号码未使用, 填入新号码
                 if user_code in sys_code:
@@ -208,7 +207,7 @@ class RequestSmsCode(Resource):
                 else:
                     return {
                         "status": "error",
-                        "message": "sms code doesn't match"
+                        "message": "验证码不正确"
                     }
         elif resp["op"] == "deregister":
             # 注销设备(不需要验证手机)
@@ -258,7 +257,7 @@ class VerifySmsCode(Resource):
         if not redisdb.exists("sms_verify:{}".format(cellphone)):
             return {
                 "status": "error",
-                "message": "sms code out of date"
+                "message": "验证码已过期"
             }
         sys_code = redisdb.lrange("sms_verify:{}".format(cellphone), 0, -1)
         if user_code in sys_code:
@@ -268,5 +267,5 @@ class VerifySmsCode(Resource):
         else:
             return {
                 "status": "error",
-                "message": "sms code doesn't match"
-            }
+                "message": "验证码不正确"
+            }, 400
