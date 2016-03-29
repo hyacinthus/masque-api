@@ -97,6 +97,37 @@ value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个�
 
 ```
 
+## POST 更换手机号码
+
+- 方法 **POST**
+
+- URI `/request_sms_code/15399481600`
+
+```
+POST /request_sms_code/15399481600 HTTP/1.1
+Host: 127.0.0.1:5000
+Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u
+Content-Type: application/json
+
+{
+    "code": "123456",
+    "op": "change"
+}
+```
+返回
+
+更换号码后的用户信息
+
+- Body: 
+
+```
+{
+    "code": "123456",
+    "op": "change"
+}
+
+```
+
 ## POST 收藏/标记一个普通帖子
 
 - 方法 **POST**
@@ -540,6 +571,34 @@ structure = {
 
 ```
 
+## POST 注销设备
+
+- 方法 **POST**
+
+- URI `/request_sms_code/15399481601`
+
+```
+POST /request_sms_code/15399481601 HTTP/1.1
+Host: 127.0.0.1:5000
+Content-Type: application/json
+Authorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq
+
+{
+    "code": "123456",
+    "op": "deregister"
+}
+```
+
+- Body: 
+
+```
+{
+    "code": "123456",
+    "op": "deregister"
+}
+
+```
+
 ## DEL 取消一个普通帖的收藏/标记
 
 - 方法 **DELETE**
@@ -628,6 +687,10 @@ endpoint:
 
 - URI `/request_sms_code/15399481600`
 
+- 说明
+
+所有需要验证码的场景均需要先发送验证码请求
+
 - endpoint
 
 ```
@@ -640,7 +703,15 @@ endpoint:
 
 ```
 {
-    "statu": "ok"
+  "message": "",
+  "data": {
+    "code": [
+      "573804",
+      "182457",
+      "123456"
+    ]
+  },
+  "status": "ok"
 }
 ```
 
@@ -648,7 +719,7 @@ endpoint:
 
 ```
 {
-    "statu": "error",
+    "status": "error",
     "message": "xxx"
 }
 ```
@@ -901,6 +972,34 @@ endpoints
 {
     "user_id": "56e3b2b17fe9e3140bfb2623",
     "mask_id": "56e3b2b17fe9e3140bfb2623"
+}
+
+```
+
+## POST 绑定手机号码
+
+- 方法 **POST**
+
+- URI `/request_sms_code/15399481601`
+
+```
+POST /request_sms_code/15399481601 HTTP/1.1
+Host: 127.0.0.1:5000
+Content-Type: application/json
+Authorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq
+
+{
+    "code": "123456",
+    "op": "bound"
+}
+```
+
+- Body: 
+
+```
+{
+    "code": "123456",
+    "op": "bound"
 }
 
 ```

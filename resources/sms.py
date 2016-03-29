@@ -11,6 +11,7 @@ from model import redisdb, connection
 
 log = logging.getLogger("masque.sms")
 
+
 def send_sms(phone, code):
     """发送验证码"""
     req = top.api.AlibabaAliqinFcSmsNumSendRequest()
@@ -45,7 +46,10 @@ def verify_phone(phone):
 class RequestSmsCode(Resource):
     def get(self, cellphone):
         if not verify_phone(cellphone):
-            return {'message': 'not a valid phone number'}, 400
+            return {
+                       "status": "error",
+                       'message': '号码输入有误，请重新输入'
+                   }, 400
         verify_code = generate_verification_code(6)
         resp = send_sms(cellphone, verify_code)
         if resp and resp["alibaba_aliqin_fc_sms_num_send_response"]["result"][
@@ -58,17 +62,26 @@ class RequestSmsCode(Resource):
                     # 设置超时时间
                     redisdb.expire("sms_verify:{}".format(cellphone),
                                    AliConfig.SMS_TTL * 60)
-                return {"status": "ok"}
+                sys_code = redisdb.lrange(
+                    "sms_verify:{}".format(cellphone), 0, -1
+                )
+                return {
+                    "status": "ok",
+                    "message": "",
+                    "data": {
+                        "code": sys_code
+                    }
+                }
             else:
                 return {
                     "status": "error",
-                    "message": "something wrong with the redis server"
-                }
+                           "message": "redis服务出错"
+                       }, 500
         else:
             return {
                 "status": "error",
-                "message": "something wrong with the sms service"
-            }
+                       "message": "短信验证服务出错"
+                   }, 500
 
     def post(self, cellphone):
         """绑定手机号码/更换号码/注销设备
@@ -97,7 +110,10 @@ class RequestSmsCode(Resource):
                 'message': 'Device not found'
             }, 404
         if not verify_phone(cellphone):
-            return {'message': 'not a valid phone number'}, 400
+            return {
+                       'message': '号码输入有误，请重新输入',
+                       "status": "error"
+                   }, 400
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
@@ -115,7 +131,11 @@ class RequestSmsCode(Resource):
             cursor = connection.Users.find_one(
                 {"cellphone": cellphone}
             )
-            log.debug(cursor)
+            if cursor._id == current_user_id:
+                return {
+                           "status": "error",
+                           "message": "你已经绑定过这个号码了"
+                       }, 400
             # 提取redis存储验证码
             log.debug(cellphone)
             if not redisdb.exists("sms_verify:{}".format(cellphone)):
@@ -246,7 +266,10 @@ class RequestSmsCode(Resource):
 class VerifySmsCode(Resource):
     def get(self, cellphone):
         if not verify_phone(cellphone):
-            return {'message': 'not a valid phone number'}, 400
+            return {
+                       'message': '号码输入有误，请重新输入',
+                       "status": "error"
+                   }, 400
         parser = reqparse.RequestParser()
         parser.add_argument('code',
                             type=str,

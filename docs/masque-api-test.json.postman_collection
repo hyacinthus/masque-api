@@ -74,6 +74,20 @@
 			"owner": "349297"
 		},
 		{
+			"id": "b7924f69-906c-e6aa-6f2c-a058779c2ac0",
+			"name": "手机短信相关",
+			"description": "",
+			"order": [
+				"a52b3365-1d9f-9748-e1e4-372d871204ea",
+				"235624aa-b2c9-55ab-510e-6863cba4fdfd",
+				"ed8c314c-6bfd-857d-8d02-479526d1277f",
+				"89fc627b-c734-8ea7-f7bd-28749e0017ef",
+				"402c5df3-8adf-d146-cd7b-719afbe60e79"
+			],
+			"owner": "349297",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c"
+		},
+		{
 			"owner": "349297",
 			"lastUpdatedBy": "349297",
 			"lastRevision": 162984859,
@@ -134,16 +148,6 @@
 				"f9188376-f3a0-5881-1ed8-b52edf0e6373",
 				"add9740e-b90a-be39-ee34-5aa8bceac4b4",
 				"fec3aabc-4ade-972a-c7dc-8ee7bf7057d5"
-			],
-			"owner": "349297"
-		},
-		{
-			"id": "f0587805-d4a5-351d-2ef1-8c2f3d8553b7",
-			"name": "短信验证",
-			"description": "",
-			"order": [
-				"a52b3365-1d9f-9748-e1e4-372d871204ea",
-				"402c5df3-8adf-d146-cd7b-719afbe60e79"
 			],
 			"owner": "349297"
 		},
@@ -297,6 +301,28 @@
 			"rawModeData": "{\n    \"author\": \"\"\n}"
 		},
 		{
+			"id": "235624aa-b2c9-55ab-510e-6863cba4fdfd",
+			"headers": "Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u\nContent-Type: application/json\n",
+			"url": "http://127.0.0.1:5000/request_sms_code/15399481600",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"data": [],
+			"dataMode": "raw",
+			"name": "POST 更换手机号码",
+			"description": "```\nPOST /request_sms_code/15399481600 HTTP/1.1\nHost: 127.0.0.1:5000\nAuthorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u\nContent-Type: application/json\n\n{\n    \"code\": \"123456\",\n    \"op\": \"change\"\n}\n```\n返回\n\n更换号码后的用户信息",
+			"descriptionFormat": "html",
+			"time": 1459220609624,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": "b7924f69-906c-e6aa-6f2c-a058779c2ac0",
+			"rawModeData": "{\n    \"code\": \"123456\",\n    \"op\": \"change\"\n}"
+		},
+		{
 			"id": "356feea3-fc59-a844-6aa4-a1904c6d62e4",
 			"headers": "Content-Type: application/json\n",
 			"url": "http://127.0.0.1:5000/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/star",
@@ -333,19 +359,19 @@
 				},
 				{
 					"key": "client_id",
-					"value": "super",
+					"value": "ferstar",
 					"type": "text",
 					"enabled": true
 				},
 				{
 					"key": "username",
-					"value": "super",
+					"value": "ferstar",
 					"type": "text",
 					"enabled": true
 				},
 				{
 					"key": "password",
-					"value": "$2b$12$q3UwMyIw4OBo5SPMgbGqqeNOAa5Hyq4FhgScW5Qf8/jK41ALoj1yK",
+					"value": "$2a$12$FV7anFq901IMonUpmLOVBO/QuqxJ6ffVI01VR1mquNlNLLtQ9idG.",
 					"type": "text",
 					"enabled": true
 				}
@@ -355,7 +381,7 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1458805201998,
+			"time": 1459183206342,
 			"name": "POST 获取授权码",
 			"description": "- http测试样例\n\n```\nPOST /token HTTP/1.1\nHost: 127.0.0.1:5000\nContent-Type: application/x-www-form-urlencoded\n# 受限于框架, client_id 和 username 必须一致且必须为设备id\ngrant_type=password&\nclient_id=super&\nusername=super&\npassword=%242b%2412%24q3UwMyIw4OBo5SPMgbGqqeNOAa5Hyq4FhgScW5Qf8%2FjK41ALoj1yK\n```\n\n- password生成方式\n\npassword 为 username 加密后的值\n\n```\nimport bcrypt\npassword = b\"username\"\nbcrypt.hashpw(password, bcrypt.gensalt())\n# 结果就可以当成是与username对应的密码\n```\n\n- 返回结果\n\n```\n{\n    \"token_type\": \"Bearer\", \n    \"scope\": \"\", \n    \"expires_in\": 864000, \n    \"access_token\": \"fvzc7tYXI4aC4yApfX2lBb6FPkigfH\",\n    \"refresh_token\": \"LWpMcVXrsFb6AnmMZfqTQOxUt1NHCX\"\n}\n```",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
@@ -380,7 +406,7 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"folder": "f0587805-d4a5-351d-2ef1-8c2f3d8553b7"
+			"folder": "b7924f69-906c-e6aa-6f2c-a058779c2ac0"
 		},
 		{
 			"id": "43799aac-a7aa-dffe-553f-b8b153eb0960",
@@ -674,6 +700,28 @@
 			"rawModeData": "{}"
 		},
 		{
+			"id": "89fc627b-c734-8ea7-f7bd-28749e0017ef",
+			"headers": "Content-Type: application/json\nAuthorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq\n",
+			"url": "http://127.0.0.1:5000/request_sms_code/15399481601",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "POST",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"data": [],
+			"dataMode": "raw",
+			"name": "POST 注销设备",
+			"description": "```\nPOST /request_sms_code/15399481601 HTTP/1.1\nHost: 127.0.0.1:5000\nContent-Type: application/json\nAuthorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq\n\n{\n    \"code\": \"123456\",\n    \"op\": \"deregister\"\n}\n```",
+			"descriptionFormat": "html",
+			"time": 1459221875968,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": "b7924f69-906c-e6aa-6f2c-a058779c2ac0",
+			"rawModeData": "{\n    \"code\": \"123456\",\n    \"op\": \"deregister\"\n}"
+		},
+		{
 			"id": "8aa06d0b-d478-fcc7-ed23-73c71eba72fd",
 			"headers": "",
 			"url": "http://127.0.0.1:5000/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/star?user_id=56df88ab7fe9e310478b9312",
@@ -735,7 +783,7 @@
 		},
 		{
 			"id": "a3244cd5-0003-fa09-c5de-7e2da4935d7c",
-			"headers": "",
+			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\n",
 			"url": "http://127.0.0.1:5000/users",
 			"preRequestScript": "",
 			"pathVariables": {},
@@ -746,12 +794,11 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1457070697539,
+			"time": 1459179365144,
 			"name": "GET 列出所有用户",
 			"description": "",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
-			"responses": [],
-			"folder": "6d552076-8bfa-ad91-8f35-134f1bbc9b4e"
+			"responses": []
 		},
 		{
 			"id": "a331cca5-b0fd-d303-2ac4-57dc9d19b220",
@@ -777,22 +824,20 @@
 			"id": "a52b3365-1d9f-9748-e1e4-372d871204ea",
 			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\n",
 			"url": "http://127.0.0.1:5000/request_sms_code/15399481600",
-			"pathVariables": {},
 			"preRequestScript": "",
+			"pathVariables": {},
 			"method": "GET",
-			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"data": [],
 			"dataMode": "params",
-			"name": "GET 发送手机验证码",
-			"description": "- endpoint\n\n```\n/request_sms_code/<cellphone>\n```\n\n- 返回值\n\n正常\n\n```\n{\n    \"statu\": \"ok\"\n}\n```\n\n异常\n\n```\n{\n    \"statu\": \"error\",\n    \"message\": \"xxx\"\n}\n```\n",
-			"descriptionFormat": "html",
-			"time": 1459090910588,
 			"version": 2,
-			"responses": [],
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"folder": "f0587805-d4a5-351d-2ef1-8c2f3d8553b7"
+			"time": 1459222555466,
+			"name": "GET 发送手机验证码",
+			"description": "- 说明\n\n所有需要验证码的场景均需要先发送验证码请求\n\n- endpoint\n\n```\n/request_sms_code/<cellphone>\n```\n\n- 返回值\n\n正常\n\n```\n{\n  \"message\": \"\",\n  \"data\": {\n    \"code\": [\n      \"573804\",\n      \"182457\",\n      \"123456\"\n    ]\n  },\n  \"status\": \"ok\"\n}\n```\n\n异常\n\n```\n{\n    \"status\": \"error\",\n    \"message\": \"xxx\"\n}\n```\n",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"responses": []
 		},
 		{
 			"id": "acf9ed2c-e94c-e4b1-756a-7cdb76ccbb98",
@@ -1123,6 +1168,28 @@
 			"helperAttributes": {},
 			"folder": "8e6d1f31-25d8-be9c-f0a3-0c7ae0361c43",
 			"rawModeData": "{\n    \"user_id\": \"56e3b2b17fe9e3140bfb2623\",\n    \"mask_id\": \"56e3b2b17fe9e3140bfb2623\"\n}"
+		},
+		{
+			"id": "ed8c314c-6bfd-857d-8d02-479526d1277f",
+			"headers": "Content-Type: application/json\nAuthorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq\n",
+			"url": "http://127.0.0.1:5000/request_sms_code/15399481601",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "POST",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"data": [],
+			"dataMode": "raw",
+			"name": "POST 绑定手机号码",
+			"description": "```\nPOST /request_sms_code/15399481601 HTTP/1.1\nHost: 127.0.0.1:5000\nContent-Type: application/json\nAuthorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq\n\n{\n    \"code\": \"123456\",\n    \"op\": \"bound\"\n}\n```",
+			"descriptionFormat": "html",
+			"time": 1459221788132,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": "b7924f69-906c-e6aa-6f2c-a058779c2ac0",
+			"rawModeData": "{\n    \"code\": \"123456\",\n    \"op\": \"bound\"\n}"
 		},
 		{
 			"id": "edea02cd-71ee-1ddb-18a9-ffa23669a309",
