@@ -5,7 +5,7 @@ from flask_restful import Resource, request, reqparse
 from marshmallow import Schema, fields, ValidationError
 
 from config import MongoConfig, APIConfig
-from model import connection
+from model import connection, redisdb
 
 
 # Custom validator
@@ -189,9 +189,31 @@ class Hearts(Resource):
 
 class Feedback(Resource):
     def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        access_token = token[token.find(" ") + 1:]
+        if redisdb.exists(
+                "oauth:access_token:{}:client_id".format(access_token)
+        ):
+            device_id = redisdb.get(
+                "oauth:access_token:{}:client_id".format(access_token)
+            )
+        else:
+            return {
+                       'status': "error",
+                       'message': 'Device not found'
+                   }, 404
         resp = request.get_json(force=True)
+        cursor = connection.Devices.find_one({"_id": device_id})
         doc = connection.Feedback()
         for item in resp:
             doc[item] = resp[item]
+        doc.author = cursor.user_id
         doc.save()
         return None, 201

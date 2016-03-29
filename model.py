@@ -644,6 +644,7 @@ class Feedback(RootDocument):
     __collection__ = CollectionName.FEEDBACK
     structure = {
         "_id": CustomObjectId(),
+        "author": str,
         "category": IS("error", "none"),
         "_created": CustomDate(),
         "name": str
