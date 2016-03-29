@@ -188,5 +188,10 @@ class Hearts(Resource):
 
 
 class Feedback(Resource):
-    def get(self):
-        pass
+    def post(self):
+        resp = request.get_json(force=True)
+        doc = connection.Feedback()
+        for item in resp:
+            doc[item] = resp[item]
+        doc.save()
+        return None, 201

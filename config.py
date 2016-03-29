@@ -75,3 +75,4 @@ class CollectionName:
     MESSAGES = "messages"
     USER_TRACE = "user_trace"
     SCHOOLS = "schools"
+    FEEDBACK = "feedback"

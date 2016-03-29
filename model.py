@@ -637,3 +637,20 @@ class UserStars(UserPosts):
 @connection.register
 class Schools(RootDocument):
     __collection__ = CollectionName.SCHOOLS
+
+
+@connection.register
+class Feedback(RootDocument):
+    __collection__ = CollectionName.FEEDBACK
+    structure = {
+        "_id": CustomObjectId(),
+        "category": IS("error", "none"),
+        "_created": CustomDate(),
+        "name": str
+    }
+    required_fields = [
+        "name"
+    ]
+    default_values = {
+        "category": "error"
+    }
