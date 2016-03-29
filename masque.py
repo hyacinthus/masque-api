@@ -136,11 +136,21 @@ api.add_resource(SchoolsList, '/location/schools',
 api.add_resource(GetToken, '/image_token', endpoint='image_token')
 
 api.add_resource(Feedback, '/feedback', endpoint='feedback')
-# 短信验证
+# 发送短信验证码
 api.add_resource(RequestSmsCode, '/request_sms_code/<string:cellphone>',
                  endpoint='request_sms_code')
+# 验证短信验证码
 api.add_resource(VerifySmsCode, '/verify_sms_code/<string:cellphone>',
                  endpoint='verify_sms_code')
+# 绑定手机
+api.add_resource(BoundPhone, '/bound_phone/<string:cellphone>',
+                 endpoint='bound_phone')
+# 更换手机
+api.add_resource(ChangePhone, '/change_phone/<string:cellphone>',
+                 endpoint='change_phone')
+# 注销设备
+api.add_resource(DeRegister, '/deregister/<string:cellphone>',
+                 endpoint='deregister')
 
 if __name__ == '__main__':
     app.run(host=DebugConfig.HOST, port=DebugConfig.PORT)
