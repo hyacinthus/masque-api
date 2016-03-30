@@ -336,7 +336,7 @@ class Token():
 class RootDocument(Document):
     __database__ = MongoConfig.DB
     structure = {}
-    skip_validation = True
+    skip_validation = False
     use_dot_notation = True
 
 
@@ -652,6 +652,7 @@ class Feedback(RootDocument):
         "category": IS("error", "none"),
         "_created": CustomDate(),
         "name": str,
+        "archived": bool,
         "location": {
             "coordinates": [
                 OR(int, float),
@@ -665,6 +666,7 @@ class Feedback(RootDocument):
         "location.coordinates"
     ]
     default_values = {
+        "archived": False,
         "category": "error",
         "location.type": "Point"
     }
