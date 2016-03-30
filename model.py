@@ -99,27 +99,6 @@ class CustomMaskList(CustomType):
             pass  # ... do something here
 
 
-class CustomStr(CustomType):
-    mongo_type = str  # optional, just for more validation
-    python_type = str
-    init_type = None  # optional, fill the first empty value
-
-    def to_bson(self, value):
-        """convert type to a mongodb type"""
-        if not value:
-            return ""
-
-    def to_python(self, value):
-        """convert type to a python type"""
-        if not value:
-            return ""
-
-    def validate(self, value, path):
-        """OPTIONAL : useful to add a validation layer"""
-        if value is not None:
-            pass  # ... do something here
-
-
 # Oauth2 model
 class Client():
     """A client is the app which want to use the resource of a user.
@@ -365,11 +344,11 @@ class Common(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
-        "mask_id": CustomStr(),
+        "mask_id": str,
         "hearts": [
             {
-                "mask_id": CustomStr(),
-                "user_id": CustomStr()
+                "mask_id": str,
+                "user_id": str
             }
         ],
         "location": {
@@ -379,7 +358,7 @@ class Common(RootDocument):
             ],
             "type": IS("Point")
         },
-        "author": CustomStr()
+        "author": str
     }
     required_fields = [
         "author"
@@ -395,8 +374,8 @@ class Posts(Common):
     structure = {
         "content": {
             "type": IS("text", "vote", "photo"),
-            "text": CustomStr(),
-            "photo": CustomStr(),
+            "text": str,
+            "photo": str,
             "options": list
         },
         "comment_count": int,
@@ -414,8 +393,8 @@ class Posts(Common):
 @connection.register
 class Comments(Common):
     structure = {
-        "content": CustomStr(),
-        "post_id": CustomStr(),
+        "content": str,
+        "post_id": str,
     }
     required_fields = [
         "post_id"
@@ -428,14 +407,14 @@ class Users(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
-        "cellphone": CustomStr(),
+        "cellphone": str,
         "exp": int,
-        "user_level_id": CustomStr(),
+        "user_level_id": str,
         "hearts_received": int,
         "hearts_owned": int,
         "_updated": CustomDate(),
         "masks": CustomMaskList(),
-        "home": CustomStr(),
+        "home": str,
         "subscribed": list
     }
     default_values = {
@@ -452,14 +431,14 @@ class Themes(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "category": IS("school", "district", "virtual", "private", "system"),
-        "subcate": CustomStr(),
-        "short_name": CustomStr(),
-        "full_name": CustomStr(),
+        "subcate": str,
+        "short_name": str,
+        "full_name": str,
         "locale": {
-            "nation": CustomStr(),
-            "province": CustomStr(),
-            "city": CustomStr(),
-            "district": CustomStr()
+            "nation": str,
+            "province": str,
+            "city": str,
+            "district": str
         }
     }
     default_values = {
@@ -478,10 +457,10 @@ class Themes(RootDocument):
 class Devices(RootDocument):
     __collection__ = CollectionName.DEVICES
     structure = {
-        "_id": CustomStr(),
-        "name": CustomStr(),
-        "user_id": CustomStr(),
-        "origin_user_id": CustomStr(),
+        "_id": str,
+        "name": str,
+        "user_id": str,
+        "origin_user_id": str,
     }
     required_fields = [
         '_id',
@@ -520,7 +499,7 @@ class UserLevels(RootDocument):
 class Masks(RootDocument):
     __collection__ = CollectionName.MASKS
     structure = {
-        "_id": CustomStr(),
+        "_id": str,
         "category": IS("system", "user")
     }
     default_values = {
@@ -535,15 +514,15 @@ class BoardPosts(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
-        "mask_id": CustomStr(),
+        "mask_id": str,
         "hearts": [
             {
-                "mask_id": CustomStr(),
-                "user_id": CustomStr()
+                "mask_id": str,
+                "user_id": str
             }
         ],
-        "content": CustomStr(),
-        "author": CustomStr()
+        "content": str,
+        "author": str
     }
 
 
@@ -566,8 +545,8 @@ class DeviceTrace(RootDocument):
     __collection__ = CollectionName.DEVICE_TRACE
     structure = {
         "_id": CustomObjectId(),
-        "serial": CustomStr(),
-        "carrier": CustomStr(),
+        "serial": str,
+        "carrier": str,
         "cellphone": int,
         "location": {
             "coordinates": [
@@ -589,9 +568,9 @@ class Messages(RootDocument):
     __collection__ = CollectionName.MESSAGES
     structure = {
         "_id": CustomObjectId(),
-        "to": CustomStr(),
-        "from": CustomStr(),
-        "content": CustomStr(),
+        "to": str,
+        "from": str,
+        "content": str,
         "_created": CustomDate(),
         "archived": bool
     }
@@ -605,7 +584,7 @@ class UserTraces(RootDocument):
     __collection__ = CollectionName.USER_TRACE
     structure = {
         "_id": CustomObjectId(),
-        "user_id": CustomStr(),
+        "user_id": str,
         "_created": CustomDate(),
         "_updated": CustomDate(),
         "thanks": int,
@@ -629,9 +608,9 @@ class UserPosts(RootDocument):
     __collection__ = CollectionName.USER_POSTS
     structure = {
         "_id": CustomObjectId(),
-        "user_id": CustomStr(),
-        "theme_id": CustomStr(),
-        "post_id": CustomStr(),
+        "user_id": str,
+        "theme_id": str,
+        "post_id": str,
         "_created": CustomDate()
     }
     required_fields = [
@@ -644,9 +623,9 @@ class UserComments(RootDocument):
     __collection__ = CollectionName.USER_COMMENTS
     structure = {
         "_id": CustomObjectId(),
-        "user_id": CustomStr(),
-        "theme_id": CustomStr(),
-        "comment_id": CustomStr(),
+        "user_id": str,
+        "theme_id": str,
+        "comment_id": str,
         "_created": CustomDate()
     }
     required_fields = [
@@ -669,10 +648,10 @@ class Feedback(RootDocument):
     __collection__ = CollectionName.FEEDBACK
     structure = {
         "_id": CustomObjectId(),
-        "author": CustomStr(),
+        "author": str,
         "category": IS("error", "none"),
         "_created": CustomDate(),
-        "name": CustomStr(),
+        "name": str,
         "archived": bool,
         "location": {
             "coordinates": [
