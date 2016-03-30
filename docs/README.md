@@ -68,6 +68,38 @@ value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个�
 /theme/用户反馈?category=system
 ```
 
+## POST 上传一个用户头像 UUID
+
+- 方法 **POST**
+
+- URI `/mask/upload`
+
+- http code
+
+```
+POST /mask/upload HTTP/1.1
+Host: 127.0.0.1:5000
+Authorization: Bearer knJkFnOgXd13tevwOpniLczIefARbD
+Content-Type: application/json
+
+{
+    "uuid": "813bbde4f63b11e59b8cb083fe4ecc7b"
+}
+```
+
+- 输出
+
+正确结果返回 201
+
+- Body: 
+
+```
+{
+    "uuid": "813bbde4f63b11e59b8cb083fe4ecc7b"
+}
+
+```
+
 ## DEL 删除主题
 
 - 方法 **DELETE**
@@ -120,11 +152,24 @@ Content-Type: application/json
 
 - URI `/feedback`
 
-默认endpoint
+- endpoint
 
 ```
 /feedback
 ```
+
+- 输入
+
+```
+{
+    "name": "湘潭大学",
+    "category": "error" // 错误error, 没有none
+}
+```
+
+- 输出
+
+None 201
 
 - Body: 
 
