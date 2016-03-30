@@ -8,7 +8,8 @@ from resources.location import SchoolsList
 from resources.mask import Mask, MasksList, RandomMask, UploadMask
 from resources.message import Message, MessagesList
 from resources.parameter import Parameter, ParametersList
-from resources.post import Post, PostsList, FavorPost, Hearts, Feedback
+from resources.post import Post, PostsList, FavorPost, Hearts, Feedback, \
+    ReportPost
 from resources.sms import VerifySmsCode, RequestSmsCode, BoundPhone, \
     ChangePhone, DeRegister
 from resources.theme import Theme, ThemesList

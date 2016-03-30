@@ -217,3 +217,8 @@ class Feedback(Resource):
         doc.author = cursor.user_id
         doc.save()
         return None, 201
+
+
+class ReportPost(Resource):
+    def post(self, theme_id, post_id):
+        pass

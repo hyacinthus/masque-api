@@ -51,6 +51,11 @@ api.add_resource(PostsList, '/theme/<string:theme_id>/posts',
 api.add_resource(Post, '/theme/<string:theme_id>/post/<string:post_id>',
                  '/theme/<string:theme_id>/post/<string:post_id>/',
                  endpoint='post')
+# 举报帖子
+api.add_resource(ReportPost,
+                 '/theme/<string:theme_id>/post/<string:post_id>/report',
+                 endpoint='report_post')
+
 api.add_resource(Hearts,
                  '/theme/<string:theme_id>/post/<string:post_id>/hearts',
                  '/theme/<string:theme_id>/post/<string:post_id>/hearts/',
