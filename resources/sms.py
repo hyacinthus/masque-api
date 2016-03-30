@@ -50,7 +50,7 @@ class RequestSmsCode(Resource):
             return {
                        "status": "error",
                        'message': '号码输入有误，请重新输入'
-                   }, 400
+                   }, 200
         verify_code = generate_verification_code(4)  # 生成4位随机数验证码
         resp = send_sms(cellphone, verify_code)
         if resp and resp["alibaba_aliqin_fc_sms_num_send_response"]["result"][
@@ -85,7 +85,7 @@ class VerifySmsCode(Resource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 400
+                   }, 200
         parser = reqparse.RequestParser()
         parser.add_argument('code',
                             type=str,
@@ -97,7 +97,7 @@ class VerifySmsCode(Resource):
             return {
                        "status": "error",
                        "message": "验证码已过期"
-                   }, 400
+                   }, 200
         sys_code = redisdb.lrange("sms_verify:{}".format(cellphone), 0, -1)
         if user_code in sys_code:
             return {
@@ -108,7 +108,7 @@ class VerifySmsCode(Resource):
             return {
                        "status": "error",
                        "message": "验证码不正确"
-                   }, 400
+                   }, 200
 
 
 class BoundPhone(Resource):
@@ -139,7 +139,7 @@ class BoundPhone(Resource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 400
+                   }, 200
         # 根据device_id查找对应user_id
         cursor = connection.Devices.find_one({"_id": device_id})
         if cursor:
@@ -156,7 +156,7 @@ class BoundPhone(Resource):
                 return {
                            "status": "error",
                            'message': '你已经绑定过这个号码了'
-                       }, 400
+                       }, 200
             # 把先前绑定手机用户id赋给当前设备
             connection.Devices.find_and_modify(
                 {"_id": device_id},
@@ -208,7 +208,7 @@ class ChangePhone(Resource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 400
+                   }, 200
         # 根据device_id查找对应user_id
         cursor = connection.Devices.find_one({"_id": device_id})
         if cursor:
@@ -221,7 +221,7 @@ class ChangePhone(Resource):
             return {
                        "status": "error",
                        "message": "该手机号码已经被使用"
-                   }, 400
+                   }, 200
         else:
             # 号码未使用, 填入新号码
             connection.Users.find_and_modify(
@@ -262,7 +262,7 @@ class DeRegister(Resource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 400
+                   }, 200
         # 根据device_id查找对应user_id
         cursor = connection.Devices.find_one({"_id": device_id})
         if cursor:
@@ -276,7 +276,7 @@ class DeRegister(Resource):
             return {
                        "status": "error",
                        'message': '设备没有绑定手机, 不需要注销'
-                   }, 400
+                   }, 200
         cursor = connection.Devices.find_one(
             {
                 "user_id": current_user_id
