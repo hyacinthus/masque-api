@@ -504,7 +504,7 @@ class Masks(RootDocument):
     }
     default_values = {
         "_id": uuid.uuid1().hex,
-        "category": "system"
+        "category": "user"
     }
 
 

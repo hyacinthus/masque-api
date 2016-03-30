@@ -1,3 +1,5 @@
+import uuid
+
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
@@ -104,9 +106,8 @@ class RandomMask(Resource):
         )
         mask_list = user_info.masks
         first_item = self.find_random()._id
-        # 删除原列表最后一项, 然后随机一个原列表里没有的项
-        last_item = mask_list.pop(-1)
-        while first_item == last_item and first_item in mask_list:
+        # 随机一个原列表里没有的项
+        while first_item in mask_list:
             first_item = self.find_random()._id
         # 拼装新头像列表
         new_mask_list = [first_item] + mask_list
@@ -115,7 +116,7 @@ class RandomMask(Resource):
             {"_id": ObjectId(current_user_id)},
             {
                 "$set": {
-                    "masks": new_mask_list
+                    "masks": new_mask_list[:-1]
                 }
             }
         )
@@ -126,3 +127,67 @@ class RandomMask(Resource):
                 "masks": new_mask_list
             }
         }
+
+
+class UploadMask(Resource):
+    def post(self):
+        """
+        将上传完成的头像uuid传入用户头像列表
+        """
+        resp = request.get_json(force=True)
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        try:
+            uuid.UUID(resp["uuid"])
+        except:
+            return {
+                       'status': 'error',
+                       'message': '%s is not a valid uuid.hex string'
+                                  % resp["uuid"]
+                   }, 400
+        mask_uuid = resp["uuid"]
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        access_token = token[token.find(" ") + 1:]
+        if redisdb.exists(
+                "oauth:access_token:{}:client_id".format(access_token)
+        ):
+            device_id = redisdb.get(
+                "oauth:access_token:{}:client_id".format(access_token)
+            )
+        else:
+            return {
+                       'status': "error",
+                       'message': 'Device not found'
+                   }, 404
+        # 根据device_id查找对应user_id
+        cursor = connection.Devices.find_one({"_id": device_id})
+        if cursor:
+            current_user_id = cursor.user_id
+        else:
+            return {'message': 'user_id not found'}, 404
+        user_info = connection.Users.find_one(
+            {"_id": ObjectId(current_user_id)}
+        )
+        mask_list = user_info.masks
+        new_mask_list = [mask_uuid] + mask_list
+        # 将新传入的头像uuid加入用户头像列表
+        connection.Users.find_and_modify(
+            {"_id": ObjectId(current_user_id)},
+            {
+                "$set": {
+                    "masks": new_mask_list[:-1]
+                }
+            }
+        )
+        # 将新传入的头像uuid加入masks
+        mask = connection.Masks()
+        mask._id = mask_uuid
+        mask.save()
+        return None, 201

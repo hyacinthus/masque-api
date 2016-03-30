@@ -104,8 +104,9 @@ api.add_resource(UserLevel, '/user_level/<string:user_level_id>',
 api.add_resource(MasksList, '/masks', endpoint='masks')
 # 在用户列表第一项随机插入一个系统头像
 api.add_resource(RandomMask, '/masks/random', endpoint='random_mask')
-api.add_resource(Mask, '/mask/<string:mask_id>',
-                 endpoint='mask')
+# 用户上传头像
+api.add_resource(UploadMask, '/mask/upload', endpoint='upload_mask')
+api.add_resource(Mask, '/mask/<string:mask_id>', endpoint='mask')
 
 api.add_resource(BoardPostsList, '/board_posts', endpoint='board_posts')
 api.add_resource(BoardPost, '/board_post/<string:board_post_id>',
