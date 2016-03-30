@@ -651,11 +651,20 @@ class Feedback(RootDocument):
         "author": str,
         "category": IS("error", "none"),
         "_created": CustomDate(),
-        "name": str
+        "name": str,
+        "location": {
+            "coordinates": [
+                OR(int, float),
+                OR(int, float)
+            ],
+            "type": IS("Point")
+        }
     }
     required_fields = [
-        "name"
+        "name",
+        "location.coordinates"
     ]
     default_values = {
-        "category": "error"
+        "category": "error",
+        "location.type": "Point"
     }
