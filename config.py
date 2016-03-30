@@ -48,7 +48,7 @@ class MongoConfig:
 
 
 class RedisConfig:
-    HOST = os.getenv("REDIS_HOST", "localhost")
+    HOST = os.getenv("REDIS_HOST", "127.0.0.1")
     PORT = int(os.getenv("REDIS_PORT", "6379"))
     DB = int(os.getenv("REDIS_DB", "8"))
 
