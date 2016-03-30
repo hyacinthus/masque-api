@@ -363,6 +363,35 @@ structure = {
 
 ```
 
+## GET 添加一个随机的用户头像
+
+- 方法 **GET**
+
+- URI `/masks/random`
+
+- 正常输出
+
+随机调取系统头像库中的 uuid, 插入到用户头像列表的第一位, 其他顺延, 最后一项删除
+
+```
+{
+  "message": "头像排序完毕",
+  "data": {
+    "masks": [
+      "9dd30cf2f59911e5bf52b083fe4eaa62",
+      "a2974a5af59911e5bf52b083fe4eaa62",
+      "9dd30cf2f59911e5bf52b083fe4eaa62",
+      "a4eaf77ef59911e5bf52b083fe4eaa62",
+      "a0247544f59911e5bf52b083fe4eaa62",
+      "9b723ce5f59911e5bf52b083fe4eaa62",
+      "a3b9c8bcf59911e5bf52b083fe4eaa62",
+      "9f000f3ef59911e5bf52b083fe4eaa62"
+    ]
+  },
+  "status": "ok"
+}
+```
+
 ## GET 获取普通帖评论列表
 
 - 方法 **GET**
