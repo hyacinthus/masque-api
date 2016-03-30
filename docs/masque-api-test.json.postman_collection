@@ -356,7 +356,7 @@
 		},
 		{
 			"id": "27071161-3138-fe0f-292e-c2db41d7c9fd",
-			"headers": "Authorization: Bearer H5HLVf6cWq6dYwDbp8SyTxlYUaD0YJ\nContent-Type: application/json\n",
+			"headers": "Authorization: Bearer knJkFnOgXd13tevwOpniLczIefARbD\nContent-Type: application/json\n",
 			"url": "http://127.0.0.1:5000/feedback",
 			"preRequestScript": "",
 			"pathVariables": {},
@@ -367,12 +367,12 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1459258143977,
-			"name": "GET 用户反馈",
-			"description": "- endpoint\n\n```\n/feedback\n```\n\n- 输入\n\n```\n{\n    \"name\": \"湘潭大学\",\n    \"category\": \"error\" // 错误error, 没有none\n}\n```\n\n- 输出\n\nNone 201",
+			"time": 1459330242443,
+			"name": "POST 用户反馈",
+			"description": "- endpoint\n\n```\n/feedback\n```\n\n- 输入\n\n```\n{\n    \"name\": \"湘潭大学\",\n    \"category\": \"error\" // 错误error, 没有none\n    \"location\": {\n        \"coordinates\": [100, 100],\n        \"type\": \"Point\"\n    }\n}\n```\n\n- 输出\n\nNone 201",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"responses": [],
-			"rawModeData": "{\n    \"name\": \"湘潭大学\"\n}"
+			"rawModeData": "{\n    \"name\": \"湘潭大学\",\n    \"category\": \"error\",\n    \"location\" : {\n        \"coordinates\" : [100,12],\n        \"type\" : \"Point\"\n    }\n}"
 		},
 		{
 			"id": "356feea3-fc59-a844-6aa4-a1904c6d62e4",

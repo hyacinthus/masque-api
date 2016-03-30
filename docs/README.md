@@ -146,7 +146,7 @@ Content-Type: application/json
 
 更换号码后的用户信息
 
-## GET 用户反馈
+## POST 用户反馈
 
 - 方法 **POST**
 
@@ -164,6 +164,10 @@ Content-Type: application/json
 {
     "name": "湘潭大学",
     "category": "error" // 错误error, 没有none
+    "location": {
+        "coordinates": [100, 100],
+        "type": "Point"
+    }
 }
 ```
 
@@ -175,7 +179,12 @@ None 201
 
 ```
 {
-    "name": "湘潭大学"
+    "name": "湘潭大学",
+    "category": "error",
+    "location" : {
+        "coordinates" : [100,12],
+        "type" : "Point"
+    }
 }
 
 ```
