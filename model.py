@@ -44,7 +44,7 @@ class CustomDate(CustomType):
 
     def to_bson(self, value):
         """convert type to a mongodb type"""
-        if value == "" or value is None:  # update time if not received.
+        if not value:  # update time if not received.
             return datetime.utcnow()
         return datetime.fromtimestamp(value)
 
@@ -77,18 +77,21 @@ class CustomObjectId(CustomType):
             pass  # ... do something here
 
 
-class CustomUUID(CustomType):
-    mongo_type = uuid.UUID  # optional, just for more validation
-    python_type = str
+class CustomMaskList(CustomType):
+    mongo_type = list  # optional, just for more validation
+    python_type = list
     init_type = None  # optional, fill the first empty value
 
     def to_bson(self, value):
         """convert type to a mongodb type"""
-        return uuid.UUID(value)
+        if not value:
+            # 随机抽取8个头像id填入mask字段
+            return [connection.Masks.find_random()._id for i in range(8) if
+                    connection.Masks.find_random()]
 
     def to_python(self, value):
         """convert type to a python type"""
-        return value.hex
+        return value
 
     def validate(self, value, path):
         """OPTIONAL : useful to add a validation layer"""
@@ -401,7 +404,6 @@ class Comments(Common):
 @connection.register
 class Users(RootDocument):
     __collection__ = CollectionName.USERS
-
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -411,7 +413,7 @@ class Users(RootDocument):
         "hearts_received": int,
         "hearts_owned": int,
         "_updated": CustomDate(),
-        "masks": list,
+        "masks": CustomMaskList(),
         "home": str,
         "subscribed": list
     }
@@ -429,6 +431,7 @@ class Themes(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "category": IS("school", "district", "virtual", "private", "system"),
+        "subcate": str,
         "short_name": str,
         "full_name": str,
         "locale": {
@@ -440,6 +443,7 @@ class Themes(RootDocument):
     }
     default_values = {
         "category": "school",
+        "subcate": "",
         "short_name": "",
         "full_name": "",
         "locale.nation": "中国",
@@ -495,7 +499,7 @@ class UserLevels(RootDocument):
 class Masks(RootDocument):
     __collection__ = CollectionName.MASKS
     structure = {
-        "_id": CustomUUID(),
+        "_id": str,
         "category": IS("system", "user")
     }
     default_values = {
