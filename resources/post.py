@@ -221,9 +221,18 @@ class Feedback(Resource):
 
 class ReportPost(Resource):
     def post(self, theme_id, post_id):
-        resp = request.get_json(force=True)
-        if not resp:
-            return {'message': 'No input data provided!'}, 400
+        # 判断被举报的帖子存在与否
+        collection = connection[MongoConfig.DB]["posts_" + theme_id]
+        cursor = collection.Posts.find_one({"_id": ObjectId(post_id)})
+        if not cursor:
+            return {
+                       "status": "error",
+                       "message": "您举报的帖子已被删除, 谢谢支持!"
+                   }, 404
+        else:
+            # 存在则取到author值
+            author = cursor.author
+        # 根据token取得当前用户/设备_id
         parser = reqparse.RequestParser()
         parser.add_argument(
             'authorization',
@@ -256,7 +265,7 @@ class ReportPost(Resource):
         if not cursor:
             # 不存在就新建
             new_report = connection.ReportPosts()
-            new_report.author = resp["author"] if resp["author"] else None
+            new_report.author = author
             new_report.theme_id = theme_id
             new_report.post_id = post_id
             new_report.device_id = device_id
