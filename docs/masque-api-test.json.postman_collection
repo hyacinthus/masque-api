@@ -111,6 +111,7 @@
 				"233a6446-03c5-86a0-ce9c-f0da32830556",
 				"e5a733a3-2c65-346d-c9da-094fb711c379",
 				"356feea3-fc59-a844-6aa4-a1904c6d62e4",
+				"25756367-df62-9510-b8b9-75b25a1bf464",
 				"8aa06d0b-d478-fcc7-ed23-73c71eba72fd",
 				"bcb9317c-bf33-b38c-d6bd-bbcd525c44c9"
 			],
@@ -353,6 +354,28 @@
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"responses": [],
 			"rawModeData": ""
+		},
+		{
+			"id": "25756367-df62-9510-b8b9-75b25a1bf464",
+			"headers": "Content-Type: application/json\nAuthorization: Bearer ekms9DV1ydn2ZZxPzKMJVpDwMVgksk\n",
+			"url": "http://127.0.0.1:5000/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/report",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"data": [],
+			"dataMode": "raw",
+			"name": "POST 举报某个帖子",
+			"description": "-endpoints\n\n```\n/theme/<string:theme_id>/post/<string:post_id>/report\n```\n\n- 输入: 无\n\n- 输出: 无\n\n- 状态码:\n\n  正常: 无内容,返回201\n  异常: \n    提示已经举报过此贴, 返回码 422\n    举报帖子被删除, 返回码 404",
+			"descriptionFormat": "html",
+			"time": 1459405518247,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": "8e6d1f31-25d8-be9c-f0a3-0c7ae0361c43",
+			"rawModeData": "{\n    \"author\": \"56e3b2b17fe9e3140bfb2623\"\n}"
 		},
 		{
 			"id": "27071161-3138-fe0f-292e-c2db41d7c9fd",

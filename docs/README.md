@@ -146,6 +146,38 @@ Content-Type: application/json
 
 更换号码后的用户信息
 
+## POST 举报某个帖子
+
+- 方法 **POST**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/report`
+
+-endpoints
+
+```
+/theme/<string:theme_id>/post/<string:post_id>/report
+```
+
+- 输入: 无
+
+- 输出: 无
+
+- 状态码:
+
+  正常: 无内容,返回201
+  异常: 
+    提示已经举报过此贴, 返回码 422
+    举报帖子被删除, 返回码 404
+
+- Body: 
+
+```
+{
+    "author": "56e3b2b17fe9e3140bfb2623"
+}
+
+```
+
 ## POST 用户反馈
 
 - 方法 **POST**
