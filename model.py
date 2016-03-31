@@ -670,3 +670,47 @@ class Feedback(RootDocument):
         "category": "error",
         "location.type": "Point"
     }
+
+
+@connection.register
+class ReportPosts(RootDocument):
+    __collection__ = CollectionName.REPORT_POSTS
+    structure = {
+        "_id": CustomObjectId(),
+        "author": str,
+        "reporters": list,
+        "device_id": str,
+        "theme_id": str,
+        "post_id": str,
+        "archived": bool,
+    }
+    required_fields = [
+        "author",
+        "theme_id",
+        "post_id",
+    ]
+    default_values = {
+        "archived": False,
+    }
+
+
+@connection.register
+class ReportComments(RootDocument):
+    __collection__ = CollectionName.REPORT_COMMENTS
+    structure = {
+        "_id": CustomObjectId(),
+        "author": str,
+        "device_id": str,
+        "reporters": list,
+        "theme_id": str,
+        "comment_id": str,
+        "archived": bool,
+    }
+    required_fields = [
+        "author",
+        "theme_id",
+        "comment_id",
+    ]
+    default_values = {
+        "archived": False,
+    }

@@ -221,4 +221,64 @@ class Feedback(Resource):
 
 class ReportPost(Resource):
     def post(self, theme_id, post_id):
-        pass
+        resp = request.get_json(force=True)
+        if not resp:
+            return {'message': 'No input data provided!'}, 400
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        access_token = token[token.find(" ") + 1:]
+        if redisdb.exists(
+                "oauth:access_token:{}:client_id".format(access_token)
+        ):
+            device_id = redisdb.get(
+                "oauth:access_token:{}:client_id".format(access_token)
+            )
+        else:
+            return {
+                       'status': "error",
+                       'message': 'Device not found'
+                   }, 404
+        cursor = connection.Devices.find_one({"_id": device_id})
+        current_user = cursor.user_id
+        # 检查是否有此举报
+        cursor = connection.ReportPosts.find_one(
+            {
+                "theme_id": theme_id,
+                "post_id": post_id
+            }
+        )
+        if not cursor:
+            # 不存在就新建
+            new_report = connection.ReportPosts()
+            new_report.author = resp["author"] if resp["author"] else None
+            new_report.theme_id = theme_id
+            new_report.post_id = post_id
+            new_report.device_id = device_id
+            new_report.reporters = [current_user]
+            new_report.save()
+            return None, 201
+        elif current_user not in cursor.reporters:
+            # 当前用户没有举报则可以举报
+            connection.ReportPosts.find_and_modify(
+                {
+                    "theme_id": theme_id,
+                    "post_id": post_id
+                },
+                {
+                    "$addToSet": {
+                        "reporters": current_user
+                    }
+                }
+            )
+            return None, 201
+        else:
+            return {
+                       "status": "error",
+                       "message": "你已经举报过该帖子了, 谢谢支持!"
+                   }, 422

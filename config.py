@@ -76,3 +76,5 @@ class CollectionName:
     USER_TRACE = "user_trace"
     SCHOOLS = "schools"
     FEEDBACK = "feedback"
+    REPORT_POSTS = "report_posts"
+    REPORT_COMMENTS = "report_comments"
