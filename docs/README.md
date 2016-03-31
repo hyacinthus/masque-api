@@ -516,6 +516,32 @@ endpoints
 状态码: 200
 
 
+## POST 感谢某个评论
+
+- 方法 **POST**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56df88ab7fe9e310478b934e/heart`
+
+- endpoints
+
+```
+/theme/<string:theme_id>/comment/<string:comment_id>/heart
+```
+
+- 输入: 无
+
+- 输出: 无
+
+- 状态码:
+
+> 正常: 无内容,返回201
+  
+> 异常: 
+    
+>> 提示已经感谢过此评论, 返回码 422
+    
+>> 提示要感谢的评论已被删除, 返回码 404
+
 ## DEL 获取参数列表
 
 - 方法 **GET**

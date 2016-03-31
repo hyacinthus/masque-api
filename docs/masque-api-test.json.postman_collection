@@ -125,13 +125,14 @@
 				"536bf89b-3d28-d2c7-c6be-0ad374ee46d9",
 				"85e00499-062e-603f-56c5-e120653a500d",
 				"44c77f70-4c3e-4817-04e0-7db14965c9fa",
+				"5b1f6d17-fa26-c3ed-c2a7-0c77e5ddf663",
 				"d2a6aef5-9c6c-f421-d3ff-abee42921b9f",
 				"af443a21-6d2e-8294-ba6f-f99e892eb007",
 				"a331cca5-b0fd-d303-2ac4-57dc9d19b220",
 				"6f8a6e17-6dc3-7d4a-219a-dd08feb35c82"
 			],
 			"owner": "349297",
-			"collectionId": "d2922d48-9ede-3e42-5811-25a1809a948b"
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c"
 		},
 		{
 			"id": "6d552076-8bfa-ad91-8f35-134f1bbc9b4e",
@@ -643,6 +644,27 @@
 			"description": "参数: 可以加`page=`指定页码\n\nendpoints\n```\n/theme/<string:theme_id>/comments/\n/theme/<string:theme_id>/comments\n```\n输入: 无\n输出: 当前主题下的评论,默认只显示第一页\n状态码: 200\n",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
 			"responses": [],
+			"folder": "9fa659ec-11bd-8ec1-2a9d-8a521bc7b12b"
+		},
+		{
+			"id": "5b1f6d17-fa26-c3ed-c2a7-0c77e5ddf663",
+			"headers": "Content-Type: application/json\nAuthorization: Bearer BEGiBZ2nWzqbIeffjKnYbRP1NWRwBJ\n",
+			"url": "http://127.0.0.1:5000/theme/56d59bd4294d90ac3d8749d8/comment/56df88ab7fe9e310478b934e/heart",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"data": [],
+			"dataMode": "params",
+			"name": "POST 感谢某个评论",
+			"description": "- endpoints\n\n```\n/theme/<string:theme_id>/comment/<string:comment_id>/heart\n```\n\n- 输入: 无\n\n- 输出: 无\n\n- 状态码:\n\n> 正常: 无内容,返回201\n  \n> 异常: \n    \n>> 提示已经感谢过此评论, 返回码 422\n    \n>> 提示要感谢的评论已被删除, 返回码 404",
+			"descriptionFormat": "html",
+			"time": 1459410291031,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
 			"folder": "9fa659ec-11bd-8ec1-2a9d-8a521bc7b12b"
 		},
 		{
