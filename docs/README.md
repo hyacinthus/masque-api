@@ -152,7 +152,7 @@ Content-Type: application/json
 
 - URI `/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/report`
 
--endpoints
+- endpoints
 
 ```
 /theme/<string:theme_id>/post/<string:post_id>/report
@@ -164,19 +164,13 @@ Content-Type: application/json
 
 - 状态码:
 
-  正常: 无内容,返回201
-  异常: 
-    提示已经举报过此贴, 返回码 422
-    举报帖子被删除, 返回码 404
-
-- Body: 
-
-```
-{
-    "author": "56e3b2b17fe9e3140bfb2623"
-}
-
-```
+> 正常: 无内容,返回201
+  
+> 异常: 
+    
+>> 提示已经举报过此贴, 返回码 422
+    
+>> 举报帖子被删除, 返回码 404
 
 ## POST 用户反馈
 
