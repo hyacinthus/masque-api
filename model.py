@@ -404,6 +404,7 @@ class Comments(Common):
 @connection.register
 class Users(RootDocument):
     __collection__ = CollectionName.USERS
+    skip_validation = True
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
