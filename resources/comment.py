@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig, APIConfig
-from model import connection
+from model import connection, redisdb
 
 
 class CommentsList(Resource):
@@ -114,3 +114,77 @@ class PostComments(Resource):
             sort=[("_created", 1)]
         )  # sort the result by ascending time
         return cursor
+
+
+class ReportComment(Resource):
+    def post(self, theme_id, comment_id):
+        # 判断被举报的评论存在与否
+        collection = connection[MongoConfig.DB]["comments_" + theme_id]
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
+        if not cursor:
+            return {
+                       "status": "error",
+                       "message": "您举报的内容已被删除, 谢谢支持!"
+                   }, 404
+        else:
+            # 存在则取到author值
+            author = cursor.author
+        # 根据token取得当前用户/设备_id
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        access_token = token[token.find(" ") + 1:]
+        if redisdb.exists(
+                "oauth:access_token:{}:client_id".format(access_token)
+        ):
+            device_id = redisdb.get(
+                "oauth:access_token:{}:client_id".format(access_token)
+            )
+        else:
+            return {
+                       'status': "error",
+                       'message': 'Device not found'
+                   }, 404
+        cursor = connection.Devices.find_one({"_id": device_id})
+        current_user = cursor.user_id
+        # 检查是否有此举报
+        cursor = connection.ReportComments.find_one(
+            {
+                "theme_id": theme_id,
+                "comment_id": comment_id
+            }
+        )
+        if not cursor:
+            # 不存在就新建
+            new_report = connection.ReportComments()
+            new_report.author = author
+            new_report.theme_id = theme_id
+            new_report.comment_id = comment_id
+            new_report.device_id = device_id
+            new_report.reporters = [current_user]
+            new_report.save()
+            return None, 201
+        elif current_user not in cursor.reporters:
+            # 当前用户没有举报则可以举报
+            connection.ReportComments.find_and_modify(
+                {
+                    "theme_id": theme_id,
+                    "comment_id": comment_id
+                },
+                {
+                    "$addToSet": {
+                        "reporters": current_user
+                    }
+                }
+            )
+            return None, 201
+        else:
+            return {
+                       "status": "error",
+                       "message": "你已经举报过该帖子了, 谢谢支持!"
+                   }, 422

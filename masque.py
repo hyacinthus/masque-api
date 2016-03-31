@@ -76,6 +76,10 @@ api.add_resource(Comment,
                  '/theme/<string:theme_id>/comment/<string:comment_id>',
                  '/theme/<string:theme_id>/comment/<string:comment_id>/',
                  endpoint='comment')
+# 举报评论
+api.add_resource(ReportComment,
+                 '/theme/<string:theme_id>/comment/<string:comment_id>/report',
+                 endpoint='report_comment')
 
 api.add_resource(UsersList, '/users', '/users/', endpoint='users')
 api.add_resource(User, '/user/<string:user_id>', '/user/<string:user_id>/',
