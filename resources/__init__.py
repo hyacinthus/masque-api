@@ -1,6 +1,7 @@
 from resources.board_comment import BoardComment, BoardCommentsList
 from resources.board_post import BoardPost, BoardPostsList
-from resources.comment import Comment, CommentsList, PostComments, ReportComment
+from resources.comment import Comment, CommentsList, PostComments, \
+    ReportComment, CommentHeart
 from resources.device import Device, DevicesList
 from resources.device_trace import DeviceTrace, DeviceTraceList
 from resources.image import GetToken

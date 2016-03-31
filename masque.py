@@ -81,6 +81,11 @@ api.add_resource(ReportComment,
                  '/theme/<string:theme_id>/comment/<string:comment_id>/report',
                  endpoint='report_comment')
 
+# 感谢某评论
+api.add_resource(CommentHeart,
+                 '/theme/<string:theme_id>/comment/<string:comment_id>/heart',
+                 endpoint='heart_comment')
+
 api.add_resource(UsersList, '/users', '/users/', endpoint='users')
 api.add_resource(User, '/user/<string:user_id>', '/user/<string:user_id>/',
                  endpoint='user')

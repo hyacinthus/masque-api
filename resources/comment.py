@@ -188,3 +188,80 @@ class ReportComment(Resource):
                        "status": "error",
                        "message": "你已经举报过该帖子了, 谢谢支持!"
                    }, 422
+
+
+class CommentHeart(Resource):
+    """感谢评论"""
+
+    def post(self, theme_id, comment_id):
+        # 判断要感谢的评论存在与否
+        collection = connection[MongoConfig.DB]["comments_" + theme_id]
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
+        if not cursor:
+            return {
+                       "status": "error",
+                       "message": "您要感谢的评论已被删除, 请刷新当前页面内容"
+                   }, 404
+        # 根据token取得当前用户/设备_id
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        access_token = token[token.find(" ") + 1:]
+        if redisdb.exists(
+                "oauth:access_token:{}:client_id".format(access_token)
+        ):
+            device_id = redisdb.get(
+                "oauth:access_token:{}:client_id".format(access_token)
+            )
+        else:
+            return {
+                       'status': "error",
+                       'message': 'Device not found'
+                   }, 404
+        cursor = connection.Devices.find_one({"_id": device_id})
+        current_user = cursor.user_id
+        cursor = connection.Users.find_one({"_id": ObjectId(current_user)})
+        current_mask = cursor.masks[0]  # 此用户当前面具id
+
+        collection = connection[MongoConfig.DB]["comments_" + theme_id]
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
+        # 发帖人不能自己感谢自己
+        if cursor.author == current_user:
+            return {
+                       "status": "error",
+                       "message": "自己不能感谢自己哦"
+                   }, 422
+        # 查找用户是否已经感谢过这个帖子
+        for item in cursor.hearts:
+            if item['user_id'] == current_user:
+                return {
+                           "status": "error",
+                           "message": "您已经感谢过这条评论了"
+                       }, 422
+        # 更新 hearts 列表
+        collection.Comments.find_and_modify(
+            {"_id": ObjectId(comment_id)},
+            {
+                "$addToSet": {
+                    "hearts": {
+                        "user_id": current_user,
+                        "mask_id": current_mask
+                    }
+                }
+            }
+        )
+        # 给评论作者 hearts_received 加一
+        connection.Users.find_and_modify(
+            {"_id": ObjectId(cursor['author'])},
+            {
+                "$inc": {
+                    "hearts_received": 1
+                }
+            }
+        )
+        return None, 201
