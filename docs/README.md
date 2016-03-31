@@ -370,6 +370,32 @@ endpoints
 
 ```
 
+## POST 举报某个评论
+
+- 方法 **POST**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56df88ab7fe9e310478b934e/report`
+
+- endpoints
+
+```
+/theme/<string:theme_id>/comment/<string:comment_id>/report
+```
+
+- 输入: 无
+
+- 输出: 无
+
+- 状态码:
+
+> 正常: 无内容,返回201
+  
+> 异常: 
+    
+>> 提示已经举报过此贴, 返回码 422
+    
+>> 举报帖子被删除, 返回码 404
+
 ## POST 新建一个参数表项
 
 - 方法 **POST**

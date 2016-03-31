@@ -115,7 +115,7 @@
 				"8aa06d0b-d478-fcc7-ed23-73c71eba72fd",
 				"bcb9317c-bf33-b38c-d6bd-bbcd525c44c9"
 			],
-			"collectionId": "d9bd040a-b433-db6f-86e0-796cc251349a"
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c"
 		},
 		{
 			"id": "9fa659ec-11bd-8ec1-2a9d-8a521bc7b12b",
@@ -124,6 +124,7 @@
 			"order": [
 				"536bf89b-3d28-d2c7-c6be-0ad374ee46d9",
 				"85e00499-062e-603f-56c5-e120653a500d",
+				"44c77f70-4c3e-4817-04e0-7db14965c9fa",
 				"d2a6aef5-9c6c-f421-d3ff-abee42921b9f",
 				"af443a21-6d2e-8294-ba6f-f99e892eb007",
 				"a331cca5-b0fd-d303-2ac4-57dc9d19b220",
@@ -499,6 +500,25 @@
 			"pathVariables": {},
 			"currentHelper": "normal",
 			"helperAttributes": "{}"
+		},
+		{
+			"id": "44c77f70-4c3e-4817-04e0-7db14965c9fa",
+			"headers": "Content-Type: application/json\nAuthorization: Bearer BEGiBZ2nWzqbIeffjKnYbRP1NWRwBJ\n",
+			"url": "http://127.0.0.1:5000/theme/56d59bd4294d90ac3d8749d8/comment/56df88ab7fe9e310478b934e/report",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1459407579679,
+			"name": "POST 举报某个评论",
+			"description": "- endpoints\n\n```\n/theme/<string:theme_id>/comment/<string:comment_id>/report\n```\n\n- 输入: 无\n\n- 输出: 无\n\n- 状态码:\n\n> 正常: 无内容,返回201\n  \n> 异常: \n    \n>> 提示已经举报过此贴, 返回码 422\n    \n>> 举报帖子被删除, 返回码 404",
+			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c",
+			"responses": []
 		},
 		{
 			"id": "454c3bf8-f605-04a5-462b-a761d6974cee",
