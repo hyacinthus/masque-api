@@ -50,7 +50,7 @@ class CustomDate(CustomType):
 
     def to_python(self, value):
         """convert type to a python type"""
-        return datetime.timestamp(value)
+        return datetime.timestamp(value) // 1  # 输出去掉小数部分
 
     def validate(self, value, path):
         """OPTIONAL : useful to add a validation layer"""
