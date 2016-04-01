@@ -3,9 +3,37 @@ description "uWSGI server instance configured to serve masque"
 start on runlevel [2345]
 stop on runlevel [!2345]
 
+# for nginx,we run as www-data group
 setuid masque
 setgid www-data
 
+# set environment 
 env PATH=/home/masque/venv/product/bin
+
+# log config
+env LOG_PATH=/home/masque/masque-api/log
+env LOG_FILE_LEVEL=INFO
+
+# db config
+env MONGO_DB=masque
+env REDIS_DB=1
+
+# security config
+env SMS_IKEY=23333302
+env SMS_AKEY=b8ce4e50cb11e6d9b702e6765fbbd722
+env SMS_TEMPLATE_CODE=SMS_6770229
+env SMS_FREE_SIGN_NAME=身份验证
+
+env ALI_IKEY=
+env ALI_AKEY=
+env ALI_API_VERSION=
+env ALI_API_VERSION=
+env ALI_ROLEARN=
+
+
+
+# work home
 chdir /home/masque/masque-api
+
+# run!
 exec uwsgi --ini wsgi.ini
