@@ -44,6 +44,9 @@ deactivate
 ### 调试启动应用
 克隆项目到本地, 进入虚拟python运行环境, 在项目根目录执行
 ```
+# uWSGI 的 internal routing 依赖于 pcre, 需要先安装之
+sudo apt-get install libpcre3 libpcre3-dev
+# 安装 python 依赖包
 pip install -r requirements.txt
 # 然后执行
 python run.py
@@ -60,7 +63,7 @@ python run.py
 
 ### 生产部署
 Ubuntu  
-* 在/run新建masque目录，并修改用户组`chown masque:www-data masque`，若要自定wsgi的socket路径，需要响应修改wsgi.ini文件
+* 在/run新建masque目录，并修改用户组`chown masque:www-data masque`，若要自定wsgi的socket路径，需要相应修改wsgi.ini文件
 * 如有必要，修改wsgi.ini文件的并行数等参数。
 * 将masque.conf.example复制到/etc/init目录，重命名为masque.conf，并修改其中的参数。
 * masque.conf中，env为python venv的bin目录位置，chdir为项目目录。
