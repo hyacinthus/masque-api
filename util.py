@@ -36,5 +36,5 @@ def add_exp(user, exp):
     new_level = get_level(user.exp)
     if new_level != user.user_level_id:
         user.user_level_id = new_level
-        notification.level_up.delay(1)
+        notification.level_up.delay(user._id, user.user_level_id)
 
