@@ -92,7 +92,6 @@ class GetToken(Resource):
         )
         args = parser.parse_args()
         token = args["authorization"]
-        log.debug(token)
         access_token = token[token.find(" ") + 1:]
         if redisdb.exists(
                 "oauth:access_token:{}:client_id".format(access_token)
@@ -102,5 +101,4 @@ class GetToken(Resource):
             )
         else:
             return {'message': 'Not found'}, 404
-        log.debug(client_id)
         return http_request(host, compose_url(client_id))
