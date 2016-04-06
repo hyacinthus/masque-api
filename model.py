@@ -553,6 +553,19 @@ class Messages(RootDocument):
 
 
 @connection.register
+class Notifications(RootDocument):
+    __collection__ = CollectionName.NOTIFICATIONS
+    structure = {
+        "_id": CustomObjectId(),
+        "user_id": str
+        "type": str
+        "theme_id": str
+        "post_id": str
+        "message_id": str
+    }
+
+
+@connection.register
 class UserTraces(RootDocument):
     __collection__ = CollectionName.USER_TRACE
     structure = {
