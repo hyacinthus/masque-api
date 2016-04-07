@@ -48,8 +48,11 @@ deactivate
 sudo apt-get install libpcre3 libpcre3-dev
 # 安装 python 依赖包
 pip install -r requirements.txt
-# 然后执行
-python run.py
+# 保证mongodb redis rabbitmq都在正常运行
+# 然后在一个终端执行
+python masque.py
+# 在另一个终端启动队列
+sh celery.sh
 
 ```
 - 输出示例
