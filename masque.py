@@ -24,7 +24,7 @@ api = Api(app, decorators=[oauth.require_oauth(), ])
 
 @api.representation('application/json')
 def output_json(data, code, headers=None):
-    resp = make_response(dumps(data), code)
+    resp = make_response(dumps(data, ensure_ascii=False), code)
     resp.headers.extend(headers or {})
     return resp
 
@@ -51,6 +51,11 @@ api.add_resource(PostsList, '/theme/<string:theme_id>/posts',
 api.add_resource(Post, '/theme/<string:theme_id>/post/<string:post_id>',
                  '/theme/<string:theme_id>/post/<string:post_id>/',
                  endpoint='post')
+# 举报帖子
+api.add_resource(ReportPost,
+                 '/theme/<string:theme_id>/post/<string:post_id>/report',
+                 endpoint='report_post')
+
 api.add_resource(Hearts,
                  '/theme/<string:theme_id>/post/<string:post_id>/hearts',
                  '/theme/<string:theme_id>/post/<string:post_id>/hearts/',
@@ -71,6 +76,15 @@ api.add_resource(Comment,
                  '/theme/<string:theme_id>/comment/<string:comment_id>',
                  '/theme/<string:theme_id>/comment/<string:comment_id>/',
                  endpoint='comment')
+# 举报评论
+api.add_resource(ReportComment,
+                 '/theme/<string:theme_id>/comment/<string:comment_id>/report',
+                 endpoint='report_comment')
+
+# 感谢某评论
+api.add_resource(CommentHeart,
+                 '/theme/<string:theme_id>/comment/<string:comment_id>/heart',
+                 endpoint='heart_comment')
 
 api.add_resource(UsersList, '/users', '/users/', endpoint='users')
 api.add_resource(User, '/user/<string:user_id>', '/user/<string:user_id>/',
@@ -102,8 +116,11 @@ api.add_resource(UserLevel, '/user_level/<string:user_level_id>',
                  endpoint='user_level')
 
 api.add_resource(MasksList, '/masks', endpoint='masks')
-api.add_resource(Mask, '/mask/<string:mask_id>',
-                 endpoint='mask')
+# 在用户列表第一项随机插入一个系统头像
+api.add_resource(RandomMask, '/masks/random', endpoint='random_mask')
+# 用户上传头像
+api.add_resource(UploadMask, '/mask/upload', endpoint='upload_mask')
+api.add_resource(Mask, '/mask/<string:mask_id>', endpoint='mask')
 
 api.add_resource(BoardPostsList, '/board_posts', endpoint='board_posts')
 api.add_resource(BoardPost, '/board_post/<string:board_post_id>',
@@ -134,13 +151,23 @@ api.add_resource(SchoolsList, '/location/schools',
                  endpoint='schools')
 
 api.add_resource(GetToken, '/image_token', endpoint='image_token')
-
+# 用户反馈
 api.add_resource(Feedback, '/feedback', endpoint='feedback')
-# 短信验证
+# 发送短信验证码
 api.add_resource(RequestSmsCode, '/request_sms_code/<string:cellphone>',
                  endpoint='request_sms_code')
+# 验证短信验证码
 api.add_resource(VerifySmsCode, '/verify_sms_code/<string:cellphone>',
                  endpoint='verify_sms_code')
+# 绑定手机
+api.add_resource(BoundPhone, '/bound_phone/<string:cellphone>',
+                 endpoint='bound_phone')
+# 更换手机
+api.add_resource(ChangePhone, '/change_phone/<string:cellphone>',
+                 endpoint='change_phone')
+# 注销设备
+api.add_resource(DeRegister, '/deregister/<string:cellphone>',
+                 endpoint='deregister')
 
 if __name__ == '__main__':
     app.run(host=DebugConfig.HOST, port=DebugConfig.PORT)

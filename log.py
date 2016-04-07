@@ -25,18 +25,18 @@ if _screen_level:
     ch.setLevel(_screen_level)
     ch.setFormatter(formatter)
     root_log.addHandler(ch)
-    root_log.debug("Logging %s level to screen", _screen_level)
+    root_log.info("Logging %s level to screen" % _screen_level)
 
 # file handler
 if LogConfig.PATH and _file_level:
     LOG_PATH = os.path.abspath(LogConfig.PATH)
     os.makedirs(os.path.realpath(LOG_PATH), exist_ok=True)
-    LOG_FILE = os.path.join(LOG_PATH, 'server.log')
+    LOG_FILE = os.path.join(LOG_PATH, 'server_%s.log' % os.getpid())
     fh = logging.FileHandler(LOG_FILE)
     fh.setLevel(_file_level)
     fh.setFormatter(formatter)
     root_log.addHandler(fh)
-    root_log.debug("Logging %s level to %s", (_file_level,
+    root_log.info("Logging %s level to %s" % (_file_level,
                    LOG_FILE))
 
 # db handler send to celery

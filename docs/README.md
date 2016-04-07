@@ -68,6 +68,38 @@ value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个�
 /theme/用户反馈?category=system
 ```
 
+## POST 上传一个用户头像 UUID
+
+- 方法 **POST**
+
+- URI `/mask/upload`
+
+- http code
+
+```
+POST /mask/upload HTTP/1.1
+Host: 127.0.0.1:5000
+Authorization: Bearer knJkFnOgXd13tevwOpniLczIefARbD
+Content-Type: application/json
+
+{
+    "uuid": "813bbde4f63b11e59b8cb083fe4ecc7b"
+}
+```
+
+- 输出
+
+正确结果返回 201
+
+- Body: 
+
+```
+{
+    "uuid": "813bbde4f63b11e59b8cb083fe4ecc7b"
+}
+
+```
+
 ## DEL 删除主题
 
 - 方法 **DELETE**
@@ -93,6 +125,92 @@ value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个�
 ```
 {
     "author": ""
+}
+
+```
+
+## POST 更换手机号码
+
+- 方法 **POST**
+
+- URI `/change_phone/15399481600`
+
+```
+POST /change_phone/15399481601 HTTP/1.1
+Host: 127.0.0.1:5000
+Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u
+Content-Type: application/json
+
+```
+返回
+
+更换号码后的用户信息
+
+## POST 举报某个帖子
+
+- 方法 **POST**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/report`
+
+- endpoints
+
+```
+/theme/<string:theme_id>/post/<string:post_id>/report
+```
+
+- 输入: 无
+
+- 输出: 无
+
+- 状态码:
+
+> 正常: 无内容,返回201
+  
+> 异常: 
+    
+>> 提示已经举报过此贴, 返回码 422
+    
+>> 举报帖子被删除, 返回码 404
+
+## POST 用户反馈
+
+- 方法 **POST**
+
+- URI `/feedback`
+
+- endpoint
+
+```
+/feedback
+```
+
+- 输入
+
+```
+{
+    "name": "湘潭大学",
+    "category": "error" // 错误error, 没有none
+    "location": {
+        "coordinates": [100, 100],
+        "type": "Point"
+    }
+}
+```
+
+- 输出
+
+None 201
+
+- Body: 
+
+```
+{
+    "name": "湘潭大学",
+    "category": "error",
+    "location" : {
+        "coordinates" : [100,12],
+        "type" : "Point"
+    }
 }
 
 ```
@@ -171,9 +289,9 @@ bcrypt.hashpw(password, bcrypt.gensalt())
 }
 ```
 
-## GET 验证手机验证码
+## POST 验证手机验证码
 
-- 方法 **GET**
+- 方法 **POST**
 
 - URI `/verify_sms_code/15399481600?code=327145`
 
@@ -252,6 +370,32 @@ endpoints
 
 ```
 
+## POST 举报某个评论
+
+- 方法 **POST**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56df88ab7fe9e310478b934e/report`
+
+- endpoints
+
+```
+/theme/<string:theme_id>/comment/<string:comment_id>/report
+```
+
+- 输入: 无
+
+- 输出: 无
+
+- 状态码:
+
+> 正常: 无内容,返回201
+  
+> 异常: 
+    
+>> 提示已经举报过此贴, 返回码 422
+    
+>> 举报帖子被删除, 返回码 404
+
 ## POST 新建一个参数表项
 
 - 方法 **POST**
@@ -325,6 +469,35 @@ structure = {
 
 ```
 
+## GET 添加一个随机的用户头像
+
+- 方法 **GET**
+
+- URI `/masks/random`
+
+- 正常输出
+
+随机调取系统头像库中的 uuid, 插入到用户头像列表的第一位, 其他顺延, 最后一项删除
+
+```
+{
+  "message": "头像排序完毕",
+  "data": {
+    "masks": [
+      "9dd30cf2f59911e5bf52b083fe4eaa62",
+      "a2974a5af59911e5bf52b083fe4eaa62",
+      "9dd30cf2f59911e5bf52b083fe4eaa62",
+      "a4eaf77ef59911e5bf52b083fe4eaa62",
+      "a0247544f59911e5bf52b083fe4eaa62",
+      "9b723ce5f59911e5bf52b083fe4eaa62",
+      "a3b9c8bcf59911e5bf52b083fe4eaa62",
+      "9f000f3ef59911e5bf52b083fe4eaa62"
+    ]
+  },
+  "status": "ok"
+}
+```
+
 ## GET 获取普通帖评论列表
 
 - 方法 **GET**
@@ -342,6 +515,32 @@ endpoints
 输出: 当前主题下的评论,默认只显示第一页
 状态码: 200
 
+
+## POST 感谢某个评论
+
+- 方法 **POST**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56df88ab7fe9e310478b934e/heart`
+
+- endpoints
+
+```
+/theme/<string:theme_id>/comment/<string:comment_id>/heart
+```
+
+- 输入: 无
+
+- 输出: 无
+
+- 状态码:
+
+> 正常: 无内容,返回201
+  
+> 异常: 
+    
+>> 提示已经感谢过此评论, 返回码 422
+    
+>> 提示要感谢的评论已被删除, 返回码 404
 
 ## DEL 获取参数列表
 
@@ -540,6 +739,20 @@ structure = {
 
 ```
 
+## POST 注销设备
+
+- 方法 **POST**
+
+- URI `/deregister/15399481600`
+
+```
+POST /deregister/15399481600 HTTP/1.1
+Host: 127.0.0.1:5000
+Content-Type: application/json
+Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u
+
+```
+
 ## DEL 取消一个普通帖的收藏/标记
 
 - 方法 **DELETE**
@@ -588,6 +801,12 @@ endpoint:
 /user/<suer_id>/posts/
 ```
 
+## GET 图片上传临时token
+
+- 方法 **GET**
+
+- URI `/image_token`
+
 ## GET 列出所有用户
 
 - 方法 **GET**
@@ -622,11 +841,15 @@ endpoint:
 
 ```
 
-## GET 发送手机验证码
+## POST 发送手机验证码
 
-- 方法 **GET**
+- 方法 **POST**
 
 - URI `/request_sms_code/15399481600`
+
+- 说明
+
+所有需要验证码的场景均需要先发送验证码请求
 
 - endpoint
 
@@ -636,19 +859,20 @@ endpoint:
 
 - 返回值
 
-正常
+正常 201
 
 ```
 {
-    "statu": "ok"
+  "message": "验证码发送成功",
+  "status": "ok"
 }
 ```
 
-异常
+异常 4xx
 
 ```
 {
-    "statu": "error",
+    "status": "error",
     "message": "xxx"
 }
 ```
@@ -902,6 +1126,20 @@ endpoints
     "user_id": "56e3b2b17fe9e3140bfb2623",
     "mask_id": "56e3b2b17fe9e3140bfb2623"
 }
+
+```
+
+## POST 绑定手机号码
+
+- 方法 **POST**
+
+- URI `/bound_phone/15399481601`
+
+```
+POST /bound_phone/15399481601 HTTP/1.1
+Host: 127.0.0.1:5000
+Content-Type: application/json
+Authorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq
 
 ```
 

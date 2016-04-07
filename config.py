@@ -4,8 +4,8 @@ import os
 class AliConfig:
     IKEY = os.getenv("ALI_IKEY", "")
     AKEY = os.getenv("ALI_AKEY", "")
-    HOST = os.getenv("STS_SERVER", "sts.aliyuncs.com")
-    API_VERSION = os.getenv("API_VERSION", "2015-04-01")
+    HOST = os.getenv("ALI_STS_SERVER", "sts.aliyuncs.com")
+    API_VERSION = os.getenv("ALI_API_VERSION", "2015-04-01")
     ROLEARN = os.getenv(
         "ALI_ROLEARN",
         'acs:ram::1521619666563483:role/aliyunosstokengeneratorrole'
@@ -17,7 +17,7 @@ class AliConfig:
     SMS_TEMPLATE_CODE = os.getenv("SMS_TEMPLATE_CODE", "SMS_6775282")
     SMS_FREE_SIGN_NAME = os.getenv("SMS_FREE_SIGN_NAME", "注册验证")
     SMS_TYPE = os.getenv("SMS_TYPE", "normal")
-    APP_NAME = os.getenv("APP_NAME", "假面")
+    APP_NAME = os.getenv("SMS_APP_NAME", "假面")
 
 
 class FlaskConfig:
@@ -76,3 +76,6 @@ class CollectionName:
     NOTIFICATIONS = "notifications"
     USER_TRACE = "user_trace"
     SCHOOLS = "schools"
+    FEEDBACK = "feedback"
+    REPORT_POSTS = "report_posts"
+    REPORT_COMMENTS = "report_comments"

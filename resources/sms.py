@@ -1,11 +1,15 @@
+import logging
 import random
 import re
 
+from bson.objectid import ObjectId
 from flask_restful import Resource, reqparse
 
 import top.api
 from config import AliConfig
-from model import redisdb
+from model import redisdb, connection
+
+log = logging.getLogger("masque.sms")
 
 
 def send_sms(phone, code):
@@ -18,7 +22,8 @@ def send_sms(phone, code):
     req.sms_free_sign_name = AliConfig.SMS_FREE_SIGN_NAME
     req.sms_param = {
         "code": code,
-        "product": AliConfig.APP_NAME
+        "product": AliConfig.APP_NAME,
+        "ttl": str(AliConfig.SMS_TTL)
     }
     try:
         resp = req.getResponse()
@@ -28,7 +33,7 @@ def send_sms(phone, code):
 
 
 def generate_verification_code(code_length=6):
-    """随机生成6位数验证码"""
+    """生成任意位随机数"""
     code_list = random.sample([str(i) for i in range(10)], code_length)
     return "".join(code_list)
 
@@ -40,13 +45,16 @@ def verify_phone(phone):
 
 
 class RequestSmsCode(Resource):
-    def get(self, cellphone):
+    def post(self, cellphone):
         if not verify_phone(cellphone):
-            return {'message': 'not a valid phone number'}, 400
-        verify_code = generate_verification_code(6)
+            return {
+                       "status": "error",
+                       'message': '号码输入有误，请重新输入'
+                   }, 200
+        verify_code = generate_verification_code(4)  # 生成4位随机数验证码
         resp = send_sms(cellphone, verify_code)
         if resp and resp["alibaba_aliqin_fc_sms_num_send_response"]["result"][
-                "err_code"] == "0":
+            "err_code"] == "0":
             if redisdb.lpush(
                     "sms_verify:{}".format(cellphone),
                     verify_code
@@ -55,21 +63,29 @@ class RequestSmsCode(Resource):
                     # 设置超时时间
                     redisdb.expire("sms_verify:{}".format(cellphone),
                                    AliConfig.SMS_TTL * 60)
-                return {"status": "ok"}
+                return {
+                           "status": "ok",
+                           "message": "验证码已发送"
+                       }, 201
             else:
                 return {
-                    "status": "error",
-                    "message": "something wrong with the redis server"
-                }
+                           "status": "error",
+                           "message": "redis服务出错"
+                       }, 500
         else:
             return {
-                "status": "error",
-                "message": "something wrong with the sms service"
-            }
+                       "status": "error",
+                       "message": "短信验证服务出错"
+                   }, 500
 
 
 class VerifySmsCode(Resource):
-    def get(self, cellphone):
+    def post(self, cellphone):
+        if not verify_phone(cellphone):
+            return {
+                       'message': '号码输入有误，请重新输入',
+                       "status": "error"
+                   }, 200
         parser = reqparse.RequestParser()
         parser.add_argument('code',
                             type=str,
@@ -79,16 +95,213 @@ class VerifySmsCode(Resource):
         user_code = args['code']
         if not redisdb.exists("sms_verify:{}".format(cellphone)):
             return {
-                "status": "error",
-                "message": "sms code out of date"
-            }
+                       "status": "error",
+                       "message": "验证码已过期"
+                   }, 200
         sys_code = redisdb.lrange("sms_verify:{}".format(cellphone), 0, -1)
         if user_code in sys_code:
             return {
-                "status": "ok"
-            }
+                       "status": "ok",
+                       "message": "验证码匹配正确"
+                   }, 201
         else:
             return {
-                "status": "error",
-                "message": "sms code doesn't match"
+                       "status": "error",
+                       "message": "验证码不正确"
+                   }, 200
+
+
+class BoundPhone(Resource):
+    """绑定手机"""
+
+    def post(self, cellphone):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        access_token = token[token.find(" ") + 1:]
+        if redisdb.exists(
+                "oauth:access_token:{}:client_id".format(access_token)
+        ):
+            device_id = redisdb.get(
+                "oauth:access_token:{}:client_id".format(access_token)
+            )
+        else:
+            return {
+                       'status': "error",
+                       'message': 'Device not found'
+                   }, 404
+        if not verify_phone(cellphone):
+            return {
+                       'message': '号码输入有误，请重新输入',
+                       "status": "error"
+                   }, 200
+        # 根据device_id查找对应user_id
+        cursor = connection.Devices.find_one({"_id": device_id})
+        if cursor:
+            current_user_id = cursor.user_id
+        else:
+            return {'message': 'user_id not found'}, 404
+        cursor = connection.Users.find_one(
+            {"cellphone": cellphone}
+        )
+        if cursor:
+            # 绑定过手机, 将当前设备匹配到先前绑定手机用户
+            if current_user_id == cursor._id:
+                # 号码未变, 不做处理
+                return {
+                           "status": "error",
+                           'message': '你已经绑定过这个号码了'
+                       }, 200
+            # 把先前绑定手机用户id赋给当前设备
+            connection.Devices.find_and_modify(
+                {"_id": device_id},
+                {
+                    "$set": {
+                        "user_id": cursor._id
+                    }
+                }
+            )
+            return connection.Users.find_one(
+                {"_id": ObjectId(cursor._id)}), 201
+        else:
+            # 没有绑定过手机, 将cellphone填入当前user_id.cellphone字段
+            connection.Users.find_and_modify(
+                {"_id": ObjectId(current_user_id)},
+                {
+                    "$set": {"cellphone": cellphone}
+                }
+            )
+            return connection.Users.find_one(
+                {"_id": ObjectId(current_user_id)}), 201
+
+
+class ChangePhone(Resource):
+    """更换手机"""
+
+    def post(self, cellphone):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        access_token = token[token.find(" ") + 1:]
+        if redisdb.exists(
+                "oauth:access_token:{}:client_id".format(access_token)
+        ):
+            device_id = redisdb.get(
+                "oauth:access_token:{}:client_id".format(access_token)
+            )
+        else:
+            return {
+                       'status': "error",
+                       'message': 'Device not found'
+                   }, 404
+        if not verify_phone(cellphone):
+            return {
+                       'message': '号码输入有误，请重新输入',
+                       "status": "error"
+                   }, 200
+        # 根据device_id查找对应user_id
+        cursor = connection.Devices.find_one({"_id": device_id})
+        if cursor:
+            current_user_id = cursor.user_id
+        else:
+            return {'message': 'user_id not found'}, 404
+        cursor = connection.Users.find_one({"cellphone": cellphone})
+        if cursor:
+            # 号码之前有使用过, 提示该手机号码已被使用
+            return {
+                       "status": "error",
+                       "message": "该手机号码已经被使用"
+                   }, 200
+        else:
+            # 号码未使用, 填入新号码
+            connection.Users.find_and_modify(
+                {"_id": ObjectId(current_user_id)},
+                {
+                    "$set": {"cellphone": cellphone}
+                }
+            )
+            return connection.Users.find_one(
+                {"_id": ObjectId(current_user_id)}), 201
+
+
+class DeRegister(Resource):
+    """注销设备(不需要验证手机)"""
+
+    def post(self, cellphone):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        access_token = token[token.find(" ") + 1:]
+        if redisdb.exists(
+                "oauth:access_token:{}:client_id".format(access_token)
+        ):
+            device_id = redisdb.get(
+                "oauth:access_token:{}:client_id".format(access_token)
+            )
+        else:
+            return {
+                       'status': "error",
+                       'message': 'Device not found'
+                   }, 404
+        if not verify_phone(cellphone):
+            return {
+                       'message': '号码输入有误，请重新输入',
+                       "status": "error"
+                   }, 200
+        # 根据device_id查找对应user_id
+        cursor = connection.Devices.find_one({"_id": device_id})
+        if cursor:
+            current_user_id = cursor.user_id
+        else:
+            return {'message': 'user_id not found'}, 404
+        cursor = connection.Users.find_one(
+            {"_id": ObjectId(current_user_id)}
+        )
+        if not cursor.cellphone:
+            return {
+                       "status": "error",
+                       'message': '设备没有绑定手机, 不需要注销'
+                   }, 200
+        cursor = connection.Devices.find_one(
+            {
+                "user_id": current_user_id
             }
+        )
+        if cursor.user_id == cursor.origin_user_id:
+            # 该设备为此号码第一台设备, 新建一个用户让其登录,
+            # 并为其初始化devices/users信息
+            user = connection.Users()
+            user.save()
+            user_id = user['_id']
+            dev = connection.Devices()
+            dev['_id'] = device_id
+            dev['user_id'] = user_id
+            dev['origin_user_id'] = user_id
+            dev.save()
+            result = connection.Users.find_one({"_id": ObjectId(user_id)})
+            return result
+        else:
+            # 不是第一台设备, 把origin_user_id填入user_id
+            connection.Devices.find_and_modify(
+                {"origin_user_id": cursor.origin_user_id},
+                {
+                    "$set": {"user_id": cursor.origin_user_id}
+                }
+            )
+            return connection.Users.find_one(
+                {"_id": ObjectId(cursor.origin_user_id)})
