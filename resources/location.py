@@ -107,24 +107,46 @@ class SchoolsList(Resource):
                 doc.save()  # 新建不存在的主题(学校)
         else:
             # 如果附近没有学校, 返回地区
-            schools = (addr["district"],)
-            cursor = connection.Themes.find_one(
-                {
-                    "full_name": addr["district"],
-                    "category": "district"
-                }
-            )
-            if cursor:
-                pass  # 忽略已有
+            # 以"区"结尾返回上一级市,以"县"或"市"结尾直接返回
+            if addr["district"].endswith('县') or addr["district"].endswith('市'):
+                schools = (addr["district"],)
+                cursor = connection.Themes.find_one(
+                    {
+                        "full_name": addr["district"],
+                        "category": "district"
+                    }
+                )
+                if cursor:
+                    pass  # 忽略已有
+                else:
+                    doc = connection.Themes()
+                    doc["category"] = "district"
+                    doc["short_name"] = addr["district"]
+                    doc["full_name"] = addr["district"]
+                    doc["locale"]["province"] = addr["province"]
+                    doc["locale"]["city"] = addr["city"]
+                    doc["locale"]["district"] = addr["district"]
+                    doc.save()  # 新建不存在的主题
             else:
-                doc = connection.Themes()
-                doc["category"] = "district"
-                doc["short_name"] = addr["district"]
-                doc["full_name"] = addr["district"]
-                doc["locale"]["province"] = addr["province"]
-                doc["locale"]["city"] = addr["city"]
-                doc["locale"]["district"] = addr["district"]
-                doc.save()  # 新建不存在的主题
+                schools = (addr["city"],)
+                cursor = connection.Themes.find_one(
+                    {
+                        "full_name": addr["city"],
+                        "category": "city"
+                    }
+                )
+                if cursor:
+                    pass  # 忽略已有
+                else:
+                    doc = connection.Themes()
+                    doc["category"] = "city"
+                    doc["short_name"] = addr["city"]
+                    doc["full_name"] = addr["city"]
+                    doc["locale"]["province"] = addr["province"]
+                    doc["locale"]["city"] = addr["city"]
+                    doc["locale"]["district"] = addr["district"]
+                    doc.save()  # 新建不存在的主题
+
         result = (connection.Themes.find_one(
             {
                 "full_name": i,
