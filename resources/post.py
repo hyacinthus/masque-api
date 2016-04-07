@@ -28,19 +28,33 @@ class FavorSchema(Schema):
 class PostsList(Resource):
     def get(self, theme_id):  # get all posts
         parser = reqparse.RequestParser()
-        parser.add_argument('page',
+        parser.add_argument('since_id',
+                            type=str,
+                            help='since_id must be string')
+        parser.add_argument('count',
                             type=int,
-                            help='page number must be int')
+                            help='count must be int')
         args = parser.parse_args()
-        if args['page'] is None:
-            args['page'] = 1
-        index = args['page'] - 1
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
-        cursor = collection.Posts.find(
-            skip=(index * APIConfig.PAGESIZE),
-            limit=APIConfig.PAGESIZE,
-            max_scan=APIConfig.MAX_SCAN,
-            sort=[("_updated", -1)])  # sorted by update time in reversed order
+        if not args['count']:
+            no_of_objects_pp = APIConfig.PAGESIZE
+        else:
+            no_of_objects_pp = args['count']
+        if not args['since_id']:
+            cursor = collection.Posts.find(
+                limit=no_of_objects_pp,
+                sort=[("_updated", -1)]
+            )  # sorted by update time in reversed order
+        else:
+            cursor = collection.Posts.find(
+                {
+                    "_id": {
+                        "$lt": ObjectId(args['since_id'])
+                    }
+                },
+                limit=no_of_objects_pp,
+                sort=[("_updated", -1)]
+            )  # sorted by update time in reversed order
         return cursor
 
     def post(self, theme_id):  # add a new post
