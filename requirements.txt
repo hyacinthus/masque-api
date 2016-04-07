@@ -17,6 +17,7 @@ marshmallow
 flask
 Flask-OAuthlib
 uwsgi
+celery
 
 # install the newest mongokit from github
 -e git+https://github.com/namlook/mongokit@development#egg=mongokit
