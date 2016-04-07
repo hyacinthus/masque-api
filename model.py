@@ -431,7 +431,7 @@ class Themes(RootDocument):
 
     structure = {
         "_id": CustomObjectId(),
-        "category": IS("school", "district", "virtual", "private", "system"),
+        "category": IS("school", "city", "district", "virtual", "private", "system"),
         "subcate": str,
         "short_name": str,
         "full_name": str,
