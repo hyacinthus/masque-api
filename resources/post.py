@@ -12,7 +12,7 @@ from model import connection, redisdb
 def must_not_be_blank(data):
     if not data:
         raise ValidationError('Data not provided.')
-    if not ObjectId(data):
+    if not ObjectId.is_valid(data):
         raise ValidationError('Data is not a valid ObjectId')
 
 
@@ -46,6 +46,12 @@ class PostsList(Resource):
                 sort=[("_updated", -1)]
             )  # sorted by update time in reversed order
         else:
+            if not ObjectId.is_valid(args['since_id']):
+                return {
+                           'status': 'error',
+                           'message': '{} is not a valid ObjectId string!'.format(
+                               args['since_id'])
+                       }, 400
             cursor = collection.Posts.find(
                 {
                     "_id": {

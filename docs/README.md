@@ -2,61 +2,77 @@
 
 > `json2md.py`可以将postman备份文档输出为md格式,需要mongodb的依赖
 
-## DEL 删除公告帖评论
-
-- 方法 **DELETE**
-
-- URI `/board_comments/56d92bad7fe9e30ec00a535a`
-
-## GET 获取帖子列表
-
-- 方法 **GET**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/posts`
-
-参数
-`?page=1` 默认显示第一页, 每页 10 条内容, 无参数默认显示第一页
-
-endpoints
-```
-/theme/<string:theme_id>/posts/
-/theme/<string:theme_id>/posts
-```
-输入: 无
-输出: 当前主题下按时间顺序排列的最新`10`个帖子
-状态码: 200
-
-- 加密请求方法
-
-可以以参数方式放在URI中,
-如`?access_token=xxx`这种形式(不建议)
-
-另外可以放在Headers里, 如
-
-```
-key=Authorization
-value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个半角空格再加access_token
-```
-
-
-## POST 新增普通帖
+## POST 新建一个参数表项
 
 - 方法 **POST**
 
-- URI `/theme/56d59bd4294d90ac3d8749d8/posts`
-
-默认返回帖子`_id`, 状态码`201`
-
-`_created`和`_updated`两个字段不需要传, 服务器会自动创建, 日后有更新只需要给`_update`填`""`或者不传即可, 服务器会自动生成当前时间填充
+- URI `/parameters`
 
 - Body: 
 
 ```
 {}
 
+
 ```
 
-## GET 获取反馈页面信息
+## GET 读取主题列表
+
+- 方法 **GET**
+
+- URI `/themes`
+
+## GET 添加一个随机的用户头像
+
+- 方法 **GET**
+
+- URI `/masks/random`
+
+- 正常输出
+
+随机调取系统头像库中的 uuid, 插入到用户头像列表的第一位, 其他顺延, 最后一项删除
+
+```
+{
+  "message": "头像排序完毕",
+  "data": {
+    "masks": [
+      "9dd30cf2f59911e5bf52b083fe4eaa62",
+      "a2974a5af59911e5bf52b083fe4eaa62",
+      "9dd30cf2f59911e5bf52b083fe4eaa62",
+      "a4eaf77ef59911e5bf52b083fe4eaa62",
+      "a0247544f59911e5bf52b083fe4eaa62",
+      "9b723ce5f59911e5bf52b083fe4eaa62",
+      "a3b9c8bcf59911e5bf52b083fe4eaa62",
+      "9f000f3ef59911e5bf52b083fe4eaa62"
+    ]
+  },
+  "status": "ok"
+}
+```
+
+## PUT 更新用户信息
+
+- 方法 **PUT**
+
+- URI `/user/56dd48d77fe9e31a5a4abfe3`
+
+- Body: 
+
+```
+{
+"name": ""
+}
+
+```
+
+## GET 列出所有用户
+
+- 方法 **GET**
+
+- URI `/users`
+
+## GET 获取某一主题
 
 - 方法 **GET**
 
@@ -65,38 +81,246 @@ value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个�
 默认endpoint
 
 ```
-/theme/用户反馈?category=system
+/theme/<theme_id>
 ```
 
-## POST 上传一个用户头像 UUID
+不加参数接受一个ObjectId, 返回对应id的主题信息
+
+- 参数
+
+category表示主题类型, 可以取的值只有
+```
+"school", "district", "virtual", "private", "system"
+```
+带参数的情况下, 上面的theme_id被当做是fullname传入, 根据fullname和category可以得到一个对应的主题信息并返回
+
+
+## DEL 删除设备信息
+
+- 方法 **DELETE**
+
+- URI `/devices/asdfsg`
+
+## POST 新建一条用户等级规则
 
 - 方法 **POST**
 
-- URI `/mask/upload`
+- URI `/user_levels`
 
-- http code
+- Body: 
 
 ```
-POST /mask/upload HTTP/1.1
-Host: 127.0.0.1:5000
-Authorization: Bearer knJkFnOgXd13tevwOpniLczIefARbD
+{}
+
+```
+
+## POST 绑定手机号码
+
+- 方法 **POST**
+
+- URI `/bound_phone/15399481601`
+
+```
+POST /bound_phone/15399481601 HTTP/1.1
+Host: test.jiamian.im
 Content-Type: application/json
+Authorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq
 
-{
-    "uuid": "813bbde4f63b11e59b8cb083fe4ecc7b"
-}
 ```
 
-- 输出
+## DEL 删除公告帖
 
-正确结果返回 201
+- 方法 **DELETE**
+
+- URI `/board_posts/56d92a4d7fe9e30ec00a52d5`
+
+## POST 添加公告帖
+
+- 方法 **POST**
+
+- URI `/board_posts`
+
+- 数据结构
+
+```
+_id
+作者：author (user._id)
+内容：content
+感谢：hearts[]
+    用户：user_id
+    面具：mask_id
+时间：_created
+面具：mask_id（发帖时的用户面具_id）
+
+structure = {
+        "_id": CustomObjectId(),
+        "_created": CustomDate(),
+        "mask_id": str,
+        "hearts": [
+            {
+                "mask_id": str,
+                "user_id": str
+            }
+        ],
+        "content": str,
+        "author": str
+    }
+```
+
+- Body: 
+
+```
+{}
+
+```
+
+## PUT 更新一条评论
+
+- 方法 **PUT**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56de57d67fe9e316bba45c6d`
 
 - Body: 
 
 ```
 {
-    "uuid": "813bbde4f63b11e59b8cb083fe4ecc7b"
+  "author": null,
+  "post_id": null,
+  "content": null,
+  "_created": 1457383254.126,
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      100,
+      0
+    ]
+  },
+  "hearts": [],
+  "mask_id": null,
+  "_id": "56de57d67fe9e316bba45c6d"
 }
+
+```
+
+## POST 验证手机验证码
+
+- 方法 **POST**
+
+- URI `/verify_sms_code/15399481600?code=327145`
+
+- endpoint
+
+```
+/verify_sms_code/<cellphone>?code=xxxxxx
+```
+
+- 返回值
+
+正常
+
+```
+{
+    "statu": "ok"
+}
+```
+
+异常(不匹配或者超时)
+
+```
+{
+    "statu": "error",
+    "message": "xxx"
+}
+```
+
+## GET 获取公告列表
+
+- 方法 **GET**
+
+- URI `/board_posts`
+
+- 数据结构
+
+```
+_id
+作者：author (user._id)
+内容：content
+感谢：hearts[]
+    用户：user_id
+    面具：mask_id
+时间：_created
+面具：mask_id（发帖时的用户面具_id）
+
+structure = {
+        "_id": CustomObjectId(),
+        "_created": CustomDate(),
+        "mask_id": str,
+        "hearts": [
+            {
+                "mask_id": str,
+                "user_id": str
+            }
+        ],
+        "content": str,
+        "author": str
+    }
+```
+
+## GET 查看公告帖
+
+- 方法 **GET**
+
+- URI `/board_post/56d92a4d7fe9e30ec00a52d5`
+
+## POST 添加主题
+
+- 方法 **POST**
+
+- URI `/themes`
+
+- 数据结构
+
+```
+structure = {
+        "_id": CustomObjectId(),
+        "category": IS("school", "district", "virtual", "private"),
+        "short_name": str,
+        "full_name": str,
+        "locale": {
+            "nation": str,
+            "province": str,
+            "city": str,
+            "county": str
+        }
+    }
+default_values = {
+        "category": "school",
+        "short_name": "",
+        "full_name": "",
+        "locale.nation": "中国",
+        "locale.province": "",
+        "locale.city": "",
+        "locale.district": ""
+    }
+```
+
+- Body: 
+
+```
+{}
+
+```
+
+## DEL 获取参数列表
+
+- 方法 **GET**
+
+- URI `/parameters`
+
+-- 数据结构
+
+```
+default_masks[]:系统头像 用来给新用户随机分配
 
 ```
 
@@ -106,71 +330,65 @@ Content-Type: application/json
 
 - URI `/themes/56d922da7fe9e30ec00a52d2`
 
-## PUT 更新一个普通帖
+## POST 新建一条用户规则信息
 
 - 方法 **PUT**
 
-- URI `/theme/56d59bd4294d90ac3d8749d8/post/56d9a8a84b33d510e7ad18a1`
-
-有更新只需要给`_update`填`""`或者不传即可, 服务器会自动生成当前时间填充
-
-输入
-
-返回值: 无
-
-状态码: 204
+- URI `/user_levels/56d92fb27fe9e30ec00a535c`
 
 - Body: 
 
 ```
 {
-    "author": ""
+  "report_limit": 100,
+  "colors": [],
+  "text_post": null,
+  "photo_post": null,
+  "exp": null,
+  "vote_post": null,
+  "_id": "56d92fb27fe9e30ec00a535c",
+  "heart_limit": null,
+  "message_limit": null,
+  "post_limit": null
 }
 
 ```
 
-## POST 更换手机号码
+## DEL 删除一条评论
 
-- 方法 **POST**
+- 方法 **DELETE**
 
-- URI `/change_phone/15399481600`
+- URI `/comments_56d59bd4294d90ac3d8749d8/56d3a2de7fe9e311d9ed1312`
 
+## GET 获取某用户发的帖子
+
+- 方法 **GET**
+
+- URI `/user/56dd48d77fe9e31a5a4abfe3/posts`
+
+endpoint:
 ```
-POST /change_phone/15399481601 HTTP/1.1
-Host: 127.0.0.1:5000
-Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u
-Content-Type: application/json
-
-```
-返回
-
-更换号码后的用户信息
-
-## POST 举报某个帖子
-
-- 方法 **POST**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/report`
-
-- endpoints
-
-```
-/theme/<string:theme_id>/post/<string:post_id>/report
+/user/<user_id>/posts
+/user/<suer_id>/posts/
 ```
 
-- 输入: 无
+## GET 获取普通帖评论列表
 
-- 输出: 无
+- 方法 **GET**
 
-- 状态码:
+- URI `/theme/56d59bd4294d90ac3d8749d8/comments`
 
-> 正常: 无内容,返回201
-  
-> 异常: 
-    
->> 提示已经举报过此贴, 返回码 422
-    
->> 举报帖子被删除, 返回码 404
+参数: 可以加`page=`指定页码
+
+endpoints
+```
+/theme/<string:theme_id>/comments/
+/theme/<string:theme_id>/comments
+```
+输入: 无
+输出: 当前主题下的评论,默认只显示第一页
+状态码: 200
+
 
 ## POST 用户反馈
 
@@ -215,6 +433,516 @@ None 201
 
 ```
 
+## PUT 更新公告帖评论
+
+- 方法 **PUT**
+
+- URI `/board_comment/56d92bad7fe9e30ec00a535a`
+
+- Body: 
+
+```
+{
+  "content": "什么东西",
+  "hearts": [],
+  "_created": 1457044269.747,
+  "author": null,
+  "mask_id": null
+}
+
+```
+
+## POST 给指定普通帖子添加感谢
+
+- 方法 **POST**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/hearts`
+
+参数: 无
+
+endpoints
+```
+/theme/<string:theme_id>/post/<string:post_id>/hearts
+```
+输入: 
+```
+{
+    "user_id": str,
+    "mask_id": str
+}
+```
+输出: 无
+
+状态码: 
+
+  正常: 201
+  异常: 重复感谢或者自己感谢自己, 返回码 204
+
+
+- Body: 
+
+```
+{
+    "user_id": "56e3b2b17fe9e3140bfb2623",
+    "mask_id": "56e3b2b17fe9e3140bfb2623"
+}
+
+```
+
+## POST 新增普通帖
+
+- 方法 **POST**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/posts`
+
+默认返回帖子`_id`, 状态码`201`
+
+`_created`和`_updated`两个字段不需要传, 服务器会自动创建, 日后有更新只需要给`_update`填`""`或者不传即可, 服务器会自动生成当前时间填充
+
+- Body: 
+
+```
+{}
+
+```
+
+## PUT 修改设备信息
+
+- 方法 **PUT**
+
+- URI `/device/9be0511311672634`
+
+## PUT 更新主题
+
+- 方法 **PUT**
+
+- URI `/theme/56d922da7fe9e30ec00a52d2`
+
+- 数据结构
+
+```
+structure = {
+        "_id": CustomObjectId(),
+        "category": IS("school", "district", "virtual", "private"),
+        "short_name": str,
+        "full_name": str,
+        "locale": {
+            "nation": str,
+            "province": str,
+            "city": str,
+            "county": str
+        }
+    }
+```
+
+- Body: 
+
+```
+{
+  "_id": "56d922da7fe9e30ec00a52d2",
+  "short_name": null,
+  "category": null,
+  "full_name": null,
+  "locale": {
+    "county": "大理",
+    "city": "昆明",
+    "nation": "中国",
+    "province": "云南"
+  }
+}
+
+```
+
+## GET 查看一个公告帖评论
+
+- 方法 **GET**
+
+- URI `/board_comment/56d92bad7fe9e30ec00a535a`
+
+## GET 获取某用户发的评论
+
+- 方法 **GET**
+
+- URI `/user/56dd48d77fe9e31a5a4abfe3/comments`
+
+endpoint:
+```
+/user/<user_id>/comments
+/user/<suer_id>/comments/
+```
+
+
+## GET 读取一条评论
+
+- 方法 **GET**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56de57d67fe9e316bba45c6d`
+
+参数: 无
+
+endpoints
+```
+/theme/<string:theme_id>/comment/<string:comment_id>/
+/theme/<string:theme_id>/comment/<string:comment_id>
+```
+输入: 无
+输出: 当前主题下指定评论
+状态码: 200
+
+
+## DEL 删除一个普通帖
+
+- 方法 **DELETE**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/posts/56d59f197fe9e3493aa291f7`
+
+对应的评论也会一并删除
+
+## POST 更换手机号码
+
+- 方法 **POST**
+
+- URI `/change_phone/15399481600`
+
+```
+POST /change_phone/15399481601 HTTP/1.1
+Host: test.jiamian.im
+Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u
+Content-Type: application/json
+
+```
+返回
+
+更换号码后的用户信息
+
+## GET 获取具体等级信息
+
+- 方法 **GET**
+
+- URI `/user_levels/56d92fb27fe9e30ec00a535c`
+
+## DEL 删除公告帖评论
+
+- 方法 **DELETE**
+
+- URI `/board_comments/56d92bad7fe9e30ec00a535a`
+
+## DEL 删除用户
+
+- 方法 **DELETE**
+
+- URI `/users/56d3b1c07fe9e3165feb1e40`
+
+## POST 新建一个公告帖评论
+
+- 方法 **POST**
+
+- URI `/board_comments`
+
+- 数据结构
+
+```
+_id
+原帖：post_id（帖子id）
+作者：author
+内容：content
+感谢：hearts[]
+    用户：user_id
+    面具：mask_id
+时间：_created
+面具：mask_id
+`
+structure = {
+        "_id": CustomObjectId(),
+        "_created": CustomDate(),
+        "mask_id": str,
+        "hearts": [
+            {
+                "mask_id": str,
+                "user_id": str
+            }
+        ],
+        "content": str,
+        "author": str
+    }
+```
+
+- Body: 
+
+```
+{}
+
+```
+
+## GET 图片上传临时token
+
+- 方法 **GET**
+
+- URI `/image_token`
+
+## DEL 取消一个普通帖的收藏/标记
+
+- 方法 **DELETE**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/star?user_id=56df88ab7fe9e310478b9312`
+
+endpoint
+```
+/theme/<theme_id>/post/<post_id>/star?user_id=<user_id>
+```
+return
+  均返回 204 状态码
+
+## POST 感谢某个评论
+
+- 方法 **POST**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56df88ab7fe9e310478b934e/heart`
+
+- endpoints
+
+```
+/theme/<string:theme_id>/comment/<string:comment_id>/heart
+```
+
+- 输入: 无
+
+- 输出: 无
+
+- 状态码:
+
+> 正常: 无内容,返回201
+  
+> 异常: 
+    
+>> 提示已经感谢过此评论, 返回码 422
+    
+>> 提示要感谢的评论已被删除, 返回码 404
+
+## POST 发送手机验证码
+
+- 方法 **POST**
+
+- URI `/request_sms_code/15399481600`
+
+- 说明
+
+所有需要验证码的场景均需要先发送验证码请求
+
+- endpoint
+
+```
+/request_sms_code/<cellphone>
+```
+
+- 返回值
+
+正常 201
+
+```
+{
+  "message": "验证码发送成功",
+  "status": "ok"
+}
+```
+
+异常 4xx
+
+```
+{
+    "status": "error",
+    "message": "xxx"
+}
+```
+
+
+## POST 上传一个用户头像 UUID
+
+- 方法 **POST**
+
+- URI `/mask/upload`
+
+- http code
+
+```
+POST /mask/upload HTTP/1.1
+Host: test.jiamian.im
+Authorization: Bearer knJkFnOgXd13tevwOpniLczIefARbD
+Content-Type: application/json
+
+{
+    "uuid": "813bbde4f63b11e59b8cb083fe4ecc7b"
+}
+```
+
+- 输出
+
+正确结果返回 201
+
+- Body: 
+
+```
+{
+    "uuid": "813bbde4f63b11e59b8cb083fe4ecc7b"
+}
+
+```
+
+## GET 获取某用户收藏的帖子
+
+- 方法 **GET**
+
+- URI `/user/56df88ab7fe9e310478b934e/stars`
+
+endpoint
+```
+/user/<user_id>/stars
+/user/<user_id>/stars/
+```
+
+
+## GET 获取反馈页面信息
+
+- 方法 **GET**
+
+- URI `/theme/用户反馈?category=system`
+
+默认endpoint
+
+```
+/theme/用户反馈?category=system
+```
+
+## POST 获取授权码
+
+- 方法 **POST**
+
+- URI `/token`
+
+- http测试样例
+
+```
+POST /token HTTP/1.1
+Host: test.jiamian.im
+Content-Type: application/x-www-form-urlencoded
+# 受限于框架, client_id 和 username 必须一致且必须为设备id
+grant_type=password&
+client_id=super&
+username=super&
+password=%242b%2412%24q3UwMyIw4OBo5SPMgbGqqeNOAa5Hyq4FhgScW5Qf8%2FjK41ALoj1yK
+```
+
+- password生成方式
+
+password 为 username 加密后的值
+
+```
+import bcrypt
+password = b"username"
+bcrypt.hashpw(password, bcrypt.gensalt())
+# 结果就可以当成是与username对应的密码
+```
+
+- 返回结果
+
+```
+{
+    "token_type": "Bearer", 
+    "scope": "", 
+    "expires_in": 864000, 
+    "access_token": "fvzc7tYXI4aC4yApfX2lBb6FPkigfH",
+    "refresh_token": "LWpMcVXrsFb6AnmMZfqTQOxUt1NHCX"
+}
+```
+
+## GET 根据设备ID获得对应用户信息
+
+- 方法 **GET**
+
+- URI `/device/9be0511311672634/user`
+
+/device/<device_id>/user
+
+返回
+
+  用户信息, 并刷新用户登录时间记录
+
+## GET 获取用户等级列表
+
+- 方法 **GET**
+
+- URI `/user_levels`
+
+```
+_id
+级别名称：name
+所需颜值：exp
+每日发帖上限：post_limit
+每日举报上限：report_limit
+每日纸条上限：message_limit
+能否发文字帖：text_post
+能否发投票贴：vote_post
+能否发照片贴：photo_post
+可用颜色：colors[]
+感谢上限：heart_limit
+
+
+structure = {
+        "_id": CustomObjectId(),
+        "exp": str,
+        "post_limit": int,
+        "report_limit": int,
+        "message_limit": int,
+        "text_post": bool,
+        "vote_post": bool,
+        "photo_post": bool,
+        "colors": list,
+        "heart_limit": int
+    }
+```
+
+## GET 获取帖子列表
+
+- 方法 **GET**
+
+- URI `/theme/5704dff11072f13b6ec359a9/posts?count=10&since_id=5706264e1072f17a13b8423d`
+
+参数
+
+`count` 每页条目数, 默认10,可不填
+
+`since_id` 每页最后一个`_id`, 必须是合法的ObjectId string, 非必须, 留空默认返回第一页
+
+endpoints
+```
+/theme/<string:theme_id>/posts/
+/theme/<string:theme_id>/posts
+```
+输入: 无
+
+输出: 当前主题下按时间顺序排列的最新`10`个帖子
+
+状态码: 200
+
+- 加密请求方法
+
+可以以参数方式放在URI中,
+如`?access_token=xxx`这种形式(不建议)
+
+另外可以放在Headers里, 如
+
+```
+key=Authorization
+value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个半角空格再加access_token
+```
+
+
+## GET 获取一个用户信息
+
+- 方法 **GET**
+
+- URI `/user/56e678167fe9e3315628da6e`
+
 ## POST 收藏/标记一个普通帖子
 
 - 方法 **POST**
@@ -247,77 +975,17 @@ endpoint
 
 ```
 
-## POST 获取授权码
+## POST 添加一条普通帖评论
 
 - 方法 **POST**
 
-- URI `/token`
+- URI `/theme/56d59bd4294d90ac3d8749d8/comments`
 
-- http测试样例
-
-```
-POST /token HTTP/1.1
-Host: 127.0.0.1:5000
-Content-Type: application/x-www-form-urlencoded
-# 受限于框架, client_id 和 username 必须一致且必须为设备id
-grant_type=password&
-client_id=super&
-username=super&
-password=%242b%2412%24q3UwMyIw4OBo5SPMgbGqqeNOAa5Hyq4FhgScW5Qf8%2FjK41ALoj1yK
-```
-
-- password生成方式
-
-password 为 username 加密后的值
+- Body: 
 
 ```
-import bcrypt
-password = b"username"
-bcrypt.hashpw(password, bcrypt.gensalt())
-# 结果就可以当成是与username对应的密码
-```
+{"author": "56dd48d77fe9e31a5a4abfe3"}
 
-- 返回结果
-
-```
-{
-    "token_type": "Bearer", 
-    "scope": "", 
-    "expires_in": 864000, 
-    "access_token": "fvzc7tYXI4aC4yApfX2lBb6FPkigfH",
-    "refresh_token": "LWpMcVXrsFb6AnmMZfqTQOxUt1NHCX"
-}
-```
-
-## POST 验证手机验证码
-
-- 方法 **POST**
-
-- URI `/verify_sms_code/15399481600?code=327145`
-
-- endpoint
-
-```
-/verify_sms_code/<cellphone>?code=xxxxxx
-```
-
-- 返回值
-
-正常
-
-```
-{
-    "statu": "ok"
-}
-```
-
-异常(不匹配或者超时)
-
-```
-{
-    "statu": "error",
-    "message": "xxx"
-}
 ```
 
 ## GET 获取一个普通帖
@@ -370,6 +1038,17 @@ endpoints
 
 ```
 
+## GET 根据坐标获取附近学校/地区信息
+
+- 方法 **GET**
+
+- URI `/location/schools?lon=108.92983&lat=34.246592`
+
+输入
+  参数分别是经度和纬度, 最多允许不超过6位小数点
+输出
+  附近学校/地区信息, 列表形式
+
 ## POST 举报某个评论
 
 - 方法 **POST**
@@ -396,349 +1075,6 @@ endpoints
     
 >> 举报帖子被删除, 返回码 404
 
-## POST 新建一个参数表项
-
-- 方法 **POST**
-
-- URI `/parameters`
-
-- Body: 
-
-```
-{}
-
-
-```
-
-## DEL 删除用户
-
-- 方法 **DELETE**
-
-- URI `/users/56d3b1c07fe9e3165feb1e40`
-
-## GET 根据设备ID获得对应用户信息
-
-- 方法 **GET**
-
-- URI `/device/9be0511311672634/user`
-
-/device/<device_id>/user
-
-返回
-
-  用户信息, 并刷新用户登录时间记录
-
-## PUT 更新主题
-
-- 方法 **PUT**
-
-- URI `/theme/56d922da7fe9e30ec00a52d2`
-
-- 数据结构
-
-```
-structure = {
-        "_id": CustomObjectId(),
-        "category": IS("school", "district", "virtual", "private"),
-        "short_name": str,
-        "full_name": str,
-        "locale": {
-            "nation": str,
-            "province": str,
-            "city": str,
-            "county": str
-        }
-    }
-```
-
-- Body: 
-
-```
-{
-  "_id": "56d922da7fe9e30ec00a52d2",
-  "short_name": null,
-  "category": null,
-  "full_name": null,
-  "locale": {
-    "county": "大理",
-    "city": "昆明",
-    "nation": "中国",
-    "province": "云南"
-  }
-}
-
-```
-
-## GET 添加一个随机的用户头像
-
-- 方法 **GET**
-
-- URI `/masks/random`
-
-- 正常输出
-
-随机调取系统头像库中的 uuid, 插入到用户头像列表的第一位, 其他顺延, 最后一项删除
-
-```
-{
-  "message": "头像排序完毕",
-  "data": {
-    "masks": [
-      "9dd30cf2f59911e5bf52b083fe4eaa62",
-      "a2974a5af59911e5bf52b083fe4eaa62",
-      "9dd30cf2f59911e5bf52b083fe4eaa62",
-      "a4eaf77ef59911e5bf52b083fe4eaa62",
-      "a0247544f59911e5bf52b083fe4eaa62",
-      "9b723ce5f59911e5bf52b083fe4eaa62",
-      "a3b9c8bcf59911e5bf52b083fe4eaa62",
-      "9f000f3ef59911e5bf52b083fe4eaa62"
-    ]
-  },
-  "status": "ok"
-}
-```
-
-## GET 获取普通帖评论列表
-
-- 方法 **GET**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/comments`
-
-参数: 可以加`page=`指定页码
-
-endpoints
-```
-/theme/<string:theme_id>/comments/
-/theme/<string:theme_id>/comments
-```
-输入: 无
-输出: 当前主题下的评论,默认只显示第一页
-状态码: 200
-
-
-## POST 感谢某个评论
-
-- 方法 **POST**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56df88ab7fe9e310478b934e/heart`
-
-- endpoints
-
-```
-/theme/<string:theme_id>/comment/<string:comment_id>/heart
-```
-
-- 输入: 无
-
-- 输出: 无
-
-- 状态码:
-
-> 正常: 无内容,返回201
-  
-> 异常: 
-    
->> 提示已经感谢过此评论, 返回码 422
-    
->> 提示要感谢的评论已被删除, 返回码 404
-
-## DEL 获取参数列表
-
-- 方法 **GET**
-
-- URI `/parameters`
-
--- 数据结构
-
-```
-default_masks[]:系统头像 用来给新用户随机分配
-
-```
-
-## POST 添加主题
-
-- 方法 **POST**
-
-- URI `/themes`
-
-- 数据结构
-
-```
-structure = {
-        "_id": CustomObjectId(),
-        "category": IS("school", "district", "virtual", "private"),
-        "short_name": str,
-        "full_name": str,
-        "locale": {
-            "nation": str,
-            "province": str,
-            "city": str,
-            "county": str
-        }
-    }
-default_values = {
-        "category": "school",
-        "short_name": "",
-        "full_name": "",
-        "locale.nation": "中国",
-        "locale.province": "",
-        "locale.city": "",
-        "locale.district": ""
-    }
-```
-
-- Body: 
-
-```
-{}
-
-```
-
-## DEL 删除一条评论
-
-- 方法 **DELETE**
-
-- URI `/comments_56d59bd4294d90ac3d8749d8/56d3a2de7fe9e311d9ed1312`
-
-## GET 根据坐标获取附近学校/地区信息
-
-- 方法 **GET**
-
-- URI `/location/schools?lon=108.92983&lat=34.246592`
-
-输入
-  参数分别是经度和纬度, 最多允许不超过6位小数点
-输出
-  附近学校/地区信息, 列表形式
-
-## POST 添加公告帖
-
-- 方法 **POST**
-
-- URI `/board_posts`
-
-- 数据结构
-
-```
-_id
-作者：author (user._id)
-内容：content
-感谢：hearts[]
-    用户：user_id
-    面具：mask_id
-时间：_created
-面具：mask_id（发帖时的用户面具_id）
-
-structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
-    }
-```
-
-- Body: 
-
-```
-{}
-
-```
-
-## GET 获取所有公告帖评论列表
-
-- 方法 **GET**
-
-- URI `/board_comments`
-
-- 数据结构
-
-```
-_id
-原帖：post_id（帖子id）
-作者：author
-内容：content
-感谢：hearts[]
-    用户：user_id
-    面具：mask_id
-时间：_created
-面具：mask_id
-`
-structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
-    }
-```
-
-## POST 添加一条普通帖评论
-
-- 方法 **POST**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/comments`
-
-- Body: 
-
-```
-{"author": "56dd48d77fe9e31a5a4abfe3"}
-
-```
-
-## POST 新建一个公告帖评论
-
-- 方法 **POST**
-
-- URI `/board_comments`
-
-- 数据结构
-
-```
-_id
-原帖：post_id（帖子id）
-作者：author
-内容：content
-感谢：hearts[]
-    用户：user_id
-    面具：mask_id
-时间：_created
-面具：mask_id
-`
-structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
-    }
-```
-
-- Body: 
-
-```
-{}
-
-```
-
 ## POST 注销设备
 
 - 方法 **POST**
@@ -747,136 +1083,64 @@ structure = {
 
 ```
 POST /deregister/15399481600 HTTP/1.1
-Host: 127.0.0.1:5000
+Host: test.jiamian.im
 Content-Type: application/json
 Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u
 
 ```
 
-## DEL 取消一个普通帖的收藏/标记
+## GET 根据设备号获取/新建用户
 
-- 方法 **DELETE**
+- 方法 **GET**
 
-- URI `/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/star?user_id=56df88ab7fe9e310478b9312`
+- URI `/device/9be0511311672634`
+
+/device/<device_id>
+
+
+## GET 获取指定帖子所有评论
+
+- 方法 **GET**
+
+- URI `/theme/56d59bd4294d90ac3d8749d8/post/56dd49587fe9e31a5a4abfe4/comments`
+
+参数: `?page=数字` 可以不加,默认返回第一页,每页十项
 
 endpoint
 ```
-/theme/<theme_id>/post/<post_id>/star?user_id=<user_id>
-```
-return
-  均返回 204 状态码
-
-## GET 获取某一主题
-
-- 方法 **GET**
-
-- URI `/theme/用户反馈?category=system`
-
-默认endpoint
-
-```
-/theme/<theme_id>
+/theme/56d59bd4294d90ac3d8749d8/post/56dd49587fe9e31a5a4abfe4/comments
+/theme/56d59bd4294d90ac3d8749d8/post/56dd49587fe9e31a5a4abfe4/comments/
 ```
 
-不加参数接受一个ObjectId, 返回对应id的主题信息
+输入: 无
 
-- 参数
+输出: 指定帖子的评论
 
-category表示主题类型, 可以取的值只有
-```
-"school", "district", "virtual", "private", "system"
-```
-带参数的情况下, 上面的theme_id被当做是fullname传入, 根据fullname和category可以得到一个对应的主题信息并返回
+状态码: `200`
 
+## DEL 删除一条用户等级规则记录
 
-## GET 获取某用户发的帖子
+- 方法 **DELETE**
 
-- 方法 **GET**
-
-- URI `/user/56dd48d77fe9e31a5a4abfe3/posts`
-
-endpoint:
-```
-/user/<user_id>/posts
-/user/<suer_id>/posts/
-```
-
-## GET 图片上传临时token
-
-- 方法 **GET**
-
-- URI `/image_token`
-
-## GET 列出所有用户
-
-- 方法 **GET**
-
-- URI `/users`
-
-## PUT 更新一条评论
-
-- 方法 **PUT**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56de57d67fe9e316bba45c6d`
+- URI `/user_levels/56d92fb27fe9e30ec00a535c`
 
 - Body: 
 
 ```
 {
-  "author": null,
-  "post_id": null,
-  "content": null,
-  "_created": 1457383254.126,
-  "location": {
-    "type": "Point",
-    "coordinates": [
-      100,
-      0
-    ]
-  },
-  "hearts": [],
-  "mask_id": null,
-  "_id": "56de57d67fe9e316bba45c6d"
+  "report_limit": 100,
+  "colors": [],
+  "text_post": null,
+  "photo_post": null,
+  "exp": null,
+  "vote_post": null,
+  "_id": "56d92fb27fe9e30ec00a535c",
+  "heart_limit": null,
+  "message_limit": null,
+  "post_limit": null
 }
 
 ```
-
-## POST 发送手机验证码
-
-- 方法 **POST**
-
-- URI `/request_sms_code/15399481600`
-
-- 说明
-
-所有需要验证码的场景均需要先发送验证码请求
-
-- endpoint
-
-```
-/request_sms_code/<cellphone>
-```
-
-- 返回值
-
-正常 201
-
-```
-{
-  "message": "验证码发送成功",
-  "status": "ok"
-}
-```
-
-异常 4xx
-
-```
-{
-    "status": "error",
-    "message": "xxx"
-}
-```
-
 
 ## PUT 更新公告帖
 
@@ -925,263 +1189,6 @@ structure = {
 
 ```
 
-## POST 新建一条用户规则信息
-
-- 方法 **PUT**
-
-- URI `/user_levels/56d92fb27fe9e30ec00a535c`
-
-- Body: 
-
-```
-{
-  "report_limit": 100,
-  "colors": [],
-  "text_post": null,
-  "photo_post": null,
-  "exp": null,
-  "vote_post": null,
-  "_id": "56d92fb27fe9e30ec00a535c",
-  "heart_limit": null,
-  "message_limit": null,
-  "post_limit": null
-}
-
-```
-
-## GET 查看一个公告帖评论
-
-- 方法 **GET**
-
-- URI `/board_comment/56d92bad7fe9e30ec00a535a`
-
-## GET 读取一条评论
-
-- 方法 **GET**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/comment/56de57d67fe9e316bba45c6d`
-
-参数: 无
-
-endpoints
-```
-/theme/<string:theme_id>/comment/<string:comment_id>/
-/theme/<string:theme_id>/comment/<string:comment_id>
-```
-输入: 无
-输出: 当前主题下指定评论
-状态码: 200
-
-
-## DEL 删除公告帖
-
-- 方法 **DELETE**
-
-- URI `/board_posts/56d92a4d7fe9e30ec00a52d5`
-
-## DEL 删除一个普通帖
-
-- 方法 **DELETE**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/posts/56d59f197fe9e3493aa291f7`
-
-对应的评论也会一并删除
-
-## GET 查看公告帖
-
-- 方法 **GET**
-
-- URI `/board_post/56d92a4d7fe9e30ec00a52d5`
-
-## GET 获取某用户发的评论
-
-- 方法 **GET**
-
-- URI `/user/56dd48d77fe9e31a5a4abfe3/comments`
-
-endpoint:
-```
-/user/<user_id>/comments
-/user/<suer_id>/comments/
-```
-
-
-## GET 根据设备号获取/新建用户
-
-- 方法 **GET**
-
-- URI `/device/9be0511311672634`
-
-/device/<device_id>
-
-
-## POST 新建一条用户等级规则
-
-- 方法 **POST**
-
-- URI `/user_levels`
-
-- Body: 
-
-```
-{}
-
-```
-
-## PUT 更新公告帖评论
-
-- 方法 **PUT**
-
-- URI `/board_comment/56d92bad7fe9e30ec00a535a`
-
-- Body: 
-
-```
-{
-  "content": "什么东西",
-  "hearts": [],
-  "_created": 1457044269.747,
-  "author": null,
-  "mask_id": null
-}
-
-```
-
-## GET 获取指定帖子所有评论
-
-- 方法 **GET**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/post/56dd49587fe9e31a5a4abfe4/comments`
-
-参数: `?page=数字` 可以不加,默认返回第一页,每页十项
-
-endpoint
-```
-/theme/56d59bd4294d90ac3d8749d8/post/56dd49587fe9e31a5a4abfe4/comments
-/theme/56d59bd4294d90ac3d8749d8/post/56dd49587fe9e31a5a4abfe4/comments/
-```
-
-输入: 无
-
-输出: 指定帖子的评论
-
-状态码: `200`
-
-## DEL 删除设备信息
-
-- 方法 **DELETE**
-
-- URI `/devices/asdfsg`
-
-## GET 读取主题列表
-
-- 方法 **GET**
-
-- URI `/themes`
-
-## GET 获取某用户收藏的帖子
-
-- 方法 **GET**
-
-- URI `/user/56df88ab7fe9e310478b934e/stars`
-
-endpoint
-```
-/user/<user_id>/stars
-/user/<user_id>/stars/
-```
-
-
-## POST 给指定普通帖子添加感谢
-
-- 方法 **POST**
-
-- URI `/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/hearts`
-
-参数: 无
-
-endpoints
-```
-/theme/<string:theme_id>/post/<string:post_id>/hearts
-```
-输入: 
-```
-{
-    "user_id": str,
-    "mask_id": str
-}
-```
-输出: 无
-
-状态码: 
-
-  正常: 201
-  异常: 重复感谢或者自己感谢自己, 返回码 204
-
-
-- Body: 
-
-```
-{
-    "user_id": "56e3b2b17fe9e3140bfb2623",
-    "mask_id": "56e3b2b17fe9e3140bfb2623"
-}
-
-```
-
-## POST 绑定手机号码
-
-- 方法 **POST**
-
-- URI `/bound_phone/15399481601`
-
-```
-POST /bound_phone/15399481601 HTTP/1.1
-Host: 127.0.0.1:5000
-Content-Type: application/json
-Authorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq
-
-```
-
-## GET 获取一个用户信息
-
-- 方法 **GET**
-
-- URI `/user/56e678167fe9e3315628da6e`
-
-## GET 获取公告列表
-
-- 方法 **GET**
-
-- URI `/board_posts`
-
-- 数据结构
-
-```
-_id
-作者：author (user._id)
-内容：content
-感谢：hearts[]
-    用户：user_id
-    面具：mask_id
-时间：_created
-面具：mask_id（发帖时的用户面具_id）
-
-structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
-    }
-```
-
 ## GET 获取所有设备信息列表
 
 - 方法 **GET**
@@ -1195,88 +1202,86 @@ _id （这个_id主动插入，详见设计文档）
 原始用户：origin_user_id（第一次登陆时的设备用户）
 ```
 
-## PUT 更新用户信息
+## PUT 更新一个普通帖
 
 - 方法 **PUT**
 
-- URI `/user/56dd48d77fe9e31a5a4abfe3`
+- URI `/theme/56d59bd4294d90ac3d8749d8/post/56d9a8a84b33d510e7ad18a1`
+
+有更新只需要给`_update`填`""`或者不传即可, 服务器会自动生成当前时间填充
+
+输入
+
+返回值: 无
+
+状态码: 204
 
 - Body: 
 
 ```
 {
-"name": ""
+    "author": ""
 }
 
 ```
 
-## PUT 修改设备信息
+## POST 举报某个帖子
 
-- 方法 **PUT**
+- 方法 **POST**
 
-- URI `/device/9be0511311672634`
+- URI `/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/report`
 
-## GET 获取具体等级信息
+- endpoints
+
+```
+/theme/<string:theme_id>/post/<string:post_id>/report
+```
+
+- 输入: 无
+
+- 输出: 无
+
+- 状态码:
+
+> 正常: 无内容,返回201
+  
+> 异常: 
+    
+>> 提示已经举报过此贴, 返回码 422
+    
+>> 举报帖子被删除, 返回码 404
+
+## GET 获取所有公告帖评论列表
 
 - 方法 **GET**
 
-- URI `/user_levels/56d92fb27fe9e30ec00a535c`
+- URI `/board_comments`
 
-## GET 获取用户等级列表
-
-- 方法 **GET**
-
-- URI `/user_levels`
+- 数据结构
 
 ```
 _id
-级别名称：name
-所需颜值：exp
-每日发帖上限：post_limit
-每日举报上限：report_limit
-每日纸条上限：message_limit
-能否发文字帖：text_post
-能否发投票贴：vote_post
-能否发照片贴：photo_post
-可用颜色：colors[]
-感谢上限：heart_limit
-
-
+原帖：post_id（帖子id）
+作者：author
+内容：content
+感谢：hearts[]
+    用户：user_id
+    面具：mask_id
+时间：_created
+面具：mask_id
+`
 structure = {
         "_id": CustomObjectId(),
-        "exp": str,
-        "post_limit": int,
-        "report_limit": int,
-        "message_limit": int,
-        "text_post": bool,
-        "vote_post": bool,
-        "photo_post": bool,
-        "colors": list,
-        "heart_limit": int
+        "_created": CustomDate(),
+        "mask_id": str,
+        "hearts": [
+            {
+                "mask_id": str,
+                "user_id": str
+            }
+        ],
+        "content": str,
+        "author": str
     }
-```
-
-## DEL 删除一条用户等级规则记录
-
-- 方法 **DELETE**
-
-- URI `/user_levels/56d92fb27fe9e30ec00a535c`
-
-- Body: 
-
-```
-{
-  "report_limit": 100,
-  "colors": [],
-  "text_post": null,
-  "photo_post": null,
-  "exp": null,
-  "vote_post": null,
-  "_id": "56d92fb27fe9e30ec00a535c",
-  "heart_limit": null,
-  "message_limit": null,
-  "post_limit": null
-}
-
 ```
 
