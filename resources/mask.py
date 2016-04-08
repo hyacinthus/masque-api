@@ -124,7 +124,7 @@ class RandomMask(Resource):
             "status": "ok",
             "message": "头像排序完毕",
             "data": {
-                "masks": new_mask_list
+                "masks": new_mask_list[:-1]
             }
         }
 
