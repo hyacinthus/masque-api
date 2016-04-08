@@ -378,6 +378,7 @@ class Posts(Common):
             "photo": str,
             "options": list
         },
+        "tag": str,
         "comment_count": int,
         "_updated": CustomDate()
     }
