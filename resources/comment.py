@@ -29,13 +29,18 @@ class CommentsList(Resource):
             max_scan=APIConfig.MAX_SCAN
         )
         paged_cursor = Paginator(cursor, page, limit)
-        return {
-            "data": [i for i in paged_cursor.items],
-            "paging": {
-                "num_pages": paged_cursor.num_pages,
-                "current_page": paged_cursor.current_page
+        if page <= paged_cursor.num_pages:
+            return {
+                "data": [i for i in paged_cursor.items],
+                "paging": {
+                    "num_pages": paged_cursor.num_pages,
+                    "current_page": paged_cursor.current_page
+                }
             }
-        }
+        else:
+            return {
+                       "message": "page number out of range"
+                   }, 400
 
     def post(self, theme_id):  # add a new comment
         utctime = datetime.timestamp(datetime.utcnow())
@@ -128,13 +133,18 @@ class PostComments(Resource):
             max_scan=APIConfig.MAX_SCAN
         )
         paged_cursor = Paginator(cursor, page, limit)
-        return {
-            "data": [i for i in paged_cursor.items],
-            "paging": {
-                "num_pages": paged_cursor.num_pages,
-                "current_page": paged_cursor.current_page
+        if page <= paged_cursor.num_pages:
+            return {
+                "data": [i for i in paged_cursor.items],
+                "paging": {
+                    "num_pages": paged_cursor.num_pages,
+                    "current_page": paged_cursor.current_page
+                }
             }
-        }
+        else:
+            return {
+                       "message": "page number out of range"
+                   }, 400
 
 
 class ReportComment(Resource):
