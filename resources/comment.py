@@ -2,6 +2,7 @@ from datetime import datetime
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
+from mongokit.paginator import Paginator
 
 from config import MongoConfig, APIConfig
 from model import connection, redisdb
@@ -13,18 +14,28 @@ class CommentsList(Resource):
         parser.add_argument('page',
                             type=int,
                             help='page number must be int')
+        parser.add_argument('count',
+                            type=int,
+                            help='count must be int')
         args = parser.parse_args()
-        if args['page'] is None:
-            args['page'] = 1
-        index = args['page'] - 1
+        page = 1 if not args['page'] else args['page']
+        if not args['count']:
+            limit = APIConfig.PAGESIZE
+        else:
+            limit = args['count']
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         cursor = collection.Comments.find(
-            skip=(index * APIConfig.PAGESIZE),
-            limit=APIConfig.PAGESIZE,
-            max_scan=APIConfig.MAX_SCAN,
-            sort=[("_created", -1)]
-        )  # sorted by create time in reversed order
-        return cursor
+            sort=[("_created", -1)],
+            max_scan=APIConfig.MAX_SCAN
+        )
+        paged_cursor = Paginator(cursor, page, limit)
+        return {
+            "data": [i for i in paged_cursor.items],
+            "paging": {
+                "num_pages": paged_cursor.num_pages,
+                "current_page": paged_cursor.current_page
+            }
+        }
 
     def post(self, theme_id):  # add a new comment
         utctime = datetime.timestamp(datetime.utcnow())
@@ -99,21 +110,31 @@ class PostComments(Resource):
         parser.add_argument('page',
                             type=int,
                             help='page number must be int')
+
+        parser.add_argument('count',
+                            type=int,
+                            help='count must be int')
         args = parser.parse_args()
-        if args['page'] is None:
-            args['page'] = 1
-        index = args['page'] - 1
+        page = 1 if not args['page'] else args['page']
+        if not args['count']:
+            limit = APIConfig.PAGESIZE
+        else:
+            limit = args['count']
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         cursor = collection.Comments.find(
             {
                 "post_id": post_id
             },
-            skip=(index * APIConfig.PAGESIZE),
-            limit=APIConfig.PAGESIZE,
-            max_scan=APIConfig.MAX_SCAN,
-            sort=[("_created", 1)]
-        )  # sort the result by ascending time
-        return cursor
+            max_scan=APIConfig.MAX_SCAN
+        )
+        paged_cursor = Paginator(cursor, page, limit)
+        return {
+            "data": [i for i in paged_cursor.items],
+            "paging": {
+                "num_pages": paged_cursor.num_pages,
+                "current_page": paged_cursor.current_page
+            }
+        }
 
 
 class ReportComment(Resource):
