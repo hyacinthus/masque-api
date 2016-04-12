@@ -2,12 +2,33 @@ import logging
 from datetime import datetime
 
 from bson.objectid import ObjectId
-from flask_restful import Resource, request
+from flask_restful import Resource, request, reqparse
 
-from config import MongoConfig
+from config import MongoConfig, APIConfig
 from model import connection
 
 log = logging.getLogger("masque.user")
+
+
+def paging_list(sorted_list, page, limit):
+    """列表分页"""
+    if len(sorted_list) % limit != 0:
+        num_pages = len(sorted_list) // limit + 1
+    else:
+        num_pages = len(sorted_list) // limit
+    # 判断页码是否超出范围
+    if page <= num_pages:
+        return {
+            "data": sorted_list[limit * (page - 1):limit * page],
+            "paging": {
+                "num_pages": num_pages,
+                "current_page": page
+            }
+        }
+    else:
+        return {
+                   "message": "page number out of range"
+               }, 400
 
 
 class UsersList(Resource):
@@ -92,6 +113,20 @@ class User(Resource):
 class UserPostsList(Resource):
     def get(self, user_id):
         """get user's posts"""
+        parser = reqparse.RequestParser()
+        parser.add_argument('page',
+                            type=int,
+                            help='page number must be int')
+
+        parser.add_argument('count',
+                            type=int,
+                            help='count must be int')
+        args = parser.parse_args()
+        page = 1 if not args['page'] else args['page']
+        if not args['count']:
+            limit = APIConfig.PAGESIZE
+        else:
+            limit = args['count']
         result = []
         cursor = connection.UserPosts.find({"user_id": user_id})
         for doc in cursor:
@@ -100,12 +135,27 @@ class UserPostsList(Resource):
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
-        return sorted(result, key=lambda k: k["_updated"], reverse=True)
+        sorted_list = sorted(result, key=lambda k: k["_updated"], reverse=True)
+        return paging_list(sorted_list, page, limit)
 
 
 class UserCommentsList(Resource):
     def get(self, user_id):
         """get user's comments"""
+        parser = reqparse.RequestParser()
+        parser.add_argument('page',
+                            type=int,
+                            help='page number must be int')
+
+        parser.add_argument('count',
+                            type=int,
+                            help='count must be int')
+        args = parser.parse_args()
+        page = 1 if not args['page'] else args['page']
+        if not args['count']:
+            limit = APIConfig.PAGESIZE
+        else:
+            limit = args['count']
         result = []
         cursor = connection.UserComments.find({"user_id": user_id})
         if cursor.count() == 0:
@@ -118,12 +168,27 @@ class UserCommentsList(Resource):
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
-        return sorted(result, key=lambda k: k["_created"], reverse=True)
+        sorted_list = sorted(result, key=lambda k: k["_created"], reverse=True)
+        return paging_list(sorted_list, page, limit)
 
 
 class UserStarsList(Resource):
     def get(self, user_id):
         """get user's favor posts"""
+        parser = reqparse.RequestParser()
+        parser.add_argument('page',
+                            type=int,
+                            help='page number must be int')
+
+        parser.add_argument('count',
+                            type=int,
+                            help='count must be int')
+        args = parser.parse_args()
+        page = 1 if not args['page'] else args['page']
+        if not args['count']:
+            limit = APIConfig.PAGESIZE
+        else:
+            limit = args['count']
         result = []
         cursor = connection.UserStars.find({"user_id": user_id})
         for doc in cursor:
@@ -132,4 +197,5 @@ class UserStarsList(Resource):
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
-        return sorted(result, key=lambda k: k["_updated"], reverse=True)
+        sorted_list = sorted(result, key=lambda k: k["_updated"], reverse=True)
+        return paging_list(sorted_list, page, limit)

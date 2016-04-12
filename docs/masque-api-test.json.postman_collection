@@ -1196,8 +1196,8 @@
 		},
 		{
 			"id": "b1f5f66e-1107-72c9-4776-a116864f6aa7",
-			"headers": "Authorization: Bearer DgJ7h3MJBZI2YGFu5gFDBwB8LPCci3\n",
-			"url": "http://test.jiamian.im/theme/5704dff11072f13b6ec359a9/posts?count=10&since_id=5706264e1072f17a13b8423d",
+			"headers": "Authorization: Bearer IOXaVQqaYVGYJiq1S1aj0JobBTssIH\n",
+			"url": "http://test.jiamian.im/theme/5704dff11072f13b6ec359a9/posts?page=1&count=2",
 			"preRequestScript": "",
 			"pathVariables": {},
 			"method": "GET",
@@ -1207,9 +1207,9 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1460021068843,
+			"time": 1460453278547,
 			"name": "GET 获取帖子列表",
-			"description": "参数\n\n`count` 每页条目数, 默认10,可不填\n\n`since_id` 每页最后一个`_id`, 必须是合法的ObjectId string, 非必须, 留空默认返回第一页\n\nendpoints\n```\n/theme/<string:theme_id>/posts/\n/theme/<string:theme_id>/posts\n```\n输入: 无\n\n输出: 当前主题下按时间顺序排列的最新`10`个帖子\n\n状态码: 200\n\n- 加密请求方法\n\n可以以参数方式放在URI中,\n如`?access_token=xxx`这种形式(不建议)\n\n另外可以放在Headers里, 如\n\n```\nkey=Authorization\nvalue=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个半角空格再加access_token\n```\n",
+			"description": "参数\n\n`count` 每页条目数, 默认50,可不填\n\n`page` 页码, 默认1, 可不填\n\nendpoints\n```\n/theme/<string:theme_id>/posts/\n/theme/<string:theme_id>/posts\n```\n输入: 无\n\n输出: 当前主题下按回帖时间顺序排列的最新`50`个帖子\n\n```\n{\n  \"data\": [\n    {\n      \"hearts\": [],\n      \"_id\": \"57075cd27fe9e32f4e48c019\",\n      \"_created\": 1460071506,\n      \"_updated\": 1460071506,\n      \"location\": {\n        \"coordinates\": [\n          108.86186218261719,\n          34.20026779174805\n        ],\n        \"type\": \"Point\"\n      },\n      \"author\": \"5704df1f1072f123b8e47c44\",\n      \"content\": {\n        \"text\": \"大家好我是帅哥😚\",\n        \"options\": [\n          \"[]\"\n        ],\n        \"photo\": \"\",\n        \"type\": \"text\"\n      },\n      \"comment_count\": 0,\n      \"mask_id\": \"9f000f43f59911e5bf52b083fe4eaa62\"\n    },\n    {\n      \"mask_id\": \"a3b9c8b0f59911e5bf52b083fe4eaa62\",\n      \"_created\": 1460067894,\n      \"location\": {\n        \"coordinates\": [\n          108.86198425292969,\n          34.200218200683594\n        ],\n        \"type\": \"Point\"\n      },\n      \"hearts\": [],\n      \"_updated\": 1460067894,\n      \"author\": \"57074a3a1072f17bd9ea188e\",\n      \"content\": {\n        \"text\": \"可口可乐\",\n        \"options\": [\n          \"[]\"\n        ],\n        \"photo\": \"\",\n        \"type\": \"text\"\n      },\n      \"_id\": \"57074eb61072f17bd9ea1893\",\n      \"comment_count\": 0\n    }\n  ],  # data 列表里是返回页面内容\n  \"paging\": {\n    \"current_page\": 1,\n    \"num_pages\": 29\n  }  # paging 包含总页码/当前页面\n}\n```\n\n状态码: \n\n- 正常返回 200\n\n- 异常 400 一般是提交页码超出了总页码数\n\n- 加密请求方法\n\n可以以参数方式放在URI中,\n如`?access_token=xxx`这种形式(不建议)\n\n另外可以放在Headers里, 如\n\n```\nkey=Authorization\nvalue=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个半角空格再加access_token\n```\n",
 			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396"
 		},
 		{
