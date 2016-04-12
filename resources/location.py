@@ -77,9 +77,12 @@ class SchoolsList(Resource):
         result = connection.Schools.find(
             {"city": addr["city"],
              "type": {'$in': ['中学', '高等院校']}},
-            {"name": 1, "_id": 0}
+            {"name": 1, "short_name": 1, "_id": 0}
         )
-        data = tuple(item['name'] for item in result)
+
+        # 实现一个学校全名和简称的映射
+        name_map = dict((item['name'], item['short_name']) for item in result)
+        data = name_map.keys()
         schools = ()
         for element in get_school:
             match_list = tuple(i for i in data if element.startswith(i) or (
@@ -98,7 +101,7 @@ class SchoolsList(Resource):
                 if cursor:  # 忽略已有记录
                     continue
                 doc = connection.Themes()
-                doc["short_name"] = item
+                doc["short_name"] = name_map[item]
                 doc["full_name"] = item
                 doc["locale"]["province"] = addr["province"]
                 doc["locale"]["city"] = addr["city"]
