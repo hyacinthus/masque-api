@@ -336,6 +336,7 @@ class Token():
 class RootDocument(Document):
     __database__ = MongoConfig.DB
     structure = {}
+    use_schemaless = True
     skip_validation = False
     use_dot_notation = True
 
