@@ -59,7 +59,7 @@ class CommentsList(Resource):
             }
         )
         if cursor:
-            doc["mask_id"] = resp["mask_id"]
+            doc["mask_id"] = cursor["mask_id"]
         doc.save()
         # save a record
         user_comments = connection.UserComments()
