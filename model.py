@@ -100,6 +100,30 @@ class CustomMaskList(CustomType):
             pass  # ... do something here
 
 
+class UserInfo:
+    """根据 Authorization Headers 传递的 token 取得 device_id 和对应 user"""
+
+    def __init__(self, token):
+        if token and token.startswith("Bearer "):
+            token = token.split()[1]
+            if redisdb.exists(
+                    "oauth:access_token:{}:client_id".format(token)
+            ):
+                self.device_id = redisdb.get(
+                    "oauth:access_token:{}:client_id".format(token)
+                )
+        else:
+            log.error("{} is not a valid string".format(token))
+
+    @property
+    def user(self):
+        device = connection.Devices.find_one({"_id": self.device_id})
+        if not device:
+            log.error("device {} not found".format(self.device_id))
+        else:
+            return connection.Users.find_one({"_id": ObjectId(device.user_id)})
+
+
 # Oauth2 model
 class Client():
     """A client is the app which want to use the resource of a user.
@@ -652,6 +676,17 @@ class UserComments(RootDocument):
     }
     required_fields = [
         'user_id', 'theme_id', 'comment_id'
+    ]
+    indexes = [
+        {
+            'fields': 'user_id',
+        },
+        {
+            'fields': 'theme_id',
+        },
+        {
+            'fields': 'comment_id',
+        }
     ]
 
 

@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from bson.objectid import ObjectId
@@ -5,7 +6,9 @@ from flask_restful import Resource, request, reqparse
 from mongokit.paginator import Paginator
 
 from config import MongoConfig, APIConfig
-from model import connection, redisdb
+from model import connection, redisdb, UserInfo
+
+log = logging.getLogger("masque.comment")
 
 
 class CommentsList(Resource):
@@ -43,27 +46,42 @@ class CommentsList(Resource):
                    }, 400
 
     def post(self, theme_id):  # add a new comment
+        # 根据token取得当前用户/设备_id
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        user = UserInfo(token)
         utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
         # save a comment
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         doc = collection.Comments()
         for item in resp:
+            if item in ("_created", "mask_id", "author"):
+                continue
             doc[item] = resp[item]
         doc['_created'] = utctime
+        doc['author'] = user.user._id
         # 如果之前回复过该贴, 头像保持原状
         cursor = collection.find_one(
             {
                 "post_id": resp["post_id"],
-                "author": resp["author"]
+                "author": user.user._id
             }
         )
         if cursor:
             doc["mask_id"] = cursor["mask_id"]
+        else:
+            doc['mask_id'] = user.user.masks[0]
         doc.save()
         # save a record
         user_comments = connection.UserComments()
-        user_comments['user_id'] = doc['author']
+        user_comments['user_id'] = user.user._id
         user_comments['theme_id'] = theme_id
         user_comments['comment_id'] = doc['_id']
         user_comments['_created'] = utctime
