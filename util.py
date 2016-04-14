@@ -1,11 +1,13 @@
 import logging
-from bson.json_util import loads,dumps
+from bson.objectid import ObjectId
+from bson.json_util import loads, dumps
 
 import pymongo
 
 from model import get_host, redisdb
 from config import MongoConfig
 from tasks import notification
+from model import connection
 
 
 log = logging.getLogger("masque.util")
@@ -37,62 +39,80 @@ def add_exp(user, exp):
     new_level = get_level(user.exp)
     if new_level != user.user_level_id:
         user.user_level_id = new_level
-        notification.level_up.delay(str(user._id), user.user_level_id)
-
-
-def minus_exp(user, exp):
-    """minus exp to user
-    input:User instance"""
-    user.exp = user.exp - exp
-    new_level = get_level(user.exp)
-    if new_level != user.user_level_id:
-        user.user_level_id = new_level
-        notification.level_down.delay(str(user._id), user.user_level_id)
+        if exp > 0:
+            notification.level_up.delay(user._id, user.user_level_id)
+        else:
+            notification.level_down.delay(user._id, user.user_level_id)
 
 
 def new_remark(comment):
     """post have a new comment
     input:Comment instance"""
     user_stars = list(mongo.user_stars.find({'post_id': comment.post_id}))
-    user_comments = list(mongo.user_comments.find({'post_id': comment.post_id}))
-    notification.new_reply.delay(comment.author, comment.post_id, str(comment._id))
+    notification.new_reply.delay(comment.author, comment.post_id, comment._id)
     for star in user_stars:
         notification.star_new_reply.deplay(star['user_id'], star['theme_id'],
-                                           star['post_id'], str(comment._id))
-    for element in user_comments:
-        notification.comment_new_reply.deplay(element['user_id'], element['theme_id'],
-                                              element['post_id'], str(comment._id))
+                                           star['post_id'], comment._id)
 
 
 def post_heart(post):
     """post have a new heart
     input:Post instance"""
-    notification.new_heart.delay(post.author, str(post._id))
+    notification.new_heart.delay(post.author, post._id)
 
 
-def max_punish(user):
+def valid_feedback(feedback, exp=10):
+    """encourage user to feedback the problems of school_name
+    input:Feedback instance"""
+    user = connection.Users.find_one({"_id": ObjectId(feedback.author)})
+    add_exp(user, exp)
+    notification.encourage_valid_feedback.delay(feedback.author, exp, feedback.name)
+
+
+def invalid_report(report, exp=-1):
+    """remind user not to give invalid report
+    input:Report instance"""
+    user = connection.Users.find_one({"_id": ObjectId(report.author)})
+    add_exp(user, exp)
+    notification.publish_invalid_report.delay(report.author, report.theme_id, report.post_id, exp)
+
+
+def illegal_post(post, theme_id, exp):
+    """remind user not to post illegal content
+    input:Post instance"""
+    user = connection.Users.find_one({"_id": ObjectId(post.author)})
+    add_exp(user, exp)
+    notification.publish_illegal_content.delay(post.author, theme_id, post._id, exp)
+
+
+def illegal_comment(comment, theme_id, exp):
+    """remind user not to post illegal content
+    input:Comment instance"""
+    user = connection.Users.find_one({"_id": ObjectId(comment.author)})
+    add_exp(user, exp)
+    notification.publish_illegal_content.delay(comment.author, theme_id, comment.post_id, exp)
+
+
+def frozen_user(user):
     """frozen user
     input:User instance"""
-    notification.frozen_user.delay(str(user._id))
+    notification.frozen_user.delay(user._id)
 
 
-def restrict_post(user, expire_time):
-    """forbit user to post in expire_time, expire_time is in seconds
+def bind_cellphone(user):
+    """bind cellphone
     input:User instance"""
-    notification.forbid_post.delay(str(user._id), expire_time)
+    add_exp(user, exp=20)
+    notification.bind_cellphone.deplay(user._id, user.cellphone)
 
 
 def update_system(user, version):
     """remind user to update software
     input:User instance"""
-    notification.forbid_post.delay(str(user._id), version)
+    notification.update_system.delay(user._id, version)
 
 
-class dict2obj(object):
-    """convert dict to object"""
-    def __init__(self, dic):
-        for k, v in dic.items():
-            if isinstance(v, (tuple, list)):
-                self.__setattr__(k, [dict2obj(i) if isinstance(i, dict) else i for i in v])
-            else:
-                self.__setattr__(k, dict2obj(v) if isinstance(v, dict) else v)
+def check_image(bucket, id):
+    """check image
+    input: bucket and id"""
+    notification.check_image.deplay(bucket, id)
