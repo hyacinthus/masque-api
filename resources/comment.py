@@ -77,7 +77,13 @@ class CommentsList(Resource):
         if cursor:
             doc["mask_id"] = cursor["mask_id"]
         else:
-            doc['mask_id'] = user.user.masks[0]
+            collection = connection[MongoConfig.DB]["posts_" + theme_id]
+            cursor = collection.find_one({"_id": ObjectId(resp['post_id'])})
+            if cursor["author"] == user.user._id:
+                # 楼主回帖, 头像不变
+                doc["mask_id"] = cursor["mask_id"]
+            else:
+                doc['mask_id'] = user.user.masks[0]
         doc.save()
         # save a record
         user_comments = connection.UserComments()
