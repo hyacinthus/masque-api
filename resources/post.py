@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from bson.objectid import ObjectId
@@ -6,8 +7,9 @@ from marshmallow import Schema, fields, ValidationError
 from mongokit.paginator import Paginator
 
 from config import MongoConfig, APIConfig
-from model import connection, redisdb
+from model import connection, redisdb, UserInfo
 
+log = logging.getLogger("masque.comment")
 
 # Custom validator
 def must_not_be_blank(data):
@@ -64,13 +66,27 @@ class PostsList(Resource):
     def post(self, theme_id):  # add a new post
         utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
+        # 根据token取得当前用户/设备_id
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        user = UserInfo(token)
         # save a post
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         doc = collection.Posts()
         for item in resp:
+            if item in ('mask_id', 'author', '_created', '_updated'):
+                continue
             doc[item] = resp[item]
         doc['_created'] = utctime
         doc['_updated'] = utctime
+        doc['mask_id'] = user.user.masks[0]
+        doc['author'] = user.user._id
         doc.save()
         # save a record
         user_posts = connection.UserPosts()
