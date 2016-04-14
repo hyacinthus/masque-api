@@ -4,7 +4,6 @@ from flask_restful import Resource, reqparse
 from config import APIConfig
 from model import connection
 
-
 # 需要过滤的黑名单
 black_list = ('网络教育', '继续教育', '远程教育', '仙桃学院', '纺织服装学院', '教学部', '分部')
 
@@ -75,39 +74,22 @@ class SchoolsList(Resource):
         if pois:
             get_school += tuple(filter(guolv, (i['name'] for i in pois)))
             get_school = tuple(i.replace('-', '') for i in get_school)
-        result = connection.Schools.find(
-            {"city": addr["city"],
-             "type": {'$in': ['中学', '高等院校']}},
-            {"name": 1, "_id": 0}
+        result = connection.Themes.find(
+            {"locale.city": "西安市",
+             "category": "school"},
+            {"full_name": 1, "short_name": 1, "_id": 0}
         )
-        data = tuple(item['name'] for item in result)
+        data = tuple(item['full_name'] for item in result)
         schools = ()
         for element in get_school:
             match_list = tuple(i for i in data if element.startswith(i) or (
                 i[0:2] == "上海" and i.endswith(element)))
             schools += match_list if match_list else ()
+        schools = rm_duplicates(schools) if schools else schools
         # 以下为Themes collection初始化处理过程
-        if schools:
-            schools = rm_duplicates(schools)
-            for item in schools:
-                cursor = connection.Themes.find_one(
-                    {
-                        "full_name": item,
-                        "category": "school"
-                    }
-                )
-                if cursor:  # 忽略已有记录
-                    continue
-                doc = connection.Themes()
-                doc["short_name"] = item
-                doc["full_name"] = item
-                doc["locale"]["province"] = addr["province"]
-                doc["locale"]["city"] = addr["city"]
-                doc["locale"]["district"] = addr["district"]
-                doc.save()  # 新建不存在的主题(学校)
-        else:
-            # 如果附近没有学校, 返回地区
-            schools = (addr["district"],)
+        # 以"区"结尾返回上一级市,以"县"或"市"结尾直接返回
+        if addr["district"].endswith('县') or addr["district"].endswith('市'):
+            schools += (addr["district"],)
             cursor = connection.Themes.find_one(
                 {
                     "full_name": addr["district"],
@@ -121,6 +103,26 @@ class SchoolsList(Resource):
                 doc["category"] = "district"
                 doc["short_name"] = addr["district"]
                 doc["full_name"] = addr["district"]
+                doc["locale"]["province"] = addr["province"]
+                doc["locale"]["city"] = addr["city"]
+                doc["locale"]["district"] = addr["district"]
+                doc.save()  # 新建不存在的主题
+
+        else:
+            schools += (addr["city"],)
+            cursor = connection.Themes.find_one(
+                {
+                    "full_name": addr["city"],
+                    "category": "city"
+                }
+            )
+            if cursor:
+                pass  # 忽略已有
+            else:
+                doc = connection.Themes()
+                doc["category"] = "city"
+                doc["short_name"] = addr["city"]
+                doc["full_name"] = addr["city"]
                 doc["locale"]["province"] = addr["province"]
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]

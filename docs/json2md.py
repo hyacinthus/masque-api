@@ -36,7 +36,7 @@ for item in req:
     with open(file_path, "a") as f:
         f.write("## {}\n\n".format(tmp['name']))
         f.write("- {} **{}**\n\n".format(white_list['method'], tmp['method']))
-        f.write("- {} `{}`\n\n".format(white_list['url'], tmp['url'][21:]))
+        f.write("- {} `{}`\n\n".format(white_list['url'], tmp['url'][22:]))
         if 'description' in tmp and tmp['description']:
             f.write("{}\n\n".format(tmp['description']))
         if "rawModeData" in tmp and tmp["rawModeData"]:

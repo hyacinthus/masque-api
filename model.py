@@ -88,6 +88,7 @@ class CustomMaskList(CustomType):
             # 随机抽取8个头像id填入mask字段
             return [connection.Masks.find_random()._id for i in range(8) if
                     connection.Masks.find_random()]
+        return value
 
     def to_python(self, value):
         """convert type to a python type"""
@@ -95,7 +96,7 @@ class CustomMaskList(CustomType):
 
     def validate(self, value, path):
         """OPTIONAL : useful to add a validation layer"""
-        if value is not None:
+        if value:
             pass  # ... do something here
 
 
@@ -336,6 +337,7 @@ class Token():
 class RootDocument(Document):
     __database__ = MongoConfig.DB
     structure = {}
+    use_schemaless = True
     skip_validation = False
     use_dot_notation = True
 
@@ -361,11 +363,13 @@ class Common(RootDocument):
         "author": str
     }
     required_fields = [
-        "author"
+        "author",
+        "mask_id"
     ]
     default_values = {
-        "location.coordinates": [0, 0],
-        "location.type": "Point"
+        "location.coordinates": [108.947001, 34.259458],
+        "location.type": "Point",
+        "hearts": [],
     }
 
 
@@ -378,14 +382,19 @@ class Posts(Common):
             "photo": str,
             "options": list
         },
+        "tag": str,
         "comment_count": int,
         "_updated": CustomDate()
     }
     # required_fields = [
-    #     'mask_id', 'hearts.mask_id', 'hearts.user_id'
+    #     "content.text"
     # ]
     default_values = {
         "content.type": "text",
+        "content.text": "",
+        "content.photo": "",
+        "content.options": [],
+        "tag": "",
         "comment_count": 0,
     }
 
@@ -397,14 +406,14 @@ class Comments(Common):
         "post_id": str,
     }
     required_fields = [
-        "post_id"
+        "post_id",
+        "content"
     ]
 
 
 @connection.register
 class Users(RootDocument):
     __collection__ = CollectionName.USERS
-    skip_validation = True
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
@@ -418,10 +427,16 @@ class Users(RootDocument):
         "home": str,
         "subscribed": list
     }
+    # required_fields = [
+    #     "content.text"
+    # ]
     default_values = {
+        "user_level_id": "level1",
         "exp": 0,
         "hearts_received": 0,
         "hearts_owned": 0,
+        "cellphone": "",
+        "home": ""
     }
 
 
@@ -431,7 +446,7 @@ class Themes(RootDocument):
 
     structure = {
         "_id": CustomObjectId(),
-        "category": IS("school", "district", "virtual", "private", "system"),
+        "category": IS("school", "city", "district", "virtual", "private", "system"),
         "subcate": str,
         "short_name": str,
         "full_name": str,
@@ -464,15 +479,18 @@ class Devices(RootDocument):
         "origin_user_id": str,
     }
     required_fields = [
-        '_id',
+        '_id', 'user_id', 'origin_user_id'
     ]
+    default_values = {
+        "name": ""
+    }
 
 
 @connection.register
 class UserLevels(RootDocument):
     __collection__ = CollectionName.USER_LEVELS
     structure = {
-        "_id": CustomObjectId(),
+        "_id": str,
         "exp": int,
         "post_limit": int,
         "report_limit": int,
@@ -483,6 +501,9 @@ class UserLevels(RootDocument):
         "colors": list,
         "heart_limit": int
     }
+    required_fields = [
+        "_id"
+    ]
     default_values = {
         "text_post": False,
         "vote_post": False,

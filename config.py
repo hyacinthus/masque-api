@@ -55,8 +55,8 @@ class RedisConfig:
 
 class APIConfig:
     AMAP_AKEY = os.getenv("AMAP_AKEY", "ab158f36829f810346ef3526727f1aa4")
-    MAX_SCAN = 100  # set int(0) to query all
-    PAGESIZE = 10  # set int(0) to return all query results
+    MAX_SCAN = 1000  # set int(0) to query all
+    PAGESIZE = 50  # set int(0) to return all query results
 
 
 class CollectionName:

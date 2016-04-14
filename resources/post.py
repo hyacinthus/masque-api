@@ -3,6 +3,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 from marshmallow import Schema, fields, ValidationError
+from mongokit.paginator import Paginator
 
 from config import MongoConfig, APIConfig
 from model import connection, redisdb
@@ -12,7 +13,7 @@ from model import connection, redisdb
 def must_not_be_blank(data):
     if not data:
         raise ValidationError('Data not provided.')
-    if not ObjectId(data):
+    if not ObjectId.is_valid(data):
         raise ValidationError('Data is not a valid ObjectId')
 
 
@@ -31,17 +32,34 @@ class PostsList(Resource):
         parser.add_argument('page',
                             type=int,
                             help='page number must be int')
+
+        parser.add_argument('count',
+                            type=int,
+                            help='count must be int')
         args = parser.parse_args()
-        if args['page'] is None:
-            args['page'] = 1
-        index = args['page'] - 1
+        page = 1 if not args['page'] else args['page']
+        if not args['count']:
+            limit = APIConfig.PAGESIZE
+        else:
+            limit = args['count']
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         cursor = collection.Posts.find(
-            skip=(index * APIConfig.PAGESIZE),
-            limit=APIConfig.PAGESIZE,
             max_scan=APIConfig.MAX_SCAN,
-            sort=[("_updated", -1)])  # sorted by update time in reversed order
-        return cursor
+            sort=[("_updated", -1)]
+        )  # 按回帖时间排序
+        paged_cursor = Paginator(cursor, page, limit)
+        if page <= paged_cursor.num_pages:
+            return {
+                "data": [i for i in paged_cursor.items],
+                "paging": {
+                    "num_pages": paged_cursor.num_pages,
+                    "current_page": paged_cursor.current_page
+                }
+            }
+        else:
+            return {
+                       "message": "page number out of range"
+                   }, 400
 
     def post(self, theme_id):  # add a new post
         utctime = datetime.timestamp(datetime.utcnow())
