@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig, APIConfig
-from model import connection
+from model import connection, UserInfo
 
 log = logging.getLogger("masque.user")
 
@@ -88,26 +88,35 @@ class User(Resource):
         return cursor
 
     def put(self, user_id):  # update user info by its ID
+        # 根据token取得当前用户/设备_id
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        user = UserInfo(token)
+        # 处理客户端请求数据
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
-        elif ("_id" or "_created") in resp:
-            resp = {i: resp[i] for i in resp if i not in ("_id", "_created")}
-        # 更新登录时间记录
-        resp["_updated"] = datetime.utcnow()
-        connection.Users.find_and_modify(
-            {"_id": ObjectId(user_id)},
-            {
-                "$set": resp
-            }
-        )
-        return None, 204
+        # 更新数据库
+        cursor = connection.Users.find_one({"_id": ObjectId(user.user._id)})
+        for item in resp:
+            if item in ('_created', '_id', '_updated'):
+                continue
+            cursor[item] = resp[item]
+        cursor._updated = None  # 更新登录时间记录
+        cursor.save()
+        return "", 204
 
     def delete(self, user_id):  # delete a post by its ID
         connection.Users.find_and_modify(
             {"_id": ObjectId(user_id)}, remove=True)
         # TODO: delete related data
-        return None, 204
+        return "", 204
 
 
 class UserPostsList(Resource):
