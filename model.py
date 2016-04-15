@@ -4,6 +4,7 @@ from datetime import datetime
 from urllib.parse import quote
 
 from bson.objectid import ObjectId
+from flask_restful import Resource, reqparse
 from mongokit import IS, OR, Document, Connection
 from mongokit.schema_document import CustomType
 from redis import StrictRedis
@@ -98,6 +99,21 @@ class CustomMaskList(CustomType):
         """OPTIONAL : useful to add a validation layer"""
         if value:
             pass  # ... do something here
+
+
+class TokenResource(Resource):
+    """从 Authorization Headers 中取得用户信息"""
+
+    def __init__(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'authorization',
+            type=str,
+            location='headers'
+        )
+        args = parser.parse_args()
+        token = args["authorization"]
+        self.user_info = UserInfo(token)
 
 
 class UserInfo:

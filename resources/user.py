@@ -6,29 +6,9 @@ from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig, APIConfig
 from model import connection, UserInfo
+from paginate import Paginate
 
 log = logging.getLogger("masque.user")
-
-
-def paging_list(sorted_list, page, limit):
-    """列表分页"""
-    if len(sorted_list) % limit != 0:
-        num_pages = len(sorted_list) // limit + 1
-    else:
-        num_pages = len(sorted_list) // limit
-    # 判断页码是否超出范围
-    if page <= num_pages:
-        return {
-            "data": sorted_list[limit * (page - 1):limit * page],
-            "paging": {
-                "num_pages": num_pages,
-                "current_page": page
-            }
-        }
-    else:
-        return {
-                   "message": "page number out of range"
-               }, 400
 
 
 class UsersList(Resource):
@@ -145,7 +125,7 @@ class UserPostsList(Resource):
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
         sorted_list = sorted(result, key=lambda k: k["_updated"], reverse=True)
-        return paging_list(sorted_list, page, limit)
+        return Paginate(sorted_list, page, limit).data
 
 
 class UserCommentsList(Resource):
@@ -178,7 +158,7 @@ class UserCommentsList(Resource):
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
         sorted_list = sorted(result, key=lambda k: k["_created"], reverse=True)
-        return paging_list(sorted_list, page, limit)
+        return Paginate(sorted_list, page, limit).data
 
 
 class UserStarsList(Resource):
@@ -207,4 +187,4 @@ class UserStarsList(Resource):
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
         sorted_list = sorted(result, key=lambda k: k["_updated"], reverse=True)
-        return paging_list(sorted_list, page, limit)
+        return Paginate(sorted_list, page, limit).data

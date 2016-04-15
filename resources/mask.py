@@ -1,9 +1,12 @@
+import logging
 import uuid
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
 from model import connection, redisdb
+
+log = logging.getLogger("masque.mask")
 
 
 class MasksList(Resource):

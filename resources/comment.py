@@ -3,15 +3,15 @@ from datetime import datetime
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
-from mongokit.paginator import Paginator
 
 from config import MongoConfig, APIConfig
-from model import connection, redisdb, UserInfo
+from model import connection, redisdb, TokenResource
+from paginate import Paginate
 
 log = logging.getLogger("masque.comment")
 
 
-class CommentsList(Resource):
+class CommentsList(TokenResource):
     def get(self, theme_id):  # get all comments
         parser = reqparse.RequestParser()
         parser.add_argument('page',
@@ -31,31 +31,10 @@ class CommentsList(Resource):
             sort=[("_created", -1)],
             max_scan=APIConfig.MAX_SCAN
         )
-        paged_cursor = Paginator(cursor, page, limit)
-        if page <= paged_cursor.num_pages:
-            return {
-                "data": [i for i in paged_cursor.items],
-                "paging": {
-                    "num_pages": paged_cursor.num_pages,
-                    "current_page": paged_cursor.current_page
-                }
-            }
-        else:
-            return {
-                       "message": "page number out of range"
-                   }, 400
+        paged_cursor = Paginate(cursor, page, limit)
+        return paged_cursor.data
 
     def post(self, theme_id):  # add a new comment
-        # 根据token取得当前用户/设备_id
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        user = UserInfo(token)
         utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
         # save a comment
@@ -66,12 +45,13 @@ class CommentsList(Resource):
                 continue
             doc[item] = resp[item]
         doc['_created'] = utctime
-        doc['author'] = user.user._id
+        doc['author'] = self.user_info.user._id
+        log.debug("{}".format(self.user_info.user))
         # 如果之前回复过该贴, 头像保持原状
         cursor = collection.find_one(
             {
                 "post_id": resp["post_id"],
-                "author": user.user._id
+                "author": self.user_info.user._id
             }
         )
         if cursor:
@@ -79,15 +59,15 @@ class CommentsList(Resource):
         else:
             collection = connection[MongoConfig.DB]["posts_" + theme_id]
             cursor = collection.find_one({"_id": ObjectId(resp['post_id'])})
-            if cursor["author"] == user.user._id:
+            if cursor["author"] == self.user_info.user._id:
                 # 楼主回帖, 头像不变
                 doc["mask_id"] = cursor["mask_id"]
             else:
-                doc['mask_id'] = user.user.masks[0]
+                doc['mask_id'] = self.user_info.user.masks[0]
         doc.save()
         # save a record
         user_comments = connection.UserComments()
-        user_comments['user_id'] = user.user._id
+        user_comments['user_id'] = self.user_info.user._id
         user_comments['theme_id'] = theme_id
         user_comments['comment_id'] = doc['_id']
         user_comments['_created'] = utctime
@@ -156,19 +136,8 @@ class PostComments(Resource):
             },
             max_scan=APIConfig.MAX_SCAN
         )
-        paged_cursor = Paginator(cursor, page, limit)
-        if page <= paged_cursor.num_pages:
-            return {
-                "data": [i for i in paged_cursor.items],
-                "paging": {
-                    "num_pages": paged_cursor.num_pages,
-                    "current_page": paged_cursor.current_page
-                }
-            }
-        else:
-            return {
-                       "message": "page number out of range"
-                   }, 400
+        paged_cursor = Paginate(cursor, page, limit)
+        return paged_cursor.data
 
 
 class ReportComment(Resource):

@@ -4,12 +4,13 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 from marshmallow import Schema, fields, ValidationError
-from mongokit.paginator import Paginator
 
 from config import MongoConfig, APIConfig
 from model import connection, redisdb, UserInfo
+from paginate import Paginate
 
 log = logging.getLogger("masque.comment")
+
 
 # Custom validator
 def must_not_be_blank(data):
@@ -49,19 +50,8 @@ class PostsList(Resource):
             max_scan=APIConfig.MAX_SCAN,
             sort=[("_updated", -1)]
         )  # 按回帖时间排序
-        paged_cursor = Paginator(cursor, page, limit)
-        if page <= paged_cursor.num_pages:
-            return {
-                "data": [i for i in paged_cursor.items],
-                "paging": {
-                    "num_pages": paged_cursor.num_pages,
-                    "current_page": paged_cursor.current_page
-                }
-            }
-        else:
-            return {
-                       "message": "page number out of range"
-                   }, 400
+        paged_cursor = Paginate(cursor, page, limit)
+        return paged_cursor.data
 
     def post(self, theme_id):  # add a new post
         utctime = datetime.timestamp(datetime.utcnow())
