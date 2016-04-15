@@ -724,7 +724,8 @@ class Feedback(RootDocument):
         "author": str,
         "category": IS("error", "none"),
         "_created": CustomDate(),
-        "name": str,
+        "full_name": str,
+        "short_name": str,
         "archived": bool,
         "location": {
             "coordinates": [
@@ -735,13 +736,15 @@ class Feedback(RootDocument):
         }
     }
     required_fields = [
-        "name",
+        "full_name",
+        "short_name",
         "location.coordinates"
     ]
     default_values = {
         "archived": False,
         "category": "error",
-        "location.type": "Point"
+        "location.type": "Point",
+        "location.coordinates": [108.947001, 34.259458],
     }
 
 
