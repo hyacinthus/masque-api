@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig, APIConfig
-from model import connection, UserInfo
+from model import connection, TokenResource
 from paginate import Paginate
 
 log = logging.getLogger("masque.user")
@@ -54,36 +54,29 @@ class DeviceUser(Resource):
         return result
 
 
-class User(Resource):
+class User(TokenResource):
     def get(self, user_id):  # get user info by its ID
         # 返回用户信息同时刷新登录时间记录
         cursor = connection.Users.find_and_modify(
-            {"_id": ObjectId(user_id)},
+            {"_id": ObjectId(self.user_info.user._id)},
             {
                 "$set": {
                     "_updated": datetime.utcnow()
                 }
             }
         )
+        log.debug("用户信息{}".format(cursor))
         return cursor
 
     def put(self, user_id):  # update user info by its ID
-        # 根据token取得当前用户/设备_id
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        user = UserInfo(token)
         # 处理客户端请求数据
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
         # 更新数据库
-        cursor = connection.Users.find_one({"_id": ObjectId(user.user._id)})
+        cursor = connection.Users.find_one(
+            {"_id": ObjectId(self.user_info.user._id)}
+        )
         for item in resp:
             if item in ('_created', '_id', '_updated'):
                 continue
@@ -94,7 +87,7 @@ class User(Resource):
 
     def delete(self, user_id):  # delete a post by its ID
         connection.Users.find_and_modify(
-            {"_id": ObjectId(user_id)}, remove=True)
+            {"_id": ObjectId(self.user_info.user._id)}, remove=True)
         # TODO: delete related data
         return "", 204
 

@@ -7,7 +7,7 @@ from flask_restful import Resource, reqparse
 
 import top.api
 from config import AliConfig
-from model import redisdb, connection
+from model import redisdb, connection, TokenResource
 
 log = logging.getLogger("masque.sms")
 
@@ -111,41 +111,16 @@ class VerifySmsCode(Resource):
                    }, 200
 
 
-class BoundPhone(Resource):
+class BoundPhone(TokenResource):
     """绑定手机"""
 
     def post(self, cellphone):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        access_token = token[token.find(" ") + 1:]
-        if redisdb.exists(
-                "oauth:access_token:{}:client_id".format(access_token)
-        ):
-            device_id = redisdb.get(
-                "oauth:access_token:{}:client_id".format(access_token)
-            )
-        else:
-            return {
-                       'status': "error",
-                       'message': 'Device not found'
-                   }, 404
         if not verify_phone(cellphone):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
                    }, 200
-        # 根据device_id查找对应user_id
-        cursor = connection.Devices.find_one({"_id": device_id})
-        if cursor:
-            current_user_id = cursor.user_id
-        else:
-            return {'message': 'user_id not found'}, 404
+        current_user_id = self.user_info.user._id
         cursor = connection.Users.find_one(
             {"cellphone": cellphone}
         )
@@ -159,7 +134,7 @@ class BoundPhone(Resource):
                        }, 200
             # 把先前绑定手机用户id赋给当前设备
             connection.Devices.find_and_modify(
-                {"_id": device_id},
+                {"_id": self.user_info.device_id},
                 {
                     "$set": {
                         "user_id": cursor._id
@@ -180,41 +155,16 @@ class BoundPhone(Resource):
                 {"_id": ObjectId(current_user_id)}), 201
 
 
-class ChangePhone(Resource):
+class ChangePhone(TokenResource):
     """更换手机"""
 
     def post(self, cellphone):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        access_token = token[token.find(" ") + 1:]
-        if redisdb.exists(
-                "oauth:access_token:{}:client_id".format(access_token)
-        ):
-            device_id = redisdb.get(
-                "oauth:access_token:{}:client_id".format(access_token)
-            )
-        else:
-            return {
-                       'status': "error",
-                       'message': 'Device not found'
-                   }, 404
         if not verify_phone(cellphone):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
                    }, 200
-        # 根据device_id查找对应user_id
-        cursor = connection.Devices.find_one({"_id": device_id})
-        if cursor:
-            current_user_id = cursor.user_id
-        else:
-            return {'message': 'user_id not found'}, 404
+        current_user_id = self.user_info.user._id
         cursor = connection.Users.find_one({"cellphone": cellphone})
         if cursor:
             # 号码之前有使用过, 提示该手机号码已被使用
@@ -234,41 +184,16 @@ class ChangePhone(Resource):
                 {"_id": ObjectId(current_user_id)}), 201
 
 
-class DeRegister(Resource):
+class DeRegister(TokenResource):
     """注销设备(不需要验证手机)"""
 
     def post(self, cellphone):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        access_token = token[token.find(" ") + 1:]
-        if redisdb.exists(
-                "oauth:access_token:{}:client_id".format(access_token)
-        ):
-            device_id = redisdb.get(
-                "oauth:access_token:{}:client_id".format(access_token)
-            )
-        else:
-            return {
-                       'status': "error",
-                       'message': 'Device not found'
-                   }, 404
         if not verify_phone(cellphone):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
                    }, 200
-        # 根据device_id查找对应user_id
-        cursor = connection.Devices.find_one({"_id": device_id})
-        if cursor:
-            current_user_id = cursor.user_id
-        else:
-            return {'message': 'user_id not found'}, 404
+        current_user_id = self.user_info.user._id
         cursor = connection.Users.find_one(
             {"_id": ObjectId(current_user_id)}
         )
@@ -289,7 +214,7 @@ class DeRegister(Resource):
             user.save()
             user_id = user['_id']
             dev = connection.Devices()
-            dev['_id'] = device_id
+            dev['_id'] = self.user_info.device_id
             dev['user_id'] = user_id
             dev['origin_user_id'] = user_id
             dev.save()

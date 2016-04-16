@@ -2,14 +2,14 @@ import logging
 import uuid
 
 from bson.objectid import ObjectId
-from flask_restful import Resource, request, reqparse
+from flask_restful import request
 
-from model import connection, redisdb
+from model import connection, TokenResource
 
 log = logging.getLogger("masque.mask")
 
 
-class MasksList(Resource):
+class MasksList(TokenResource):
     def get(self):  # get all posts
         cursor = connection.Masks.find()
         return cursor
@@ -25,7 +25,7 @@ class MasksList(Resource):
         return None, 201
 
 
-class Mask(Resource):
+class Mask(TokenResource):
     def get(self, mask_id):  # get a post by its ID
         cursor = connection.Masks.find_one({"_id": ObjectId(mask_id)})
         return cursor
@@ -51,7 +51,7 @@ class Mask(Resource):
         return None, 204
 
 
-class RandomMask(Resource):
+class RandomMask(TokenResource):
     """随机取一个 mask_id 放在原列表第一位, 删掉原列表最末位"""
 
     def find_random(self):
@@ -78,32 +78,7 @@ class RandomMask(Resource):
             ).skip(num).next()
 
     def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        access_token = token[token.find(" ") + 1:]
-        if redisdb.exists(
-                "oauth:access_token:{}:client_id".format(access_token)
-        ):
-            device_id = redisdb.get(
-                "oauth:access_token:{}:client_id".format(access_token)
-            )
-        else:
-            return {
-                       'status': "error",
-                       'message': 'Device not found'
-                   }, 404
-        # 根据device_id查找对应user_id
-        cursor = connection.Devices.find_one({"_id": device_id})
-        if cursor:
-            current_user_id = cursor.user_id
-        else:
-            return {'message': 'user_id not found'}, 404
+        current_user_id = self.user_info.user._id
         user_info = connection.Users.find_one(
             {"_id": ObjectId(current_user_id)}
         )
@@ -132,7 +107,7 @@ class RandomMask(Resource):
         }
 
 
-class UploadMask(Resource):
+class UploadMask(TokenResource):
     def post(self):
         """
         将上传完成的头像uuid传入用户头像列表
@@ -149,32 +124,7 @@ class UploadMask(Resource):
                                   % resp["uuid"]
                    }, 400
         mask_uuid = resp["uuid"]
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        access_token = token[token.find(" ") + 1:]
-        if redisdb.exists(
-                "oauth:access_token:{}:client_id".format(access_token)
-        ):
-            device_id = redisdb.get(
-                "oauth:access_token:{}:client_id".format(access_token)
-            )
-        else:
-            return {
-                       'status': "error",
-                       'message': 'Device not found'
-                   }, 404
-        # 根据device_id查找对应user_id
-        cursor = connection.Devices.find_one({"_id": device_id})
-        if cursor:
-            current_user_id = cursor.user_id
-        else:
-            return {'message': 'user_id not found'}, 404
+        current_user_id = self.user_info.user._id
         user_info = connection.Users.find_one(
             {"_id": ObjectId(current_user_id)}
         )
@@ -193,4 +143,4 @@ class UploadMask(Resource):
         mask = connection.Masks()
         mask._id = mask_uuid
         mask.save()
-        return None, 201
+        return '', 201

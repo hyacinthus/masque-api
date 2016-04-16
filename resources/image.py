@@ -8,10 +8,8 @@ from datetime import datetime
 from hashlib import sha1
 from urllib.parse import quote_plus, urlencode
 
-from flask_restful import Resource, reqparse
-
 from config import AliConfig
-from model import redisdb
+from model import TokenResource
 
 log = logging.getLogger("masque.image")
 
@@ -82,23 +80,7 @@ def http_request(site='sts.aliyuncs.com', url=""):
         return json.loads(data), res.status
 
 
-class GetToken(Resource):
+class GetToken(TokenResource):
     def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        access_token = token[token.find(" ") + 1:]
-        if redisdb.exists(
-                "oauth:access_token:{}:client_id".format(access_token)
-        ):
-            client_id = redisdb.get(
-                "oauth:access_token:{}:client_id".format(access_token)
-            )
-        else:
-            return {'message': 'Not found'}, 404
-        return http_request(host, compose_url(client_id))
+        device_id = self.user_info.device_id
+        return http_request(host, compose_url(device_id))
