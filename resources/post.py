@@ -3,33 +3,15 @@ from datetime import datetime
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
-from marshmallow import Schema, fields, ValidationError
 
 from config import MongoConfig, APIConfig
-from model import connection, redisdb, UserInfo
+from model import connection, TokenResource
 from paginate import Paginate
 
 log = logging.getLogger("masque.comment")
 
 
-# Custom validator
-def must_not_be_blank(data):
-    if not data:
-        raise ValidationError('Data not provided.')
-    if not ObjectId.is_valid(data):
-        raise ValidationError('Data is not a valid ObjectId')
-
-
-class HeartSchema(Schema):
-    mask_id = fields.Str(required=True, validate=must_not_be_blank)
-    user_id = fields.Str(required=True, validate=must_not_be_blank)
-
-
-class FavorSchema(Schema):
-    user_id = fields.Str(required=True, validate=must_not_be_blank)
-
-
-class PostsList(Resource):
+class PostsList(TokenResource):
     def get(self, theme_id):  # get all posts
         parser = reqparse.RequestParser()
         parser.add_argument('page',
@@ -56,16 +38,6 @@ class PostsList(Resource):
     def post(self, theme_id):  # add a new post
         utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
-        # 根据token取得当前用户/设备_id
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        user = UserInfo(token)
         # save a post
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         doc = collection.Posts()
@@ -75,8 +47,8 @@ class PostsList(Resource):
             doc[item] = resp[item]
         doc['_created'] = utctime
         doc['_updated'] = utctime
-        doc['mask_id'] = user.user.masks[0]
-        doc['author'] = user.user._id
+        doc['mask_id'] = self.user_info.user.masks[0]
+        doc['author'] = self.user_info.user._id
         doc.save()
         # save a record
         user_posts = connection.UserPosts()
@@ -107,7 +79,7 @@ class Post(Resource):
                 "$set": resp
             }
         )
-        return None, 204
+        return '', 204
 
     def delete(self, theme_id, post_id):  # delete a post by its ID
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
@@ -116,86 +88,78 @@ class Post(Resource):
         # delete related comments
         collection.Comments.find_and_modify(
             {"post_id": ObjectId(post_id)}, remove=True)
-        return None, 204
+        return '', 204
 
 
-class FavorPost(Resource):
+class FavorPost(TokenResource):
     def post(self, theme_id, post_id):
-        resp = request.get_json(force=True)
-        # 输入验证
-        if not resp:
-            return {'message': 'No input data provided!'}, 400
-        data, errors = FavorSchema().load(resp)
-        if errors:
-            return errors, 422
         cursor = connection.UserStars.find_one(
             {
                 "post_id": post_id,
-                "user_id": data['user_id'],
+                "user_id": self.user_info.user._id,
                 "theme_id": theme_id
             }
         )
         # 检测帖子是否已被收藏
-        if cursor is None:  # do nothing if repeatedly submits happened
+        if not cursor:  # do nothing if repeatedly submits happened
             connection.UserStars.find_and_modify(
                 {
                     "post_id": post_id,
-                    "user_id": data['user_id'],
+                    "user_id": self.user_info.user._id,
                     "theme_id": theme_id
                 },
                 {
                     "post_id": post_id,
-                    "user_id": data['user_id'],
+                    "user_id": self.user_info.user._id,
                     "theme_id": theme_id
                 },
                 upsert=True
             )
-            return None, 201
+            return '', 201
         else:
-            return {'message': 'Record Exists!'}, 200
+            return {
+                       "status": "error",
+                       "message": "你已经收藏过这个帖子了"
+                   }, 422
 
     def delete(self, theme_id, post_id):
-        parser = reqparse.RequestParser()
-        parser.add_argument('user_id',
-                            type=str,
-                            required=True,
-                            help='user_id not found')
-        args = parser.parse_args()
         connection.UserStars.find_and_modify(
             {
                 "post_id": post_id,
-                "user_id": args['user_id'],
+                "user_id": self.user_info.user._id,
                 "theme_id": theme_id
             },
             remove=True
         )
-        return None, 204
+        return '', 204
 
 
-class Hearts(Resource):
+class Hearts(TokenResource):
     def post(self, theme_id, post_id):
-        resp = request.get_json(force=True)
-        # 输入验证
-        if not resp:
-            return {'message': 'No input data provided!'}, 400
-        data, errors = HeartSchema().load(resp)
-        if errors:
-            return errors, 422
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         cursor = collection.Posts.find_one({"_id": ObjectId(post_id)})
-        # 发帖人不能自己评论自己
-        if cursor['author'] == data['user_id']:
-            return None, 204
+        # 感谢不能送给自己
+        if cursor['author'] == self.user_info.user._id:
+            return {
+                       "status": "error",
+                       "message": "感谢不能送给自己!"
+                   }, 422
         # 查找用户是否已经感谢过这个帖子
         for item in cursor['hearts']:
-            if item['user_id'] == data['user_id']:
-                return None, 204
+            if item['user_id'] == self.user_info.user._id:
+                return {
+                           "status": "error",
+                           "message": "你已经感谢过这个帖子!"
+                       }, 422
         # 更新 hearts 列表
         collection.Posts.find_and_modify(
             {"_id": ObjectId(post_id)},
             {
                 "$addToSet": {
-                    "hearts": data
+                    "hearts": {
+                        "user_id": self.user_info.user._id,
+                        "mask_id": self.user_info.user.masks[0]
+                    }
                 }
             }
         )
@@ -208,42 +172,23 @@ class Hearts(Resource):
                 }
             }
         )
-        return None, 201
+        return '', 201
 
 
-class Feedback(Resource):
+class Feedback(TokenResource):
+    """反馈"""
     def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        access_token = token[token.find(" ") + 1:]
-        if redisdb.exists(
-                "oauth:access_token:{}:client_id".format(access_token)
-        ):
-            device_id = redisdb.get(
-                "oauth:access_token:{}:client_id".format(access_token)
-            )
-        else:
-            return {
-                       'status': "error",
-                       'message': 'Device not found'
-                   }, 404
         resp = request.get_json(force=True)
-        cursor = connection.Devices.find_one({"_id": device_id})
         doc = connection.Feedback()
         for item in resp:
             doc[item] = resp[item]
-        doc.author = cursor.user_id
+        doc.author = self.user_info.user._id
         doc.save()
-        return None, 201
+        return '', 201
 
 
-class ReportPost(Resource):
+class ReportPost(TokenResource):
+    """举报"""
     def post(self, theme_id, post_id):
         # 判断被举报的帖子存在与否
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
@@ -256,29 +201,7 @@ class ReportPost(Resource):
         else:
             # 存在则取到author值
             author = cursor.author
-        # 根据token取得当前用户/设备_id
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            'authorization',
-            type=str,
-            location='headers'
-        )
-        args = parser.parse_args()
-        token = args["authorization"]
-        access_token = token[token.find(" ") + 1:]
-        if redisdb.exists(
-                "oauth:access_token:{}:client_id".format(access_token)
-        ):
-            device_id = redisdb.get(
-                "oauth:access_token:{}:client_id".format(access_token)
-            )
-        else:
-            return {
-                       'status': "error",
-                       'message': 'Device not found'
-                   }, 404
-        cursor = connection.Devices.find_one({"_id": device_id})
-        current_user = cursor.user_id
+        current_user = self.user_info.user._id
         # 检查是否有此举报
         cursor = connection.ReportPosts.find_one(
             {
@@ -292,12 +215,11 @@ class ReportPost(Resource):
             new_report.author = author
             new_report.theme_id = theme_id
             new_report.post_id = post_id
-            new_report.device_id = device_id
             new_report.reporters = [current_user]
             new_report.save()
-            return None, 201
+            return '', 201
         elif current_user not in cursor.reporters:
-            # 当前用户没有举报则可以举报
+            # 当前用户没有举报则可以举报, 只需要在 reporters 列表加入当前用户 id 即可
             connection.ReportPosts.find_and_modify(
                 {
                     "theme_id": theme_id,
@@ -306,10 +228,13 @@ class ReportPost(Resource):
                 {
                     "$addToSet": {
                         "reporters": current_user
+                    },
+                    "$set": {
+                        "_updated": datetime.utcnow()
                     }
                 }
             )
-            return None, 201
+            return '', 201
         else:
             return {
                        "status": "error",

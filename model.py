@@ -755,10 +755,11 @@ class ReportPosts(RootDocument):
         "_id": CustomObjectId(),
         "author": str,
         "reporters": list,
-        "device_id": str,
         "theme_id": str,
         "post_id": str,
         "archived": bool,
+        "_created": CustomDate(),
+        "_updated": CustomDate(),
     }
     required_fields = [
         "author",
@@ -776,11 +777,12 @@ class ReportComments(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "author": str,
-        "device_id": str,
         "reporters": list,
         "theme_id": str,
         "comment_id": str,
         "archived": bool,
+        "_created": CustomDate(),
+        "_updated": CustomDate(),
     }
     required_fields = [
         "author",

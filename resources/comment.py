@@ -167,7 +167,6 @@ class ReportComment(TokenResource):
             new_report.author = author
             new_report.theme_id = theme_id
             new_report.comment_id = comment_id
-            new_report.device_id = self.user_info.device_id
             new_report.reporters = [current_user]
             new_report.save()
             return '', 201
@@ -181,6 +180,9 @@ class ReportComment(TokenResource):
                 {
                     "$addToSet": {
                         "reporters": current_user
+                    },
+                    "$set": {
+                        "_updated": datetime.utcnow()
                     }
                 }
             )
