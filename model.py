@@ -102,7 +102,10 @@ class CustomMaskList(CustomType):
 
 
 class TokenResource(Resource):
-    """从 Authorization Headers 中取得用户信息"""
+    """从 Authorization Headers 中取得用户信息
+    - 输入: 无
+    - 输出: user_info (包含 user 对象和 device_id), 权限限制信息 limit_info
+    """
 
     def __init__(self):
         parser = reqparse.RequestParser()
@@ -113,15 +116,32 @@ class TokenResource(Resource):
         )
         args = parser.parse_args()
         token = args["authorization"]
-        self.user_info = UserInfo(token)
+        if token.startswith("Bearer "):
+            self.user_info = UserInfo(token.split()[1])
+        else:
+            log.error("unsupported authorization header")
+
+    @property
+    def limit_info(self):
+        """获取用户权限信息"""
+
+        if self.user_info.user.user_level_id:
+            user_level = connection.UserLevels.find_one(
+                {"_id": self.user_info.user.user_level_id}
+            )
+            return user_level if user_level else None
+        else:
+            log.error("level information does not exist.")
 
 
 class UserInfo:
-    """根据 Authorization Headers 传递的 token 取得 device_id 和对应 user"""
+    """根据 Authorization Headers 传递的 token 取得 device_id 和对应 user \n
+    - 输入: Bearer Token \n
+    - 输出: device_id 和对应 user
+    """
 
     def __init__(self, token):
-        if token and token.startswith("Bearer "):
-            token = token.split()[1]
+        if token:
             if redisdb.exists(
                     "oauth:access_token:{}:client_id".format(token)
             ):
@@ -138,6 +158,95 @@ class UserInfo:
             log.error("device {} not found".format(self.device_id))
         else:
             return connection.Users.find_one({"_id": ObjectId(device.user_id)})
+
+
+class CheckPermission:
+    """权限检测 \n
+    - 输入: 当前 user_id 类型 str \n
+    - 输出: 当天发帖/举报/感谢/消息次数 类型 int \n
+    - Optional: 支持写入操作, 每次赋值即给对应次数加指定的 value, 可以是负值, 即表示减
+    """
+
+    def __init__(self, user_id):
+        if user_id:
+            # 检查 redis 数据库
+            self.user_id = user_id
+            self._day()
+        else:
+            log.error("user_id missed.")
+
+    def _day(self):
+        hash_map = {
+            "day": datetime.now().date(),
+            "post": 0,
+            "report": 0,
+            "message": 0,
+            "heart": 0
+        }
+        if not redisdb.hexists(
+                "user:{}:daily_count".format(self.user_id), "day"
+        ):
+            redisdb.hmset(
+                "user:{}:daily_count".format(self.user_id), hash_map
+            )  # 不存在记录则初始化
+
+        else:
+            old_day = redisdb.hget(
+                "user:{}:daily_count".format(self.user_id), "day"
+            )
+            old_day = datetime.strptime(old_day, "%Y-%m-%d").date()
+            day_delta = (hash_map["day"] - old_day).days
+            if day_delta:
+                # 超过一天, 归档并重置数据
+                log.debug("%s" % day_delta)
+                # TODO HASH 数据归档
+                redisdb.hmset(
+                    "user:{}:daily_count".format(self.user_id), hash_map
+                )
+
+    @property
+    def post(self):
+        return int(
+            redisdb.hget("user:{}:daily_count".format(self.user_id), "post"))
+
+    @post.setter
+    def post(self, value):
+        redisdb.hincrby(
+            "user:{}:daily_count".format(self.user_id), "post", value
+        )
+
+    @property
+    def report(self):
+        return int(
+            redisdb.hget("user:{}:daily_count".format(self.user_id), "report"))
+
+    @report.setter
+    def report(self, value):
+        redisdb.hincrby(
+            "user:{}:daily_count".format(self.user_id), "report", value
+        )
+
+    @property
+    def message(self):
+        return int(
+            redisdb.hget("user:{}:daily_count".format(self.user_id), "message"))
+
+    @message.setter
+    def message(self, value):
+        redisdb.hincrby(
+            "user:{}:daily_count".format(self.user_id), "message", value
+        )
+
+    @property
+    def heart(self):
+        return int(
+            redisdb.hget("user:{}:daily_count".format(self.user_id), "heart"))
+
+    @heart.setter
+    def heart(self, value):
+        redisdb.hincrby(
+            "user:{}:daily_count".format(self.user_id), "heart", value
+        )
 
 
 # Oauth2 model
