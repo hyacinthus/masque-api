@@ -18,6 +18,7 @@ flask
 Flask-OAuthlib
 uwsgi
 celery
+fabric3
 
 # install the newest mongokit from github
 -e git+https://github.com/namlook/mongokit@development#egg=mongokit
