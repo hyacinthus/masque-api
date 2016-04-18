@@ -1,34 +1,19 @@
-# masque-api
+# masque-api 测试/部署说明
 
-## 部署说明
+## 项目依赖
 
-### MongoDB
-1. 官网安装说明
-  <https://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/>
-2. 开启授权验证
-  ```shell
-  # 首先切换到test数据库下
-  > use test;
-  # 添加一个用户root, 密码是abc123
-  > db.createUser({
-    user: 'root',
-    pwd: 'abc123',
-    roles: [{role: 'dbOwner', db: 'test'}]
-  });
-  # 测试下是否正确
-  > db.auth("root", "abc123");
-   1 # 返回1表示正确
-  # 接下来开启数据库授权验证
-  sudo vi /etc/mongodb.conf
-  auth = ture
-  sudo service mongodb restart  # systemd 方式: sudo systemctl restart mongod.service
-  
-  ```
-  
+```
+sudo apt-get install libpcre3 libpcre3-dev mongodb virtualenvwrapper \
+    redis-server rabbitmq-server supervisor
+```
+
+> 注: MongoDB 如果是从官网软件源安装, 则包名为 mongodb-org
+
+## Python Venv 环境准备
+
 ### virtualenvwrapper
 
 ```
-sudo apt-get install virtualenvwrapper
 sudo vi ~/.zshrc
 # 添加下面这句
 source /usr/local/bin/virtualenvwrapper.sh
@@ -41,31 +26,43 @@ workon test
 # 退出运行环境
 deactivate
 ```
-### 调试启动应用
-克隆项目到本地, 进入虚拟python运行环境, 在项目根目录执行
+
+### 安装 Python 依赖
+
 ```
-# uWSGI 的 internal routing 依赖于 pcre, 需要先安装之
-sudo apt-get install libpcre3 libpcre3-dev
-# 安装 python 依赖包
+git clone git@github.com:Tarsbot/masque-api.git
+cd masque-api
+# 进入虚拟 Python 运行环境
+workon test
 pip install -r requirements.txt
+```
+
+> 注: 可以选用阿里云的 pip 镜像站加快 Python 软件包的下载速度
+>> vi ~/.pip/pip.conf
+```
+[global]
+index-url = http://mirrors.aliyun.com/pypi/simple/
+
+[install]
+trusted-host=mirrors.aliyun.com
+
+```
+
+## 调试应用
+```
+# 进入虚拟python运行环境
+workon test
 # 保证mongodb redis rabbitmq都在正常运行
 # 然后在一个终端执行
 python masque.py
 # 在另一个终端启动队列
 sh celery.sh
-
 ```
-- 输出示例
-  ```
-   * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
-   * Restarting with stat
-   * Debugger is active!
-   * Debugger pin code: 446-423-189
-   
-   ```
 
-### 生产部署
-Ubuntu  
+## 生产部署
+
+### 准备
+
 * 在/run新建masque目录，并修改用户组`chown masque:www-data masque`，若要自定wsgi的socket路径，需要相应修改wsgi.ini文件
 * 如有必要，修改wsgi.ini文件的并行数等参数。
 * 将masque.conf.example复制到/etc/init目录，重命名为masque.conf，并修改其中的参数。
@@ -76,7 +73,7 @@ Ubuntu
 * `nginx -t`检查配置
 * `service nginx reload`
 
-升级部署流程:
+### 持续部署
 
 1. `git checkout product && git pull`
 2. `sudo service masque restart`
