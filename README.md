@@ -39,16 +39,17 @@ pip install -r requirements.txt
 
 > 注: 可以选用阿里云的 pip 镜像站加快 Python 软件包的下载速度
 >> vi ~/.pip/pip.conf
+
 ```
 [global]
 index-url = http://mirrors.aliyun.com/pypi/simple/
 
 [install]
 trusted-host=mirrors.aliyun.com
-
 ```
 
 ## 调试应用
+
 ```
 # 进入虚拟python运行环境
 workon test
