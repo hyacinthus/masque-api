@@ -73,6 +73,7 @@ class CollectionName:
     PARAMETERS = "parameters"
     DEVICE_TRACE = "device_trace"
     MESSAGES = "messages"
+    NOTIFICATIONS = "notifications"
     USER_TRACE = "user_trace"
     SCHOOLS = "schools"
     FEEDBACK = "feedback"
