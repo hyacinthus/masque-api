@@ -1,8 +1,8 @@
-import sys
 import json
-import requests
+import sys
 from datetime import datetime
 
+import requests
 from fabric.api import local, task
 from fabric.colors import blue, red
 
@@ -18,7 +18,12 @@ def do_exit(msg):
 def get_event():
     url = "https://api.github.com/repos/Tarsbot/masque-api/events"
     querystring = {"page": "1", "per_page": "1"}
-    headers = {'authorization': 'Basic ZmVyc3Rhcjpxd2VydDEyMzQ1'}
+    token = local(
+        'git remote -v | grep fetch', capture=True
+    ).split(":")[2].split("@")[0]
+    headers = {
+        'authorization': 'Token {}'.format(token)
+    }
     response = requests.request("GET", url, headers=headers, params=querystring)
     return json.loads(response.text)[0]
 
