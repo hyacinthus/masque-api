@@ -5,8 +5,9 @@ from bson.objectid import ObjectId
 from flask_restful import request, reqparse
 
 from config import MongoConfig, APIConfig
-from model import connection, TokenResource
+from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
+from util import add_exp
 
 log = logging.getLogger("masque.comment")
 
@@ -35,6 +36,14 @@ class CommentsList(TokenResource):
         return paged_cursor.data
 
     def post(self, theme_id):  # add a new comment
+        # 每条评论加 1 经验, 每日上限 10
+        perm = CheckPermission(self.user_info.user._id)
+        if perm.comment < 5:
+            user = self.user_info.user
+            add_exp(user, 1)
+            user.save()
+        # 当日评论数加 1
+        perm.comment = 1
         utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
         # save a comment
@@ -46,7 +55,6 @@ class CommentsList(TokenResource):
             doc[item] = resp[item]
         doc['_created'] = utctime
         doc['author'] = self.user_info.user._id
-        log.debug("{}".format(self.user_info.user))
         # 如果之前回复过该贴, 头像保持原状
         cursor = collection.find_one(
             {

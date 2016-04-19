@@ -179,6 +179,7 @@ class CheckPermission:
         hash_map = {
             "day": datetime.now().date(),
             "post": 0,
+            "comment": 0,
             "report": 0,
             "message": 0,
             "heart": 0
@@ -217,6 +218,17 @@ class CheckPermission:
     def post(self, value):
         redisdb.hincrby(
             "user:{}:daily_count".format(self.user_id), "post", value
+        )
+
+    @property
+    def comment(self):
+        return int(
+            redisdb.hget("user:{}:daily_count".format(self.user_id), "comment"))
+
+    @comment.setter
+    def comment(self, value):
+        redisdb.hincrby(
+            "user:{}:daily_count".format(self.user_id), "comment", value
         )
 
     @property
@@ -765,6 +777,14 @@ class Notifications(RootDocument):
         "theme_id": str,
         "post_id": str,
         "message_id": str
+    }
+    default_values = {
+        "user_id": '',
+        "type": '',
+        "content": '',
+        "theme_id": '',
+        "post_id": '',
+        "message_id": ''
     }
 
 
