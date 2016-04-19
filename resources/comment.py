@@ -38,9 +38,10 @@ class CommentsList(TokenResource):
     def post(self, theme_id):  # add a new comment
         # 每条评论加 1 经验, 每日上限 10
         perm = CheckPermission(self.user_info.user._id)
-        if perm.comment < 5:
+        if perm.exp < 10:
             user = self.user_info.user
             add_exp(user, 1)
+            perm.exp = 1  # 每日经验记数加 1
             user.save()
         # 当日评论数加 1
         perm.comment = 1

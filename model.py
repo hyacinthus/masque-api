@@ -182,7 +182,8 @@ class CheckPermission:
             "comment": 0,
             "report": 0,
             "message": 0,
-            "heart": 0
+            "heart": 0,
+            "exp": 0
         }
         if not redisdb.hexists(
                 "user:{}:daily_count".format(self.user_id), "day"
@@ -264,6 +265,16 @@ class CheckPermission:
             "user:{}:daily_count".format(self.user_id), "heart", value
         )
 
+    @property
+    def exp(self):
+        return int(
+            redisdb.hget("user:{}:daily_count".format(self.user_id), "exp"))
+
+    @exp.setter
+    def exp(self, value):
+        redisdb.hincrby(
+            "user:{}:daily_count".format(self.user_id), "exp", value
+        )
 
 # Oauth2 model
 class Client():

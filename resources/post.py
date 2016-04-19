@@ -41,9 +41,10 @@ class PostsList(TokenResource):
         perm = CheckPermission(self.user_info.user._id)
         if perm.post < self.limit_info.post_limit:
             # 经验限制(每发一帖经验加5, 每日上限10)
-            if perm.post < 1:
+            if perm.exp <= 5:
                 user = self.user_info.user
                 add_exp(user, 5)
+                perm.exp = 5  # 经验记数加 5
                 user.save()
             perm.post = 1  # 没有超额, 允许发帖, 同时发帖数加 1
         else:
