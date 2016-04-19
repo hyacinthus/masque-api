@@ -19,6 +19,10 @@ Flask-OAuthlib
 uwsgi
 celery
 fabric3
+aliyun-python-sdk-green==1.1.0
 
 # install the newest mongokit from github
 -e git+https://github.com/namlook/mongokit@development#egg=mongokit
+
+# install the newest mongokit from github
+-e git+https://github.com/hugoxia/aliyunsdkcore@new#egg=aliyun-python-sdk-core

@@ -1,7 +1,7 @@
 import logging
-import random
 
 import pymongo
+import random
 from bson.json_util import loads, dumps
 from bson.objectid import ObjectId
 
@@ -9,7 +9,10 @@ from config import MongoConfig
 from model import connection
 from model import get_host, redisdb
 from tasks import notification
+from tools import detection
+from tools.oss import OssConnection
 
+oc = OssConnection()
 log = logging.getLogger("masque.util")
 mongo = pymongo.MongoClient(get_host())[MongoConfig.DB]
 
@@ -120,4 +123,7 @@ def update_system(user, version):
 def check_image(bucket, id):
     """check image
     input: bucket and id"""
-    notification.check_image.deplay(bucket, id)
+    img_url = oc.bucket.sign_url("GET", bucket + '/' + id, 60)
+    label, rate = detection.detect(img_url)
+    if not label:
+        notification.check_image.deplay(bucket, id)

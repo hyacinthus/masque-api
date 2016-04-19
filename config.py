@@ -18,6 +18,7 @@ class AliConfig:
     SMS_FREE_SIGN_NAME = os.getenv("SMS_FREE_SIGN_NAME", "注册验证")
     SMS_TYPE = os.getenv("SMS_TYPE", "normal")
     APP_NAME = os.getenv("SMS_APP_NAME", "假面")
+    REGIONID = os.getenv("REGION_ID", "cn-beijing")
 
 
 class FlaskConfig:
