@@ -1,14 +1,13 @@
 import logging
-from bson.objectid import ObjectId
-from bson.json_util import loads, dumps
 
 import pymongo
+from bson.json_util import loads, dumps
+from bson.objectid import ObjectId
 
-from model import get_host, redisdb
 from config import MongoConfig
-from tasks import notification
 from model import connection
-
+from model import get_host, redisdb
+from tasks import notification
 
 log = logging.getLogger("masque.util")
 mongo = pymongo.MongoClient(get_host())[MongoConfig.DB]
@@ -39,6 +38,7 @@ def add_exp(user, exp):
     new_level = get_level(user.exp)
     if new_level != user.user_level_id:
         user.user_level_id = new_level
+        user.save()  # 保存level变化到数据库
         if exp > 0:
             notification.level_up.delay(user._id, user.user_level_id)
         else:
