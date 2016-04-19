@@ -601,7 +601,12 @@ class Users(RootDocument):
         "_updated": CustomDate(),
         "masks": CustomMaskList(),
         "home": str,
-        "subscribed": list
+        "subscribed": list,
+        "options": {
+            "new_comment": bool,
+            "star_comment": bool,
+            "comment_reply": bool
+        }
     }
     # required_fields = [
     #     "content.text"
@@ -612,7 +617,10 @@ class Users(RootDocument):
         "hearts_received": 0,
         "hearts_owned": 0,
         "cellphone": "",
-        "home": ""
+        "home": "",
+        "options.new_comment": True,
+        "options.star_comment": True,
+        "options.comment_reply": False,
     }
 
 

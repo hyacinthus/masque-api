@@ -88,6 +88,9 @@ class CommentsList(TokenResource):
             {
                 "$inc": {
                     "comment_count": 1
+                },
+                "$set": {
+                    "_updated": datetime.utcnow()
                 }
             }
         )
