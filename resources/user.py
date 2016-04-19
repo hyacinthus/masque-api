@@ -1,12 +1,12 @@
 import logging
-from datetime import datetime
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig, APIConfig
-from model import connection, TokenResource
+from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
+from util import add_exp
 
 log = logging.getLogger("masque.user")
 
@@ -43,30 +43,20 @@ class DeviceUser(Resource):
             result = connection.Users.find_one({"_id": ObjectId(user_id)})
         else:
             # 查到 device_id 对应信息, 返回对应用户信息并刷新用户登录时间
-            result = connection.Users.find_and_modify(
-                {"_id": ObjectId(cursor['user_id'])},
-                {
-                    "$set": {
-                        "_updated": datetime.utcnow()
-                    }
-                }
+            result = connection.Users.find_one(
+                {"_id": ObjectId(cursor['user_id'])}
             )
+            if CheckPermission(result._id).is_first_login:
+                # 当天初次登录随机加 1-5 经验
+                add_exp(result)
+            result._updated = None
+            result.save()
         return result
 
 
 class User(TokenResource):
     def get(self, user_id):  # get user info by its ID
-        # 返回用户信息同时刷新登录时间记录
-        cursor = connection.Users.find_and_modify(
-            {"_id": ObjectId(self.user_info.user._id)},
-            {
-                "$set": {
-                    "_updated": datetime.utcnow()
-                }
-            }
-        )
-        log.debug("用户信息{}".format(cursor))
-        return cursor
+        return self.user_info.user
 
     def put(self, user_id):  # update user info by its ID
         # 处理客户端请求数据

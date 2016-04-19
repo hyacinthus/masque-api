@@ -171,7 +171,7 @@ class CheckPermission:
         if user_id:
             # 检查 redis 数据库
             self.user_id = user_id
-            self._day()
+            self.is_first_login = self._day()
         else:
             log.error("user_id missed.")
 
@@ -186,9 +186,11 @@ class CheckPermission:
         if not redisdb.hexists(
                 "user:{}:daily_count".format(self.user_id), "day"
         ):
+            # 不存在记录则初始化
             redisdb.hmset(
                 "user:{}:daily_count".format(self.user_id), hash_map
-            )  # 不存在记录则初始化
+            )
+            return True
 
         else:
             old_day = redisdb.hget(
@@ -203,6 +205,8 @@ class CheckPermission:
                 redisdb.hmset(
                     "user:{}:daily_count".format(self.user_id), hash_map
                 )
+                return True
+            return False
 
     @property
     def post(self):

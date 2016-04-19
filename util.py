@@ -1,4 +1,5 @@
 import logging
+import random
 
 import pymongo
 from bson.json_util import loads, dumps
@@ -31,14 +32,18 @@ def get_level(exp):
             return l['_id']
 
 
-def add_exp(user, exp):
+def add_exp(user, exp=None):
     """add exp to user 
-    input:User instance"""
+    input:User instance
+    调用后必须save()保存经验变更到数据库
+    """
+    if not exp:
+        # 默认经验值是1-5的随机数
+        exp = random.sample([i for i in range(1, 6)], 1)[0]
     user.exp = user.exp + exp
     new_level = get_level(user.exp)
     if new_level != user.user_level_id:
         user.user_level_id = new_level
-        user.save()  # 保存level变化到数据库
         if exp > 0:
             notification.level_up.delay(user._id, user.user_level_id)
         else:
