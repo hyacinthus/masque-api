@@ -7,6 +7,7 @@ from flask_restful import Resource, request, reqparse
 from config import MongoConfig, APIConfig
 from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
+from util import add_exp
 
 log = logging.getLogger("masque.comment")
 
@@ -179,15 +180,12 @@ class Hearts(TokenResource):
                 }
             }
         )
+        user = connection.Users.find_one({"_id": ObjectId(cursor['author'])})
         # 给帖子作者 hearts_received 加一
-        connection.Users.find_and_modify(
-            {"_id": ObjectId(cursor['author'])},
-            {
-                "$inc": {
-                    "hearts_received": 1
-                }
-            }
-        )
+        user.hearts_received += 1
+        # 给帖子作者加 10 经验
+        add_exp(user, 10)
+        user.save()
         return '', 201
 
 

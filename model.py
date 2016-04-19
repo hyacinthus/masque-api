@@ -722,7 +722,7 @@ class DeviceTrace(RootDocument):
         "_id": CustomObjectId(),
         "serial": str,
         "carrier": str,
-        "cellphone": int,
+        "cellphone": str,
         "location": {
             "coordinates": [
                 OR(int, float),
@@ -732,7 +732,7 @@ class DeviceTrace(RootDocument):
         }
     }
     default_values = {
-        "cellphone": 18000000000,
+        "cellphone": str,
         "location.coordinates": [0, 0],
         "location.type": "Point"
     }
