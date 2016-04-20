@@ -154,6 +154,14 @@ class PostComments(TokenResource):
 
 class ReportComment(TokenResource):
     def post(self, theme_id, comment_id):
+        # 权限检测
+        perm = CheckPermission(self.user_info.user._id)
+        if perm.report < self.limit_info.report_limit:
+            perm.report = 1  # 没有超额, 允许举报, 同时举报数加 1
+        else:
+            return {
+                       "message": "今日举报的次数已达上限, 谢谢支持!"
+                   }, 403
         # 判断被举报的评论存在与否
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
@@ -210,6 +218,18 @@ class CommentHeart(TokenResource):
     """感谢评论"""
 
     def post(self, theme_id, comment_id):
+        # 权限检测
+        user = self.user_info.user
+        perm = CheckPermission(user._id)
+        if user.hearts_owned > 0:
+            # 感谢余额充足, 允许感谢, 同时当天感谢记数加 1, 拥有感谢数减 1
+            user.hearts_owned -= 1
+            user.save()
+            perm.heart = 1
+        else:
+            return {
+                       "message": "感谢数不足, 无法送出感谢"
+                   }, 403
         # 判断要感谢的评论存在与否
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})

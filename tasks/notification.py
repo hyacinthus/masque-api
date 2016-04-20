@@ -157,6 +157,20 @@ def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
 
 
 @app.task
+def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
+    content = "you post a illegal comment %s" % comment_id
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "punishment"
+    notifi.user_id = user_id
+    notifi.theme_id = theme_id
+    notifi.post_id = post_id
+    notifi.comment_id = comment_id
+    notifi.content = content
+    notifi.save()
+
+
+@app.task
 def frozen_user(user_id):
     content = "Warning! your account has been frozen "
     log.info(content)
@@ -211,6 +225,7 @@ def bind_cellphone(user_id, cellphone):
     notifi.save()
 
 
+
 @app.task
 def publish_porn_image(user_id, image_id):
     content = "you post a illegal porn image %s" % image_id
@@ -220,3 +235,4 @@ def publish_porn_image(user_id, image_id):
     notifi.content = content
     notifi.user_id = user_id
     notifi.save()
+

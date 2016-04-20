@@ -1,4 +1,5 @@
 import logging
+import re
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
@@ -46,9 +47,19 @@ class DeviceUser(Resource):
             result = connection.Users.find_one(
                 {"_id": ObjectId(cursor['user_id'])}
             )
-            if CheckPermission(result._id).is_first_login:
+            perm = CheckPermission(result._id)
+            if perm.is_first_login:
                 # 当天初次登录随机加 1-5 经验
                 add_exp(result)
+                heart_limit = connection.UserLevels.find_one(
+                    {"_id": result.user_level_id}
+                ).heart_limit
+                # 每天第一次登录拥有感谢数加 1
+                if result.hearts_owned < (heart_limit + int(
+                        re.search('\d+', result.user_level_id).group()) - 1):
+                    # 感谢增加上限为等级数减一
+                    # 个人拥有感谢总数为对应等级的感谢数上限与因每日登录奖励的感谢数之和
+                    result.hearts_owned += 1
             result._updated = None
             result.save()
         return result
