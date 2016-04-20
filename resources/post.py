@@ -39,18 +39,27 @@ class PostsList(TokenResource):
     def post(self, theme_id):  # add a new post
         # 权限检测
         perm = CheckPermission(self.user_info.user._id)
-        if perm.post < self.limit_info.post_limit:
-            # 经验限制(每发一帖经验加5, 每日上限10)
+        if theme_id != "用户反馈":
+            if perm.post < self.limit_info.post_limit:
+                # 经验限制(每发一帖经验加5, 每日上限10)
+                if perm.exp <= 5:
+                    user = self.user_info.user
+                    add_exp(user, 5)
+                    perm.exp = 5  # 经验记数加 5
+                    user.save()
+                perm.post = 1  # 没有超额, 允许发帖, 同时发帖数加 1
+            else:
+                return {
+                           "message": "今日发帖数量已到上限, 大侠还请明日再来"
+                       }, 403
+        else:
+            # 反馈帖只限制增长经验, 不限制发帖次数
             if perm.exp <= 5:
                 user = self.user_info.user
                 add_exp(user, 5)
                 perm.exp = 5  # 经验记数加 5
                 user.save()
-            perm.post = 1  # 没有超额, 允许发帖, 同时发帖数加 1
-        else:
-            return {
-                       "message": "今日发帖数量已到上限, 大侠还请明日再来"
-                   }, 403
+            perm.post = 1
         utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
         # save a post
