@@ -3,7 +3,7 @@ from config import AliConfig
 from aliyunsdkcore import client
 from aliyunsdkgreen.request.v20160308 import ImageDetectionRequest
 
-clt = client.AcsClient(AliConfig.IKEY, AliConfig.AKEY, AliConfig.REGIONID)
+clt = client.AcsClient('IuZZE8uphLHbbo7e', 'EcYS7y4K7MfJtzHfNVuxVpUaK4lXn0', 'cn-shenzhen')
 
 
 def detect(image_url, async=False, scene=['porn']):
@@ -27,5 +27,6 @@ def detect(image_url, async=False, scene=['porn']):
         label, rate = pornResult["Label"], pornResult["Rate"]
         return label, rate
     else:
+        print(result)
         raise Exception('Code: %s' % result["Code"],
-                        'Message: %s' % result["Message"])
+                        'Message: %s' % result["Msg"])

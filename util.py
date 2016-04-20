@@ -125,5 +125,9 @@ def check_image(bucket, id):
     input: bucket and id"""
     img_url = oc.bucket.sign_url("GET", bucket + '/' + id, 60)
     label, rate = detection.detect(img_url)
-    if not label:
+    if label:
+        detect = connection.Detections()
+        detect._id = id
+        detect.bucket = bucket
+        detect.save()
         notification.check_image.deplay(bucket, id)

@@ -80,3 +80,4 @@ class CollectionName:
     FEEDBACK = "feedback"
     REPORT_POSTS = "report_posts"
     REPORT_COMMENTS = "report_comments"
+    DETECTIONS = "detections"

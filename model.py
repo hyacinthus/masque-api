@@ -958,3 +958,21 @@ class ReportComments(RootDocument):
     default_values = {
         "archived": False,
     }
+
+
+@connection.register
+class Detections(RootDocument):
+    __collection__ = CollectionName.DETECTIONS
+    structure = {
+        "_id": str,
+        "bucket": str,
+        "archived": bool,
+        "_created": CustomDate(),
+    }
+    required_fields = [
+        "_id",
+        "bucket",
+    ]
+    default_values = {
+        "archived": False,
+    }

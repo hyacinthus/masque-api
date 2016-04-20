@@ -4,10 +4,10 @@ import bcrypt
 import datetime
 import http.client
 import urllib.parse
-from resource import redisdb
+from model import redisdb
 
 
-conn = http.client.HTTPConnection("localhost", 5000)
+conn = http.client.HTTPConnection("localhost")
 
 
 class OssConnection:
@@ -38,11 +38,8 @@ class OssConnection:
 
     # 获得oss_token
     def get_auth(self):
-        access_token = None if redisdb.get("admin:{'admin'}:api_access_token") is None \
-            else redisdb.get("admin:{'admin'}:api_access_token")
-
+        access_token = redisdb.get("admin:{admin}:api_access_token")
         access_token = self.get_api_token()['access_token'] if access_token is None else access_token
-
         headers = {'authorization': "Bearer " + access_token}
         conn.request("GET", "/image_token", headers=headers)
         res = conn.getresponse()
