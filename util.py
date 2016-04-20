@@ -1,7 +1,7 @@
 import logging
+import random
 
 import pymongo
-import random
 from bson.json_util import loads, dumps
 from bson.objectid import ObjectId
 
@@ -36,7 +36,7 @@ def get_level(exp):
 
 
 def add_exp(user, exp=None):
-    """add exp to user 
+    """add exp to user
     input:User instance
     调用后必须save()保存经验变更到数据库
     """
@@ -57,7 +57,9 @@ def new_remark(comment):
     """post have a new comment
     input:Comment instance"""
     user_stars = list(mongo.user_stars.find({'post_id': comment.post_id}))
-    notification.new_reply.delay(comment.author, comment.post_id, comment._id)
+    cursor = connection.UserComments.find_one({"comment_id": comment._id})
+    notification.new_reply.delay(comment.author, cursor.theme_id,
+                                 comment.post_id, comment._id)
     for star in user_stars:
         notification.star_new_reply.deplay(star['user_id'], star['theme_id'],
                                            star['post_id'], comment._id)
@@ -66,7 +68,16 @@ def new_remark(comment):
 def post_heart(post):
     """post have a new heart
     input:Post instance"""
-    notification.new_heart.delay(post.author, post._id)
+    cursor = connection.UserPosts.find_one({"post_id": post._id})
+    notification.new_heart.delay(post.author, cursor.theme_id, post._id)
+
+
+def comment_heart(comment):
+    """comment have a new heart
+    input: Comment instance"""
+    cursor = connection.UserComments.find_one({"comment_id": comment._id})
+    notification.comment_new_heart.delay(comment.author, cursor.theme_id,
+                                         comment.post_id, comment._id)
 
 
 def valid_feedback(feedback, exp=10):
@@ -82,23 +93,23 @@ def invalid_report(report, exp=-1):
     input:Report instance"""
     user = connection.Users.find_one({"_id": ObjectId(report.author)})
     add_exp(user, exp)
-    notification.publish_invalid_report.delay(report.author, report.theme_id, report.post_id, exp)
+    notification.publish_invalid_report.delay(report.author, report.theme_id,
+                                              report.post_id, exp)
 
 
-def illegal_post(post, theme_id, exp):
+def illegal_post(post):
     """remind user not to post illegal content
     input:Post instance"""
-    user = connection.Users.find_one({"_id": ObjectId(post.author)})
-    add_exp(user, exp)
-    notification.publish_illegal_content.delay(post.author, theme_id, post._id, exp)
+    cursor = connection.UserPosts.find_one({"post_id": post._id})
+    notification.publish_illegal_post.delay(post.author, cursor.theme_id, post._id)
 
 
-def illegal_comment(comment, theme_id, exp):
+def illegal_comment(comment):
     """remind user not to post illegal content
     input:Comment instance"""
-    user = connection.Users.find_one({"_id": ObjectId(comment.author)})
-    add_exp(user, exp)
-    notification.publish_illegal_content.delay(comment.author, theme_id, comment.post_id, exp)
+    cursor = connection.UserComments.find_one({"comment_id": comment._id})
+    notification.publish_illegal_comment.delay(comment.author, cursor.theme_id,
+                                               comment.post_id, comment._id)
 
 
 def frozen_user(user):
@@ -111,7 +122,7 @@ def bind_cellphone(user):
     """bind cellphone
     input:User instance"""
     add_exp(user, exp=20)
-    notification.bind_cellphone.deplay(user._id, user.cellphone)
+    notification.bind_cellphone.delay(user._id, user.cellphone)
 
 
 def update_system(user, version):
@@ -120,14 +131,23 @@ def update_system(user, version):
     notification.update_system.delay(user._id, version)
 
 
-def check_image(bucket, id):
+def check_image(user_image):
     """check image
-    input: bucket and id"""
-    img_url = oc.bucket.sign_url("GET", bucket + '/' + id, 60)
+    input: User Image instance"""
+    img_url = oc.bucket.sign_url("GET", user_image.category + '/' + user_image._id, 60)
     label, rate = detection.detect(img_url)
     if label:
         detect = connection.Detections()
-        detect._id = id
-        detect.bucket = bucket
+        detect._id = user_image._id
+        detect.author = user_image.author
+        detect.bucket = user_image.category
         detect.save()
-        notification.check_image.deplay(bucket, id)
+        notification.check_image.deplay(user_image.author, user_image._id)
+
+
+def porn_image(user_image, exp=-5):
+    """remind user not to post porn_image
+    input: User Image instance"""
+    user = connection.Users.find_one({"_id": ObjectId(user_image.author)})
+    add_exp(user, exp)
+    notification.publish_porn_image.delay(user_image.author, user_image._id)
