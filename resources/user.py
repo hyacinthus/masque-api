@@ -64,9 +64,7 @@ class User(TokenResource):
         if not resp:
             return {'message': 'No input data provided!'}, 400
         # 更新数据库
-        cursor = connection.Users.find_one(
-            {"_id": ObjectId(self.user_info.user._id)}
-        )
+        cursor = self.user_info.user
         for item in resp:
             if item in ('_created', '_id', '_updated'):
                 continue

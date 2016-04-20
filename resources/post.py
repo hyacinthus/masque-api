@@ -7,6 +7,7 @@ from flask_restful import Resource, request, reqparse
 from config import MongoConfig, APIConfig
 from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
+from util import add_exp
 
 log = logging.getLogger("masque.comment")
 
@@ -39,6 +40,12 @@ class PostsList(TokenResource):
         # 权限检测
         perm = CheckPermission(self.user_info.user._id)
         if perm.post < self.limit_info.post_limit:
+            # 经验限制(每发一帖经验加5, 每日上限10)
+            if perm.exp <= 5:
+                user = self.user_info.user
+                add_exp(user, 5)
+                perm.exp = 5  # 经验记数加 5
+                user.save()
             perm.post = 1  # 没有超额, 允许发帖, 同时发帖数加 1
         else:
             return {
@@ -179,15 +186,12 @@ class Hearts(TokenResource):
                 }
             }
         )
+        user = connection.Users.find_one({"_id": ObjectId(cursor['author'])})
         # 给帖子作者 hearts_received 加一
-        connection.Users.find_and_modify(
-            {"_id": ObjectId(cursor['author'])},
-            {
-                "$inc": {
-                    "hearts_received": 1
-                }
-            }
-        )
+        user.hearts_received += 1
+        # 给帖子作者加 10 经验
+        add_exp(user, 10)
+        user.save()
         return '', 201
 
 

@@ -179,9 +179,11 @@ class CheckPermission:
         hash_map = {
             "day": datetime.now().date(),
             "post": 0,
+            "comment": 0,
             "report": 0,
             "message": 0,
-            "heart": 0
+            "heart": 0,
+            "exp": 0
         }
         if not redisdb.hexists(
                 "user:{}:daily_count".format(self.user_id), "day"
@@ -220,6 +222,17 @@ class CheckPermission:
         )
 
     @property
+    def comment(self):
+        return int(
+            redisdb.hget("user:{}:daily_count".format(self.user_id), "comment"))
+
+    @comment.setter
+    def comment(self, value):
+        redisdb.hincrby(
+            "user:{}:daily_count".format(self.user_id), "comment", value
+        )
+
+    @property
     def report(self):
         return int(
             redisdb.hget("user:{}:daily_count".format(self.user_id), "report"))
@@ -252,6 +265,16 @@ class CheckPermission:
             "user:{}:daily_count".format(self.user_id), "heart", value
         )
 
+    @property
+    def exp(self):
+        return int(
+            redisdb.hget("user:{}:daily_count".format(self.user_id), "exp"))
+
+    @exp.setter
+    def exp(self, value):
+        redisdb.hincrby(
+            "user:{}:daily_count".format(self.user_id), "exp", value
+        )
 
 # Oauth2 model
 class Client():
@@ -578,7 +601,12 @@ class Users(RootDocument):
         "_updated": CustomDate(),
         "masks": CustomMaskList(),
         "home": str,
-        "subscribed": list
+        "subscribed": list,
+        "options": {
+            "new_comment": bool,
+            "star_comment": bool,
+            "comment_reply": bool
+        }
     }
     # required_fields = [
     #     "content.text"
@@ -589,7 +617,10 @@ class Users(RootDocument):
         "hearts_received": 0,
         "hearts_owned": 0,
         "cellphone": "",
-        "home": ""
+        "home": "",
+        "options.new_comment": True,
+        "options.star_comment": True,
+        "options.comment_reply": False,
     }
 
 
@@ -722,7 +753,7 @@ class DeviceTrace(RootDocument):
         "_id": CustomObjectId(),
         "serial": str,
         "carrier": str,
-        "cellphone": int,
+        "cellphone": str,
         "location": {
             "coordinates": [
                 OR(int, float),
@@ -732,7 +763,7 @@ class DeviceTrace(RootDocument):
         }
     }
     default_values = {
-        "cellphone": 18000000000,
+        "cellphone": str,
         "location.coordinates": [0, 0],
         "location.type": "Point"
     }
@@ -765,6 +796,14 @@ class Notifications(RootDocument):
         "theme_id": str,
         "post_id": str,
         "message_id": str
+    }
+    default_values = {
+        "user_id": '',
+        "type": '',
+        "content": '',
+        "theme_id": '',
+        "post_id": '',
+        "message_id": ''
     }
 
 

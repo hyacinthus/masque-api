@@ -8,6 +8,7 @@ from flask_restful import Resource, reqparse
 import top.api
 from config import AliConfig
 from model import redisdb, connection, TokenResource
+from util import add_exp
 
 log = logging.getLogger("masque.sms")
 
@@ -151,8 +152,11 @@ class BoundPhone(TokenResource):
                     "$set": {"cellphone": cellphone}
                 }
             )
-            return connection.Users.find_one(
-                {"_id": ObjectId(current_user_id)}), 201
+            user = connection.Users.find_one({"_id": ObjectId(current_user_id)})
+            # 绑定手机加 20 经验
+            add_exp(user, 20)
+            user.save()
+            return user, 201
 
 
 class ChangePhone(TokenResource):
