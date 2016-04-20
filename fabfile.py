@@ -42,4 +42,5 @@ def pull():
             local('git fetch', capture=False)
             local('git pull', capture=False)
             local('sudo supervisorctl restart masque', capture=False)
+            local('sudo supervisorctl restart celery', capture=False)
             do_exit('Update Complete!')
