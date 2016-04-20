@@ -605,6 +605,8 @@ class Users(RootDocument):
         "options": {
             "new_comment": bool,
             "star_comment": bool,
+            "post_hearted": bool,
+            "comment_hearted": bool,
         }
     }
     # required_fields = [
@@ -618,7 +620,9 @@ class Users(RootDocument):
         "cellphone": "",
         "home": "",
         "options.new_comment": True,
-        "options.star_comment": True
+        "options.star_comment": True,
+        "options.post_hearted": True,
+        "options.comment_hearted": True,
     }
 
 

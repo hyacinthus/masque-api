@@ -7,7 +7,7 @@ from flask_restful import Resource, request, reqparse
 from config import MongoConfig, APIConfig
 from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
-from util import add_exp
+from util import add_exp, post_heart
 
 log = logging.getLogger("masque.comment")
 
@@ -205,6 +205,8 @@ class Hearts(TokenResource):
         # 给帖子作者加 10 经验
         add_exp(user, 10)
         user.save()
+        # 发送感谢通知
+        post_heart(cursor)
         return '', 201
 
 
