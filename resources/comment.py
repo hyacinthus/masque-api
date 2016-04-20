@@ -219,10 +219,12 @@ class CommentHeart(TokenResource):
 
     def post(self, theme_id, comment_id):
         # 权限检测
-        perm = CheckPermission(self.user_info.user._id)
-        if self.user_info.user.hearts_owned > 0:
+        user = self.user_info.user
+        perm = CheckPermission(user._id)
+        if user.hearts_owned > 0:
             # 感谢余额充足, 允许感谢, 同时当天感谢记数加 1, 拥有感谢数减 1
-            self.user_info.user.hearts_owned -= 1
+            user.hearts_owned -= 1
+            user.save()
             perm.heart = 1
         else:
             return {
