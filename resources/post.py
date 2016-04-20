@@ -153,11 +153,13 @@ class Hearts(TokenResource):
     def post(self, theme_id, post_id):
         # 权限检测
         perm = CheckPermission(self.user_info.user._id)
-        if perm.heart < self.limit_info.heart_limit:
-            perm.heart = 1  # 没有超额, 允许感谢, 同时感谢数加 1
+        if self.user_info.user.hearts_owned > 0:
+            # 感谢余额充足, 允许感谢, 同时当天感谢记数加 1, 拥有感谢数减 1
+            self.user_info.user.hearts_owned -= 1
+            perm.heart = 1
         else:
             return {
-                       "message": "今天发出的感谢已经够多了, 亲先歇歇吧"
+                       "message": "感谢数不足, 无法送出感谢"
                    }, 403
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         cursor = collection.Posts.find_one({"_id": ObjectId(post_id)})
