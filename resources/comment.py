@@ -218,6 +218,16 @@ class CommentHeart(TokenResource):
     """感谢评论"""
 
     def post(self, theme_id, comment_id):
+        # 权限检测
+        perm = CheckPermission(self.user_info.user._id)
+        if self.user_info.user.hearts_owned > 0:
+            # 感谢余额充足, 允许感谢, 同时当天感谢记数加 1, 拥有感谢数减 1
+            self.user_info.user.hearts_owned -= 1
+            perm.heart = 1
+        else:
+            return {
+                       "message": "感谢数不足, 无法送出感谢"
+                   }, 403
         # 判断要感谢的评论存在与否
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
