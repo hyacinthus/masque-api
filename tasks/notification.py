@@ -60,6 +60,19 @@ def new_heart(author_id, theme_id, post_id):
 
 
 @app.task
+def comment_new_heart(user_id, theme_id, post_id, comment_id):
+    content = "There are new hearts for the comment %s you remarked" % comment_id
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "message"
+    notifi.user_id = user_id
+    notifi.theme_id = theme_id
+    notifi.post_id = post_id
+    notifi.content = content
+    notifi.save()
+
+
+@app.task
 def level_up(user_id, user_level):
     content = "Level up! your new level is %s" % user_level
     log.info(content)
@@ -83,7 +96,7 @@ def level_down(user_id, user_level):
 
 @app.task
 def encourage_valid_feedback(user_id, exp, name):
-    content = "Thanks, your feedback %s have solved, exp +%s" % (exp, name)
+    content = "Thanks, your feedback %s have solved, exp +%s" % (name, exp)
     log.info(content)
     notifi = connection.Notifications()
     notifi.type = "encourage"
@@ -117,14 +130,28 @@ def publish_invalid_report(author_id, theme_id, post_id, exp):
 
 
 @app.task
-def publish_illegal_content(user_id, theme_id, post_id, exp):
-    content = "you post a illegal content, exp %s" % exp
+def publish_illegal_post(user_id, theme_id, post_id):
+    content = "you post a illegal post %s" % post_id
     log.info(content)
     notifi = connection.Notifications()
     notifi.type = "punishment"
     notifi.user_id = user_id
     notifi.theme_id = theme_id
     notifi.post_id = post_id
+    notifi.content = content
+    notifi.save()
+
+
+@app.task
+def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
+    content = "you post a illegal comment %s" % comment_id
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "punishment"
+    notifi.user_id = user_id
+    notifi.theme_id = theme_id
+    notifi.post_id = post_id
+    notifi.comment_id = comment_id
     notifi.content = content
     notifi.save()
 
