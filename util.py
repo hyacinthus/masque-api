@@ -1,17 +1,14 @@
 import logging
 import random
 
-import pymongo
 from bson.json_util import loads, dumps
 from bson.objectid import ObjectId
 
-from config import MongoConfig
 from model import connection
-from model import get_host, redisdb
+from model import redisdb
 from tasks import notification
 
 log = logging.getLogger("masque.util")
-mongo = pymongo.MongoClient(get_host())[MongoConfig.DB]
 
 
 def get_level(exp):
@@ -20,8 +17,7 @@ def get_level(exp):
     if levels_json:
         levels = loads(levels_json)
     else:
-        levels = list(mongo.user_levels.find().sort(
-                    [("exp", pymongo.ASCENDING)]))
+        levels = list(connection.UserLevels.find(sort=[("exp", 1)]))
         if not levels:
             log.error("Please init UserLevels collection")
             return None
@@ -52,14 +48,19 @@ def add_exp(user, exp=None):
 
 def new_remark(comment):
     """post have a new comment
-    input:Comment instance"""
-    user_stars = list(mongo.user_stars.find({'post_id': comment.post_id}))
+    input:  User instance
+            Comment instance
+    """
+    # 发的帖子有新评论
     cursor = connection.UserComments.find_one({"comment_id": comment._id})
     notification.new_reply.delay(comment.author, cursor.theme_id,
                                  comment.post_id, comment._id)
+    # 关注的帖子有新评论
+    user_stars = list(
+        connection.UserStars.find({'post_id': comment.post_id}))
     for star in user_stars:
-        notification.star_new_reply.deplay(star['user_id'], star['theme_id'],
-                                           star['post_id'], comment._id)
+        notification.star_new_reply.delay(
+            star['user_id'], star['theme_id'], star['post_id'], comment._id)
 
 
 def post_heart(post):

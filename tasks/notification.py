@@ -1,41 +1,55 @@
 import logging
 
-from tasks import app
+from bson.objectid import ObjectId
+
+from config import MongoConfig
 from model import connection
-from log import app_log
+from tasks import app
 
 log = logging.getLogger("masque.task.notifications")
 
 
 @app.task
 def new_reply(author_id, theme_id, post_id, comment_id):
-    content = "Your post %s have a new comment %s" % (post_id, comment_id)
-    log.info(content)
-    notifi = connection.Notifications()
-    notifi.type = "comment"
-    notifi.theme_id = theme_id
-    notifi.post_id = post_id
-    notifi.user_id = author_id
-    notifi.content = content
-    notifi.save()
+    collection = connection[MongoConfig.DB]["posts_" + theme_id]
+    cursor = collection.Posts.find_one({"_id": ObjectId(post_id)})
+    notifi_user = connection.Users.find_one({"_id": ObjectId(cursor.author)})
+    if notifi_user.options.new_comment:
+        # 只有用户允许通知才会提醒
+        content = "Your post %s have a new comment %s" % (post_id, comment_id)
+        log.info(content)
+        notifi = connection.Notifications()
+        notifi.type = "comment"
+        notifi.theme_id = theme_id
+        notifi.post_id = post_id
+        notifi.user_id = author_id
+        notifi.comment_id = comment_id
+        notifi.content = content
+        notifi.save()
 
 
 @app.task
 def star_new_reply(author_id, theme_id, post_id, comment_id):
-    content = "There are new comments %s for the post %s you viewed" % (post_id, comment_id)
-    log.info(content)
-    notifi = connection.Notifications()
-    notifi.type = "comment"
-    notifi.theme_id = theme_id
-    notifi.post_id = post_id
-    notifi.user_id = author_id
-    notifi.content = content
-    notifi.save()
+    notifi_user = connection.Users.find_one({"_id": ObjectId(author_id)})
+    if notifi_user.options.star_comment:
+        # 只有用户允许通知才会提醒
+        content = "There are new comments %s for the post %s you viewed" % (
+            post_id, comment_id)
+        log.info(content)
+        notifi = connection.Notifications()
+        notifi.type = "comment"
+        notifi.theme_id = theme_id
+        notifi.post_id = post_id
+        notifi.comment_id = comment_id
+        notifi.user_id = author_id
+        notifi.content = content
+        notifi.save()
 
 
 @app.task
 def comment_new_reply(author_id, theme_id, post_id, comment_id):
-    content = "There are new comments %s for the post %s you remarked" % (comment_id, post_id)
+    content = "There are new comments %s for the post %s you remarked" % (
+        comment_id, post_id)
     log.info(content)
     notifi = connection.Notifications()
     notifi.type = "comment"
