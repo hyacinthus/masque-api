@@ -13,19 +13,31 @@ log = logging.getLogger("masque.util")
 
 def get_level(exp):
     """get the right level_id by exp"""
+    if exp == 0:
+        return "level0"
     levels_json = redisdb.get("cache:userlevels")
     if levels_json:
         levels = loads(levels_json)
     else:
-        levels = list(connection.UserLevels.find(sort=[("exp", 1)]))
-        if not levels:
+        # 从小到大取出各等级边界值
+        # (0, 20, 50, 200, 500, 1000, 2000, 5000, 10000, 20000, 40000)
+        lst = tuple(
+            i.exp for i in connection.UserLevels.find(sort=[("exp", 1)]))
+        if not lst:
             log.error("Please init UserLevels collection")
-            return None
+        # 生成各等级经验取值范围列表
+        # ((1, 20), (20, 50), (50, 200), (200, 500), (500, 1000), (1000, 2000),
+        # (2000, 5000), (5000, 10000), (10000, 20000), (20000, 40000))
+        levels = tuple(
+            ((lambda i: i + 1 if i == 0 else i)(i), lst[lst.index(i) + 1])
+            for i in lst if lst.index(i) + 1 < len(lst))
         redisdb.set("cache:userlevels", dumps(levels))
-    for l in levels:
-        if exp < l['exp']:
-            l['_id'] = 'level{0}'.format(int(list(filter(str.isdigit, l['_id']))[0]) - 1)
-            return l['_id']
+    for i in levels:
+        if i[0] <= exp < i[1]:
+            # 计算等级区间, 前闭后开
+            level = "level%s" % (levels.index(i) + 1)
+            break
+    return level
 
 
 def add_exp(user, exp=None):
