@@ -5,7 +5,7 @@ from config import APIConfig
 from model import connection
 
 # 需要过滤的黑名单
-black_list = ('网络教育', '继续教育', '远程教育', '仙桃学院', '纺织服装学院', '教学部', '分部')
+black_list = ('网络教育', '继续教育', '远程教育', '仙桃学院', '纺织服装学院', '教学部', '分部', '小学')
 
 
 def guolv(t):
