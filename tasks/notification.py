@@ -5,7 +5,10 @@ from bson.objectid import ObjectId
 from config import MongoConfig
 from model import connection
 from tasks import app
+from tools import detection
+from tools.oss import OssConnection
 
+oc = OssConnection()
 log = logging.getLogger("masque.task.notifications")
 
 
@@ -136,7 +139,7 @@ def publish_forbid_post(user_id, expiry=7 * 24 * 3600):
 
 
 @app.task
-def publish_invalid_report(author_id, theme_id, post_id, exp):
+def publish_invalid_report_post(author_id, theme_id, post_id, exp):
     content = "you give us a invalid report %s, exp %s" % (post_id, exp)
     log.info(content)
     notifi = connection.Notifications()
@@ -144,6 +147,19 @@ def publish_invalid_report(author_id, theme_id, post_id, exp):
     notifi.user_id = author_id
     notifi.theme_id = theme_id
     notifi.post_id = post_id
+    notifi.content = content
+    notifi.save()
+
+
+@app.task
+def publish_invalid_report_comment(author_id, theme_id, comment_id, exp):
+    content = "you give us a invalid report %s, exp %s" % (comment_id, exp)
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "punishment"
+    notifi.user_id = author_id
+    notifi.theme_id = theme_id
+    notifi.post_id = comment_id
     notifi.content = content
     notifi.save()
 
@@ -157,6 +173,20 @@ def publish_illegal_post(user_id, theme_id, post_id):
     notifi.user_id = user_id
     notifi.theme_id = theme_id
     notifi.post_id = post_id
+    notifi.content = content
+    notifi.save()
+
+
+@app.task
+def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
+    content = "you post a illegal comment %s" % comment_id
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "punishment"
+    notifi.user_id = user_id
+    notifi.theme_id = theme_id
+    notifi.post_id = post_id
+    notifi.comment_id = comment_id
     notifi.content = content
     notifi.save()
 
@@ -209,13 +239,22 @@ def update_system(user_id, version):
 
 
 @app.task
-def check_image(bucket, id):
-    content = "check image %s/%s" % (bucket, id)
-    log.info(content)
-    notifi = connection.Notifications()
-    notifi.type = "message"
-    notifi.content = content
-    notifi.save()
+def check_image(bucket, image_id, author):
+    content = "check image: %s/%s" % (bucket, image_id)
+    img_url = oc.bucket.sign_url("GET", bucket + '/' + image_id, 60)
+    label, rate = detection.detect(img_url)
+    if label:
+        detect = connection.Detections()
+        detect._id = image_id
+        detect.author = author
+        detect.bucket = bucket
+        detect.save()
+        log.info(content)
+        notifi = connection.Notifications()
+        notifi.type = "message"
+        notifi.user_id = author
+        notifi.content = content
+        notifi.save()
 
 
 @app.task
@@ -227,3 +266,15 @@ def bind_cellphone(user_id, cellphone):
     notifi.content = content
     notifi.user_id = user_id
     notifi.save()
+
+
+@app.task
+def publish_porn_image(user_id, image_id):
+    content = "you post a illegal porn image %s" % image_id
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "publish"
+    notifi.content = content
+    notifi.user_id = user_id
+    notifi.save()
+
