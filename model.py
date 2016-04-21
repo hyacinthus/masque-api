@@ -534,7 +534,7 @@ class Common(RootDocument):
                 OR(int, float),
                 OR(int, float)
             ],
-            "type": IS("Point")
+            "type": IS("Point", "None")
         },
         "author": str
     }
@@ -544,7 +544,7 @@ class Common(RootDocument):
     ]
     default_values = {
         "location.coordinates": [108.947001, 34.259458],
-        "location.type": "Point",
+        "location.type": "None",
         "hearts": [],
     }
 
