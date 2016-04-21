@@ -10,7 +10,7 @@ from tasks import notification
 from tools import detection
 from tools.oss import OssConnection
 
-oc = OssConnection()
+
 log = logging.getLogger("masque.util")
 
 
@@ -135,18 +135,11 @@ def update_system(user, version):
 def check_image(user_image):
     """check image
     input: User Image instance"""
-    img_url = oc.bucket.sign_url("GET", user_image.category + '/' + user_image._id, 60)
-    label, rate = detection.detect(img_url)
-    if label:
-        detect = connection.Detections()
-        detect._id = user_image._id
-        detect.author = user_image.author
-        detect.bucket = user_image.category
-        detect.save()
-        notification.check_image.deplay(user_image.author, user_image._id)
+    notification.check_image.deplay(user_image.category,
+                                    user_image._id, user_image.author)
 
 
-def porn_image(user_image, exp=-5):
+def porn_image(user_image, exp=-10):
     """remind user not to post porn_image
     input: User Image instance"""
     user = connection.Users.find_one({"_id": ObjectId(user_image.author)})

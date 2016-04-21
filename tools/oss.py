@@ -1,13 +1,8 @@
 import oss2
-import json
 import bcrypt
+import requests
 import datetime
-import http.client
-import urllib.parse
 from model import redisdb
-
-
-conn = http.client.HTTPConnection("localhost")
 
 
 class OssConnection:
@@ -17,46 +12,42 @@ class OssConnection:
 
     # 获得api_token
     def get_api_token(self):
-        params = urllib.parse.urlencode({
+        params = {
             'grant_type': 'password',
             'client_id': 'admin',
             'username': 'admin',
-            'password': bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode()})
+            'password': bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode()}
         headers = {"Content-type": "application/x-www-form-urlencoded"}
-        conn.request("POST", "/token", params, headers)
-        response = conn.getresponse()
-        if response.status == 200:
-            data = response.read()
-            expire_time = json.JSONDecoder().decode(data.decode())['expires_in']
+        response = requests.post("http://localhost/token", data=params, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            expire_time = data['expires_in']
             redisdb.setex('admin:{%s}:api_access_token' % 'admin',
-                          expire_time, json.JSONDecoder().decode(data.decode())['access_token'])
+                          expire_time, data['access_token'])
             redisdb.set('admin:{%s}:api_refresh_token' % 'admin',
-                        json.JSONDecoder().decode(data.decode())['refresh_token'])
+                        data['refresh_token'])
         else:
-            raise Exception('Status: {0}, Reason: {1}'.format(response.status, response.reason))
-        return json.JSONDecoder().decode(data.decode())
+            raise Exception('Status: {0}, Reason: {1}'.format(response.status_code, response.reason))
+        return data['access_token']
 
     # 获得oss_token
     def get_auth(self):
         access_token = redisdb.get("admin:{admin}:api_access_token")
-        access_token = self.get_api_token()['access_token'] if access_token is None else access_token
+        access_token = self.get_api_token() if access_token is None else access_token
         headers = {'authorization': "Bearer " + access_token}
-        conn.request("GET", "/image_token", headers=headers)
-        res = conn.getresponse()
-        if res.status == 200:
-            data = res.read()
-            token = json.JSONDecoder().decode(data.decode())
+        res = requests.get("http://localhost/image_token", headers=headers)
+        if res.status_code == 200:
+            token = res.json()
             if token.get('Credentials'):
-                oss_token = token
                 _time = token['Credentials']['Expiration']
                 self._extime = datetime.datetime.strptime(_time, "%Y-%m-%dT%H:%M:%SZ")
             else:
                 raise Exception(token.get('message'))
         else:
-            raise Exception('Status: {0}, Reason: {1}'.format(res.status, res.reason))
-        auth = oss2.StsAuth(oss_token['Credentials']['AccessKeyId'],
-                            oss_token['Credentials']['AccessKeySecret'],
-                            oss_token['Credentials']['SecurityToken'])
+            raise Exception('Status: {0}, Reason: {1}'.format(res.status_code, res.reason))
+        auth = oss2.StsAuth(token['Credentials']['AccessKeyId'],
+                            token['Credentials']['AccessKeySecret'],
+                            token['Credentials']['SecurityToken'])
         return auth
 
     @property

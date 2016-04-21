@@ -5,7 +5,10 @@ from bson.objectid import ObjectId
 from config import MongoConfig
 from model import connection
 from tasks import app
+from tools import detection
+from tools.oss import OssConnection
 
+oc = OssConnection()
 log = logging.getLogger("masque.task.notifications")
 
 
@@ -223,14 +226,22 @@ def update_system(user_id, version):
 
 
 @app.task
-def check_image(user_id, image_id):
-    content = "check user: %s , image: %s" % (user_id, image_id)
-    log.info(content)
-    notifi = connection.Notifications()
-    notifi.type = "message"
-    notifi.user_id = user_id
-    notifi.content = content
-    notifi.save()
+def check_image(bucket, image_id, author):
+    content = "check image: %s/%s" % (bucket, image_id)
+    img_url = oc.bucket.sign_url("GET", bucket + '/' + image_id, 60)
+    label, rate = detection.detect(img_url)
+    if label:
+        detect = connection.Detections()
+        detect._id = image_id
+        detect.author = author
+        detect.bucket = bucket
+        detect.save()
+        log.info(content)
+        notifi = connection.Notifications()
+        notifi.type = "message"
+        notifi.user_id = author
+        notifi.content = content
+        notifi.save()
 
 
 @app.task
@@ -242,7 +253,6 @@ def bind_cellphone(user_id, cellphone):
     notifi.content = content
     notifi.user_id = user_id
     notifi.save()
-
 
 
 @app.task
