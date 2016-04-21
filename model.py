@@ -963,3 +963,37 @@ class ReportComments(RootDocument):
     default_values = {
         "archived": False,
     }
+
+
+@connection.register
+class UserImages(RootDocument):
+    __collection__ = CollectionName.USER_IMAGES
+    structure = {
+        "_id": str,
+        "category": IS("mask", "post"),
+        "author": str,
+        "_created": CustomDate(),
+    }
+    default_values = {
+        "_id": uuid.uuid1().hex,
+    }
+
+
+@connection.register
+class Detections(RootDocument):
+    __collection__ = CollectionName.DETECTIONS
+    structure = {
+        "_id": str,
+        "bucket": str,
+        "author": str,
+        "archived": bool,
+        "_created": CustomDate(),
+    }
+    required_fields = [
+        "_id",
+        "bucket",
+        "author"
+    ]
+    default_values = {
+        "archived": False,
+    }

@@ -41,7 +41,7 @@ def get_level(exp):
 
 
 def add_exp(user, exp=None):
-    """add exp to user 
+    """add exp to user
     input:User instance
     调用后必须save()保存经验变更到数据库
     """
@@ -101,22 +101,29 @@ def valid_feedback(feedback, exp=10):
 def invalid_report(report, exp=-1):
     """remind user not to give invalid report
     input:Report instance"""
-    user = connection.Users.find_one({"_id": ObjectId(report.author)})
-    add_exp(user, exp)
-    notification.publish_invalid_report.delay(report.author, report.theme_id,
-                                              report.post_id, exp)
+    for user in report.reporters:
+        user = connection.Users.find_one({"_id": ObjectId(user)})
+        add_exp(user, exp)
+        if hasattr(report, 'post_id'):
+            notification.publish_invalid_report_post.delay(report.reporters,
+                                                           report.theme_id,
+                                                           report.post_id, exp)
+        else:
+            notification.publish_invalid_report_comment.delay(report.reporters,
+                                                              report.theme_id,
+                                                              report.comment_id, exp)
 
 
 def illegal_post(post):
     """remind user not to post illegal content
-    input:Post instance"""
+    input:Report Post instance"""
     cursor = connection.UserPosts.find_one({"post_id": post._id})
     notification.publish_illegal_post.delay(post.author, cursor.theme_id, post._id)
 
 
 def illegal_comment(comment):
     """remind user not to post illegal content
-    input:Comment instance"""
+    input:Report Comment instance"""
     cursor = connection.UserComments.find_one({"comment_id": comment._id})
     notification.publish_illegal_comment.delay(comment.author, cursor.theme_id,
                                                comment.post_id, comment._id)
@@ -141,7 +148,16 @@ def update_system(user, version):
     notification.update_system.delay(user._id, version)
 
 
-def check_image(bucket, id):
+def check_image(user_image):
     """check image
-    input: bucket and id"""
-    notification.check_image.delay(bucket, id)
+    input: User Image instance"""
+    notification.check_image.delay(user_image.category,
+                                    user_image._id, user_image.author)
+
+
+def porn_image(user_image, exp=-10):
+    """remind user not to post porn_image
+    input: User Image instance"""
+    user = connection.Users.find_one({"_id": ObjectId(user_image.author)})
+    add_exp(user, exp)
+    notification.publish_porn_image.delay(user_image.author, user_image._id)
