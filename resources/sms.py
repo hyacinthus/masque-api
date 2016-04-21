@@ -51,7 +51,7 @@ class RequestSmsCode(Resource):
             return {
                        "status": "error",
                        'message': '号码输入有误，请重新输入'
-                   }, 200
+                   }, 422
         verify_code = generate_verification_code(4)  # 生成4位随机数验证码
         resp = send_sms(cellphone, verify_code)
         if resp and resp["alibaba_aliqin_fc_sms_num_send_response"]["result"][
@@ -71,12 +71,12 @@ class RequestSmsCode(Resource):
             else:
                 return {
                            "status": "error",
-                           "message": "redis服务出错"
+                           "message": "短信验证服务出错, 请稍后再试"
                        }, 500
         else:
             return {
                        "status": "error",
-                       "message": "短信验证服务出错"
+                       "message": "短信验证服务出错, 请稍后再试"
                    }, 500
 
 
@@ -86,7 +86,7 @@ class VerifySmsCode(Resource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 200
+                   }, 422
         parser = reqparse.RequestParser()
         parser.add_argument('code',
                             type=str,
@@ -98,7 +98,7 @@ class VerifySmsCode(Resource):
             return {
                        "status": "error",
                        "message": "验证码已过期"
-                   }, 200
+                   }, 403
         sys_code = redisdb.lrange("sms_verify:{}".format(cellphone), 0, -1)
         if user_code in sys_code:
             return {
@@ -109,7 +109,7 @@ class VerifySmsCode(Resource):
             return {
                        "status": "error",
                        "message": "验证码不正确"
-                   }, 200
+                   }, 403
 
 
 class BoundPhone(TokenResource):
@@ -120,7 +120,7 @@ class BoundPhone(TokenResource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 200
+                   }, 422
         current_user_id = self.user_info.user._id
         cursor = connection.Users.find_one(
             {"cellphone": cellphone}
@@ -132,7 +132,7 @@ class BoundPhone(TokenResource):
                 return {
                            "status": "error",
                            'message': '你已经绑定过这个号码了'
-                       }, 200
+                       }, 403
             # 把先前绑定手机用户id赋给当前设备
             connection.Devices.find_and_modify(
                 {"_id": self.user_info.device_id},
@@ -142,8 +142,7 @@ class BoundPhone(TokenResource):
                     }
                 }
             )
-            return connection.Users.find_one(
-                {"_id": ObjectId(cursor._id)}), 201
+            user = connection.Users.find_one({"_id": ObjectId(cursor._id)})
         else:
             # 没有绑定过手机, 将cellphone填入当前user_id.cellphone字段
             connection.Users.find_and_modify(
@@ -156,7 +155,11 @@ class BoundPhone(TokenResource):
             # 绑定手机加 20 经验
             add_exp(user, 20)
             user.save()
-            return user, 201
+        return {
+                   "status": "ok",
+                   "data": user,
+                   "message": "手机号码绑定成功"
+               }, 201
 
 
 class ChangePhone(TokenResource):
@@ -167,7 +170,7 @@ class ChangePhone(TokenResource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 200
+                   }, 422
         current_user_id = self.user_info.user._id
         cursor = connection.Users.find_one({"cellphone": cellphone})
         if cursor:
@@ -175,7 +178,7 @@ class ChangePhone(TokenResource):
             return {
                        "status": "error",
                        "message": "该手机号码已经被使用"
-                   }, 200
+                   }, 403
         else:
             # 号码未使用, 填入新号码
             connection.Users.find_and_modify(
@@ -184,8 +187,13 @@ class ChangePhone(TokenResource):
                     "$set": {"cellphone": cellphone}
                 }
             )
-            return connection.Users.find_one(
-                {"_id": ObjectId(current_user_id)}), 201
+            new_user = connection.Users.find_one(
+                {"_id": ObjectId(current_user_id)})
+            return {
+                       "status": "ok",
+                       "data": new_user,
+                       "message": "手机号码更换成功"
+                   }, 201
 
 
 class DeRegister(TokenResource):
@@ -194,9 +202,9 @@ class DeRegister(TokenResource):
     def post(self, cellphone):
         if not verify_phone(cellphone):
             return {
-                       'message': '号码输入有误，请重新输入',
+                       'message': '手机号码输入有误，请重新输入',
                        "status": "error"
-                   }, 200
+                   }, 422
         current_user_id = self.user_info.user._id
         cursor = connection.Users.find_one(
             {"_id": ObjectId(current_user_id)}
@@ -204,8 +212,8 @@ class DeRegister(TokenResource):
         if not cursor.cellphone:
             return {
                        "status": "error",
-                       'message': '设备没有绑定手机, 不需要注销'
-                   }, 200
+                       'message': '您的设备没有绑定手机, 不需要注销'
+                   }, 422
         cursor = connection.Devices.find_one(
             {
                 "user_id": current_user_id
@@ -223,7 +231,6 @@ class DeRegister(TokenResource):
             dev['origin_user_id'] = user_id
             dev.save()
             result = connection.Users.find_one({"_id": ObjectId(user_id)})
-            return result
         else:
             # 不是第一台设备, 把origin_user_id填入user_id
             connection.Devices.find_and_modify(
@@ -232,5 +239,10 @@ class DeRegister(TokenResource):
                     "$set": {"user_id": cursor.origin_user_id}
                 }
             )
-            return connection.Users.find_one(
+            result = connection.Users.find_one(
                 {"_id": ObjectId(cursor.origin_user_id)})
+        return {
+                   "status": "ok",
+                   "data": result,
+                   "message": "设备已注销"
+               }, 201
