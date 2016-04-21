@@ -139,7 +139,7 @@ def publish_forbid_post(user_id, expiry=7 * 24 * 3600):
 
 
 @app.task
-def publish_invalid_report(author_id, theme_id, post_id, exp):
+def publish_invalid_report_post(author_id, theme_id, post_id, exp):
     content = "you give us a invalid report %s, exp %s" % (post_id, exp)
     log.info(content)
     notifi = connection.Notifications()
@@ -147,6 +147,19 @@ def publish_invalid_report(author_id, theme_id, post_id, exp):
     notifi.user_id = author_id
     notifi.theme_id = theme_id
     notifi.post_id = post_id
+    notifi.content = content
+    notifi.save()
+
+
+@app.task
+def publish_invalid_report_comment(author_id, theme_id, comment_id, exp):
+    content = "you give us a invalid report %s, exp %s" % (comment_id, exp)
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "punishment"
+    notifi.user_id = author_id
+    notifi.theme_id = theme_id
+    notifi.post_id = comment_id
     notifi.content = content
     notifi.save()
 

@@ -7,9 +7,6 @@ from bson.objectid import ObjectId
 from model import connection
 from model import redisdb
 from tasks import notification
-from tools import detection
-from tools.oss import OssConnection
-
 
 log = logging.getLogger("masque.util")
 
@@ -27,7 +24,7 @@ def get_level(exp):
         redisdb.set("cache:userlevels", dumps(levels))
     for l in levels:
         if exp < l['exp']:
-            l['_id'] = 'level{0}'.format(int(list(filter(str.isdigit, l['_id']))[0])-1)
+            l['_id'] = 'level{0}'.format(int(list(filter(str.isdigit, l['_id']))[0]) - 1)
             return l['_id']
 
 
@@ -92,22 +89,29 @@ def valid_feedback(feedback, exp=10):
 def invalid_report(report, exp=-1):
     """remind user not to give invalid report
     input:Report instance"""
-    user = connection.Users.find_one({"_id": ObjectId(report.author)})
-    add_exp(user, exp)
-    notification.publish_invalid_report.delay(report.author, report.theme_id,
-                                              report.post_id, exp)
+    for user in report.reporters:
+        user = connection.Users.find_one({"_id": ObjectId(user)})
+        add_exp(user, exp)
+        if hasattr(report, 'post_id'):
+            notification.publish_invalid_report_post.delay(report.reporters,
+                                                           report.theme_id,
+                                                           report.post_id, exp)
+        else:
+            notification.publish_invalid_report_comment.delay(report.reporters,
+                                                              report.theme_id,
+                                                              report.comment_id, exp)
 
 
 def illegal_post(post):
     """remind user not to post illegal content
-    input:Post instance"""
+    input:Report Post instance"""
     cursor = connection.UserPosts.find_one({"post_id": post._id})
     notification.publish_illegal_post.delay(post.author, cursor.theme_id, post._id)
 
 
 def illegal_comment(comment):
     """remind user not to post illegal content
-    input:Comment instance"""
+    input:Report Comment instance"""
     cursor = connection.UserComments.find_one({"comment_id": comment._id})
     notification.publish_illegal_comment.delay(comment.author, cursor.theme_id,
                                                comment.post_id, comment._id)
@@ -135,7 +139,7 @@ def update_system(user, version):
 def check_image(user_image):
     """check image
     input: User Image instance"""
-    notification.check_image.deplay(user_image.category,
+    notification.check_image.delay(user_image.category,
                                     user_image._id, user_image.author)
 
 
