@@ -605,7 +605,8 @@ class Users(RootDocument):
         "options": {
             "new_comment": bool,
             "star_comment": bool,
-            "comment_reply": bool
+            "post_hearted": bool,
+            "comment_hearted": bool,
         }
     }
     # required_fields = [
@@ -620,7 +621,8 @@ class Users(RootDocument):
         "home": "",
         "options.new_comment": True,
         "options.star_comment": True,
-        "options.comment_reply": False,
+        "options.post_hearted": True,
+        "options.comment_hearted": True,
     }
 
 
@@ -790,10 +792,12 @@ class Notifications(RootDocument):
     __collection__ = CollectionName.NOTIFICATIONS
     structure = {
         "_id": CustomObjectId(),
+        "_created": CustomDate(),
         "user_id": str,
         "type": str,
         "content": str,
         "theme_id": str,
+        "comment_id": str,
         "post_id": str,
         "message_id": str
     }
@@ -803,7 +807,8 @@ class Notifications(RootDocument):
         "content": '',
         "theme_id": '',
         "post_id": '',
-        "message_id": ''
+        "message_id": '',
+        "comment_id": ''
     }
 
 
