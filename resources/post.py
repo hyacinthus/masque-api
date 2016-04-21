@@ -69,10 +69,12 @@ class PostsList(TokenResource):
             if item in ('mask_id', 'author', '_created', '_updated'):
                 continue
             if item == 'label':
-                # 增加label字段，接受4个汉字，8个英文字母以内的字符串
-                if is_chinese(resp[item]) and len(resp[item]) <= 4:
+                # 增加label.name字段，接受4个汉字，8个英文字母以内的字符串
+                # label.color字段, 用以标示帖子颜色, 暂不作限制
+                name = resp[item]['name']
+                if is_chinese(name) and len(name) <= 4:
                     doc[item] = resp[item]
-                if not is_chinese(resp[item]) and len(resp[item]) <= 6:
+                if not is_chinese(name) and len(name) <= 6:
                     doc[item] = resp[item]
                 continue
             doc[item] = resp[item]

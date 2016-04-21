@@ -559,7 +559,10 @@ class Posts(Common):
             "options": list
         },
         "tag": str,
-        "label": str,
+        "label": {
+            "name": str,
+            "color": str
+        },
         "comment_count": int,
         "_updated": CustomDate()
     }
@@ -572,7 +575,8 @@ class Posts(Common):
         "content.photo": "",
         "content.options": [],
         "tag": "",
-        "label": "",
+        "label.name": "",
+        "label.color": "",
         "comment_count": 0,
     }
 
