@@ -559,6 +559,7 @@ class Posts(Common):
             "options": list
         },
         "tag": str,
+        "label": str,
         "comment_count": int,
         "_updated": CustomDate()
     }
@@ -571,6 +572,7 @@ class Posts(Common):
         "content.photo": "",
         "content.options": [],
         "tag": "",
+        "label": "",
         "comment_count": 0,
     }
 
@@ -614,7 +616,7 @@ class Users(RootDocument):
     # ]
     default_values = {
         "user_level_id": "level1",
-        "exp": 0,
+        "exp": 1,
         "hearts_received": 0,
         "hearts_owned": 0,
         "cellphone": "",

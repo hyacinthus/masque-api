@@ -161,3 +161,10 @@ def porn_image(user_image, exp=-10):
     user = connection.Users.find_one({"_id": ObjectId(user_image.author)})
     add_exp(user, exp)
     notification.publish_porn_image.delay(user_image.author, user_image._id)
+
+
+def is_chinese(text):
+    """判断一个unicode是否是汉字\n
+    sample: is_chinese('一') == True, is_chinese('我&&你') == False
+    """
+    return all('\u4e00' <= char <= '\u9fff' for char in text)

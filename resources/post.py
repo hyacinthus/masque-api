@@ -7,7 +7,7 @@ from flask_restful import Resource, request, reqparse
 from config import MongoConfig, APIConfig
 from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
-from util import add_exp, post_heart
+from util import add_exp, post_heart, is_chinese
 
 log = logging.getLogger("masque.comment")
 
@@ -67,6 +67,13 @@ class PostsList(TokenResource):
         doc = collection.Posts()
         for item in resp:
             if item in ('mask_id', 'author', '_created', '_updated'):
+                continue
+            if item == 'label':
+                # 增加label字段，接受4个汉字，8个英文字母以内的字符串
+                if is_chinese(resp[item]) and len(resp[item]) <= 4:
+                    doc[item] = resp[item]
+                if not is_chinese(resp[item]) and len(resp[item]) <= 6:
+                    doc[item] = resp[item]
                 continue
             doc[item] = resp[item]
         doc['_created'] = utctime
