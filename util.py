@@ -11,33 +11,74 @@ from tasks import notification
 log = logging.getLogger("masque.util")
 
 
-def get_level(exp):
-    """get the right level_id by exp"""
-    if exp == 0:
-        return "level0"
-    levels_json = redisdb.get("cache:userlevels")
-    if levels_json:
-        levels = loads(levels_json)
-    else:
-        # 从小到大取出各等级边界值
-        # (0, 20, 50, 200, 500, 1000, 2000, 5000, 10000, 20000, 40000)
-        lst = tuple(
-            i.exp for i in connection.UserLevels.find(sort=[("exp", 1)]))
-        if not lst:
-            log.error("Please init UserLevels collection")
-        # 生成各等级经验取值范围列表
-        # ((1, 20), (20, 50), (50, 200), (200, 500), (500, 1000), (1000, 2000),
-        # (2000, 5000), (5000, 10000), (10000, 20000), (20000, 40000))
-        levels = tuple(
-            ((lambda i: i + 1 if i == 0 else i)(i), lst[lst.index(i) + 1])
-            for i in lst if lst.index(i) + 1 < len(lst))
-        redisdb.set("cache:userlevels", dumps(levels))
-    for i in levels:
-        if i[0] <= exp < i[1]:
-            # 计算等级区间, 前闭后开
-            level = "level%s" % (levels.index(i) + 1)
-            break
-    return level
+class Exp2Level:
+    """get the right level info by exp"""
+
+    def __init__(self, exp):
+        if exp <= 0:
+            self.level_str = 'level0'
+            self.level_int = 0
+            self.name = 'ban'
+            self.post_limit = 0
+            self.report_limit = 0
+            self.heart_limit = 0
+            self.message_limit = 0
+            self.text_post = False
+            self.photo_post = False
+            self.vote_post = False
+            self.colors = ['black']
+        else:
+            self._get_level(exp)
+
+    def _get_level(self, exp):
+        if redisdb.exists("cache:userlevels"):
+            levels = loads(redisdb.get("cache:userlevels"))
+        else:
+            # 从小到大取出各等级边界值以及对应等级具体属性值
+            lst = tuple((i.exp, i._id, i.name, i.post_limit, i.report_limit,
+                         i.heart_limit, i.message_limit, i.text_post,
+                         i.photo_post, i.vote_post, i.colors) for i in
+                        connection.UserLevels.find(sort=[("exp", 1)]))
+            if not lst:
+                log.error("Please init UserLevels collection")
+            # 生成各等级经验取值范围和对应等级具体属性值
+            levels = tuple(((lambda i: i[0] + 1 if i[0] == 0 else i[0])(i),
+                            lst[lst.index(i) + 1][0], lst[lst.index(i) + 1][1],
+                            lst[lst.index(i) + 1][2], lst[lst.index(i) + 1][3],
+                            lst[lst.index(i) + 1][4], lst[lst.index(i) + 1][5],
+                            lst[lst.index(i) + 1][6], lst[lst.index(i) + 1][7],
+                            lst[lst.index(i) + 1][8], lst[lst.index(i) + 1][9],
+                            lst[lst.index(i) + 1][10]) for i in lst if
+                           lst.index(i) + 1 < len(lst))
+            redisdb.set("cache:userlevels", dumps(levels))
+        for i in levels:
+            if i[0] <= exp < i[1]:
+                # 计算等级区间, 前闭后开
+                self.level_int = levels.index(i) + 1
+                self.level_str = i[2]
+                self.name = i[3]
+                self.post_limit = i[4]
+                self.report_limit = i[5]
+                self.heart_limit = i[6]
+                self.message_limit = i[7]
+                self.text_post = i[8]
+                self.photo_post = i[9]
+                self.vote_post = i[10]
+                self.colors = i[11]
+                break
+            else:
+                # 超过最高等级限制经验, 等级等于最高级且不再增加(几乎不可能的情况)
+                self.level_int = len(levels)
+                self.level_str = levels[-1][2]
+                self.name = levels[-1][3]
+                self.post_limit = levels[-1][4]
+                self.report_limit = levels[-1][5]
+                self.heart_limit = levels[-1][6]
+                self.message_limit = levels[-1][7]
+                self.text_post = levels[-1][8]
+                self.photo_post = levels[-1][9]
+                self.vote_post = levels[-1][10]
+                self.colors = levels[-1][11]
 
 
 def add_exp(user, exp=None):
@@ -49,10 +90,12 @@ def add_exp(user, exp=None):
         # 默认经验值是1-5的随机数
         exp = random.sample([i for i in range(1, 6)], 1)[0]
     user.exp = user.exp + exp
-    new_level = get_level(user.exp)
-    if new_level != user.user_level_id:
-        user.user_level_id = new_level
+    e2l = Exp2Level(user.exp)
+    if e2l.level_str != user.user_level_id:
+        user.user_level_id = e2l.level_str
         if exp > 0:
+            # 升级后拥有感谢机会增加
+            user.hearts_owned += e2l.heart_limit
             notification.level_up.delay(user._id, user.user_level_id)
         else:
             notification.level_down.delay(user._id, user.user_level_id)
@@ -95,7 +138,8 @@ def valid_feedback(feedback, exp=10):
     input:Feedback instance"""
     user = connection.Users.find_one({"_id": ObjectId(feedback.author)})
     add_exp(user, exp)
-    notification.encourage_valid_feedback.delay(feedback.author, exp, feedback.name)
+    notification.encourage_valid_feedback.delay(feedback.author, exp,
+                                                feedback.name)
 
 
 def invalid_report(report, exp=-1):
@@ -111,14 +155,16 @@ def invalid_report(report, exp=-1):
         else:
             notification.publish_invalid_report_comment.delay(report.reporters,
                                                               report.theme_id,
-                                                              report.comment_id, exp)
+                                                              report.comment_id,
+                                                              exp)
 
 
 def illegal_post(post):
     """remind user not to post illegal content
     input:Report Post instance"""
     cursor = connection.UserPosts.find_one({"post_id": post._id})
-    notification.publish_illegal_post.delay(post.author, cursor.theme_id, post._id)
+    notification.publish_illegal_post.delay(post.author, cursor.theme_id,
+                                            post._id)
 
 
 def illegal_comment(comment):
@@ -152,7 +198,7 @@ def check_image(user_image):
     """check image
     input: User Image instance"""
     notification.check_image.delay(user_image.category,
-                                    user_image._id, user_image.author)
+                                   user_image._id, user_image.author)
 
 
 def porn_image(user_image, exp=-10):
