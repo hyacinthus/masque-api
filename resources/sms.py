@@ -214,6 +214,11 @@ class DeRegister(TokenResource):
                        "status": "error",
                        'message': '您的设备没有绑定手机, 不需要注销'
                    }, 422
+        if cursor.cellphone != cellphone:
+            return {
+                       "status": "error",
+                       'message': '当前设备关联的手机号码不一致, 无法注销'
+                   }, 422
         cursor = connection.Devices.find_one(
             {
                 "user_id": current_user_id
