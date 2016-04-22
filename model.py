@@ -558,7 +558,6 @@ class Posts(Common):
             "photo": str,
             "options": list
         },
-        "tag": str,
         "label": {
             "name": str,
             "color": str
@@ -574,7 +573,6 @@ class Posts(Common):
         "content.text": "",
         "content.photo": "",
         "content.options": [],
-        "tag": "",
         "label.name": "",
         "label.color": "",
         "comment_count": 0,
