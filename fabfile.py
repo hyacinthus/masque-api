@@ -31,12 +31,11 @@ def get_event():
 @task
 def pull():
     resp = get_event()
-    if resp['type'] != "PushEvent":
-        do_exit('No Push Event')
-    else:
+    if resp['payload']['ref'] == "refs/heads/product" and resp[
+        'type'] == "PushEvent":
         push_time = datetime.strptime(resp['created_at'], "%Y-%m-%dT%H:%M:%SZ")
         deltime = nowtime - push_time
-        if deltime.seconds > 330:
+        if deltime.seconds > 24 * 3600:
             do_exit('Nothing to be done')
         else:
             local('git fetch', capture=False)
@@ -44,3 +43,5 @@ def pull():
             local('sudo supervisorctl restart masque', capture=False)
             local('sudo supervisorctl restart celery', capture=False)
             do_exit('Update Complete!')
+    else:
+        do_exit('No Push Event')
