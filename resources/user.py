@@ -1,5 +1,4 @@
 import logging
-import re
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
@@ -7,7 +6,7 @@ from flask_restful import Resource, request, reqparse
 from config import MongoConfig, APIConfig
 from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
-from util import add_exp
+from util import add_exp, Exp2Level
 
 log = logging.getLogger("masque.user")
 
@@ -51,14 +50,11 @@ class DeviceUser(Resource):
             if perm.is_first_login:
                 # 当天初次登录随机加 1-5 经验
                 add_exp(result)
-                heart_limit = connection.UserLevels.find_one(
-                    {"_id": result.user_level_id}
-                ).heart_limit
+                e2l = Exp2Level(result.exp)
+                log.debug("当前等级:{}".format(e2l.level_str))
                 # 每天第一次登录拥有感谢数加 1
-                if result.hearts_owned < (heart_limit + int(
-                        re.search('\d+', result.user_level_id).group()) - 1):
-                    # 感谢增加上限为等级数减一
-                    # 个人拥有感谢总数为对应等级的感谢数上限与因每日登录奖励的感谢数之和
+                if result.hearts_owned < (e2l.heart_limit + e2l.level_int - 1):
+                    # 拥有感谢数不高于对应等级数与该等级对应最高限制感谢数之和
                     result.hearts_owned += 1
             result._updated = None
             result.save()
