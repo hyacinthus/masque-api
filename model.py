@@ -514,7 +514,7 @@ class RootDocument(Document):
     __database__ = MongoConfig.DB
     structure = {}
     use_schemaless = True
-    skip_validation = False
+    skip_validation = True
     use_dot_notation = True
 
 
