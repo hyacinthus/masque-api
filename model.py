@@ -630,7 +630,7 @@ class Users(RootDocument):
         "cellphone": "",
         "home.short_name": "",
         "home.full_name": "",
-        "home._id": "",
+        "home.theme_id": "",
         "options.new_comment": True,
         "options.star_comment": True,
         "options.post_hearted": True,
