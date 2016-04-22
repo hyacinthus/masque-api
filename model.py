@@ -609,7 +609,7 @@ class Users(RootDocument):
         "home": {
             "full_name": str,
             "short_name": str,
-            "_id": str
+            "theme_id": str
         },
         "subscribed": list,
         "options": {
