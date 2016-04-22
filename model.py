@@ -606,7 +606,11 @@ class Users(RootDocument):
         "hearts_owned": int,
         "_updated": CustomDate(),
         "masks": CustomMaskList(),
-        "home": str,
+        "home": {
+            "full_name": str,
+            "short_name": str,
+            "_id": str
+        },
         "subscribed": list,
         "options": {
             "new_comment": bool,
@@ -624,7 +628,9 @@ class Users(RootDocument):
         "hearts_received": 0,
         "hearts_owned": 0,
         "cellphone": "",
-        "home": "",
+        "home.short_name": "",
+        "home.full_name": "",
+        "home._id": "",
         "options.new_comment": True,
         "options.star_comment": True,
         "options.post_hearted": True,
