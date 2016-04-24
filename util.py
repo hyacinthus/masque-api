@@ -94,8 +94,6 @@ def add_exp(user, exp=None):
     if e2l.level_str != user.user_level_id:
         user.user_level_id = e2l.level_str
         if exp > 0:
-            # 升级后拥有感谢机会增加
-            user.hearts_owned += e2l.heart_limit
             notification.level_up.delay(user._id, user.user_level_id)
         else:
             notification.level_down.delay(user._id, user.user_level_id)

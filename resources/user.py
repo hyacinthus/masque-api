@@ -53,7 +53,7 @@ class DeviceUser(Resource):
                 e2l = Exp2Level(result.exp)
                 log.debug("当前等级:{}".format(e2l.level_str))
                 # 每天第一次登录拥有感谢数加 1
-                if result.hearts_owned < (e2l.heart_limit + e2l.level_int - 1):
+                if result.hearts_owned < (e2l.heart_limit - 1):
                     # 拥有感谢数不高于对应等级数与该等级对应最高限制感谢数之和
                     result.hearts_owned += 1
             result._updated = None
