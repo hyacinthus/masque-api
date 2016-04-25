@@ -59,7 +59,6 @@ class RandomMask(TokenResource):
         return one random document from the masks collection
         """
         import random
-        # TODO: 现在数据库都是 "user" 类型, 等改回 "system" 后需要去掉 "user"
         count = connection.Masks.find(
             {
                 "category": {
@@ -67,12 +66,12 @@ class RandomMask(TokenResource):
                 }
             }
         ).count()
-        if max:
+        if count:
             num = random.randint(0, count - 1)
             return connection.Masks.find(
                 {
                     "category": {
-                        "$in": ["user", "system"]
+                        "$in": ["system"]
                     }
                 }
             ).skip(num).next()
