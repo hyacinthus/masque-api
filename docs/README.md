@@ -28,6 +28,13 @@
 
 - URI `/masks/random`
 
+- 参数
+
+type: single 或者 multi (默认multi, 返回随机头像列表)
+
+type=single时返回一个随机头像id
+
+
 - 正常输出
 
 随机调取系统头像库中的 uuid, 插入到用户头像列表的第一位, 其他顺延, 最后一项删除
@@ -46,6 +53,18 @@
       "a3b9c8bcf59911e5bf52b083fe4eaa62",
       "9f000f3ef59911e5bf52b083fe4eaa62"
     ]
+  },
+  "status": "ok"
+}
+```
+
+type=single时返回示例
+
+```
+{
+  "message": "成功生成随机头像",
+  "data": {
+    "mask_id": "9dd30cf2f59911e5bf52b083fe4eaa62"
   },
   "status": "ok"
 }
@@ -1004,7 +1023,7 @@ value=Bearer xxx  # Bearer是这个授权框架的名字, 后面需要留一个�
 
 - 方法 **GET**
 
-- URI `/user/56e678167fe9e3315628da6e`
+- URI `/user/5704df1f1072f123b8e47c44`
 
 ## POST 收藏/标记一个普通帖子
 
@@ -1156,7 +1175,7 @@ Authorization: Bearer fAWEygYfAr2H9lANGOptQSfUqHLa4u
 
 - 方法 **GET**
 
-- URI `/device/9be0511311672634`
+- URI `/device/2a4c56aecaaf95a/user`
 
 /device/<device_id>
 
