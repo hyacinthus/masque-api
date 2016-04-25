@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from bson.objectid import ObjectId
-from flask_restful import request
+from flask_restful import request, reqparse
 
 from model import connection, TokenResource
 
@@ -78,6 +78,12 @@ class RandomMask(TokenResource):
             ).skip(num).next()
 
     def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('type',
+                            type=str,
+                            help='默认返回随机列表, type=single表示返回单个头像随机ID')
+        args = parser.parse_args()
+        mask_type = args['type'] if args['type'] else 'multi'
         current_user_id = self.user_info.user._id
         user_info = connection.Users.find_one(
             {"_id": ObjectId(current_user_id)}
@@ -87,24 +93,34 @@ class RandomMask(TokenResource):
         # 随机一个原列表里没有的项
         while first_item in mask_list:
             first_item = self.find_random()._id
-        # 拼装新头像列表
-        new_mask_list = [first_item] + mask_list
-        # 写入数据库
-        connection.Users.find_and_modify(
-            {"_id": ObjectId(current_user_id)},
-            {
-                "$set": {
+        if mask_type == 'single':
+            # 返回单个头像ID
+            return {
+                "status": "ok",
+                "message": "成功生成随机头像",
+                "data": {
+                    "mask_id": first_item
+                }
+            }
+        else:
+            # 拼装新头像列表
+            new_mask_list = [first_item] + mask_list
+            # 写入数据库
+            connection.Users.find_and_modify(
+                {"_id": ObjectId(current_user_id)},
+                {
+                    "$set": {
+                        "masks": new_mask_list[:-1]
+                    }
+                }
+            )
+            return {
+                "status": "ok",
+                "message": "头像排序完毕",
+                "data": {
                     "masks": new_mask_list[:-1]
                 }
             }
-        )
-        return {
-            "status": "ok",
-            "message": "头像排序完毕",
-            "data": {
-                "masks": new_mask_list[:-1]
-            }
-        }
 
 
 class UploadMask(TokenResource):
