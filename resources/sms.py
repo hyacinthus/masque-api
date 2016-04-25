@@ -134,7 +134,7 @@ class BoundPhone(TokenResource):
                            'message': '你已经绑定过这个号码了'
                        }, 403
             old_device_id = connection.Devices.find_one({"user_id": cursor._id})
-            if old_device_id._id != self.user_info.device_id:
+            if old_device_id and old_device_id._id != self.user_info.device_id:
                 # 设备跟先前绑定设备不一致, 拒绝绑定
                 return {
                            "status": "error",
