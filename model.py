@@ -584,11 +584,15 @@ class Comments(Common):
     structure = {
         "content": str,
         "post_id": str,
+        "index": int,
     }
     required_fields = [
         "post_id",
-        "content"
+        "content",
     ]
+    default_values = {
+        "index": 1
+    }
 
 
 @connection.register

@@ -246,7 +246,7 @@
 			"data": [],
 			"dataMode": "params",
 			"name": "GET 添加一个随机的用户头像",
-			"description": "- 正常输出\n\n随机调取系统头像库中的 uuid, 插入到用户头像列表的第一位, 其他顺延, 最后一项删除\n\n```\n{\n  \"message\": \"头像排序完毕\",\n  \"data\": {\n    \"masks\": [\n      \"9dd30cf2f59911e5bf52b083fe4eaa62\",\n      \"a2974a5af59911e5bf52b083fe4eaa62\",\n      \"9dd30cf2f59911e5bf52b083fe4eaa62\",\n      \"a4eaf77ef59911e5bf52b083fe4eaa62\",\n      \"a0247544f59911e5bf52b083fe4eaa62\",\n      \"9b723ce5f59911e5bf52b083fe4eaa62\",\n      \"a3b9c8bcf59911e5bf52b083fe4eaa62\",\n      \"9f000f3ef59911e5bf52b083fe4eaa62\"\n    ]\n  },\n  \"status\": \"ok\"\n}\n```",
+			"description": "- 参数\n\ntype: single 或者 multi (默认multi, 返回随机头像列表)\n\ntype=single时返回一个随机头像id\n\n\n- 正常输出\n\n随机调取系统头像库中的 uuid, 插入到用户头像列表的第一位, 其他顺延, 最后一项删除\n\n```\n{\n  \"message\": \"头像排序完毕\",\n  \"data\": {\n    \"masks\": [\n      \"9dd30cf2f59911e5bf52b083fe4eaa62\",\n      \"a2974a5af59911e5bf52b083fe4eaa62\",\n      \"9dd30cf2f59911e5bf52b083fe4eaa62\",\n      \"a4eaf77ef59911e5bf52b083fe4eaa62\",\n      \"a0247544f59911e5bf52b083fe4eaa62\",\n      \"9b723ce5f59911e5bf52b083fe4eaa62\",\n      \"a3b9c8bcf59911e5bf52b083fe4eaa62\",\n      \"9f000f3ef59911e5bf52b083fe4eaa62\"\n    ]\n  },\n  \"status\": \"ok\"\n}\n```\n\ntype=single时返回示例\n\n```\n{\n  \"message\": \"成功生成随机头像\",\n  \"data\": {\n    \"mask_id\": \"9dd30cf2f59911e5bf52b083fe4eaa62\"\n  },\n  \"status\": \"ok\"\n}\n```",
 			"descriptionFormat": "html",
 			"time": 1459315912903,
 			"version": 2,
@@ -1214,8 +1214,8 @@
 		},
 		{
 			"id": "b6fc1bf0-d90e-da1c-448c-80f70fcb8050",
-			"headers": "",
-			"url": "http://test.jiamian.im/user/56e678167fe9e3315628da6e",
+			"headers": "Authorization: Bearer Ox0tRPGeAZcOZnwjhbAWs9m511ZGTW\n",
+			"url": "http://test.jiamian.im/user/5704df1f1072f123b8e47c44",
 			"preRequestScript": "",
 			"pathVariables": {},
 			"method": "GET",
@@ -1225,12 +1225,11 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1457945017342,
+			"time": 1460687056198,
 			"name": "GET 获取一个用户信息",
 			"description": "",
 			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"responses": [],
-			"folder": "667cc2f1-68f7-64f1-226e-4ca484c3847b"
+			"responses": []
 		},
 		{
 			"id": "c24098db-ee58-7579-858b-a74257e7abaa",
@@ -1358,8 +1357,8 @@
 		},
 		{
 			"id": "dfc5eaa2-23fa-1459-3e23-df75cdc78a2e",
-			"headers": "",
-			"url": "http://test.jiamian.im/device/9be0511311672634",
+			"headers": "Authorization: Bearer Ox0tRPGeAZcOZnwjhbAWs9m511ZGTW\n",
+			"url": "http://test.jiamian.im/device/2a4c56aecaaf95a/user",
 			"preRequestScript": "",
 			"pathVariables": {},
 			"method": "GET",
@@ -1369,12 +1368,11 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1457944933591,
+			"time": 1460687057947,
 			"name": "GET 根据设备号获取/新建用户",
 			"description": "/device/<device_id>\n",
 			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"responses": [],
-			"folder": "c4d138f3-808f-8a54-710d-160809c105cb"
+			"responses": []
 		},
 		{
 			"id": "e2a27a42-a11a-a533-3fd3-88e5b6c781f9",
