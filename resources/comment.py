@@ -56,6 +56,8 @@ class CommentsList(TokenResource):
             doc[item] = resp[item]
         doc['_created'] = utctime
         doc['author'] = self.user_info.user._id
+        # 记录评论序号
+        doc['index'] = collection.find({"post_id": resp["post_id"]}).count() + 1
         # 如果之前回复过该贴, 头像保持原状
         cursor = collection.find_one(
             {
