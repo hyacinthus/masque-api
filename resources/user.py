@@ -68,7 +68,10 @@ class User(TokenResource):
         # 处理客户端请求数据
         resp = request.get_json(force=True)
         if not resp:
-            return {'message': 'No input data provided!'}, 400
+            return {
+                       'status': "error",
+                       'message': 'No input data provided!'
+                   }, 400
         # 更新数据库
         cursor = self.user_info.user
         for item in resp:
@@ -77,13 +80,19 @@ class User(TokenResource):
             cursor[item] = resp[item]
         cursor._updated = None  # 更新登录时间记录
         cursor.save()
-        return "", 204
+        return {
+                   'status': "ok",
+                   'message': "修改成功"
+               }, 204
 
     def delete(self, user_id):  # delete a post by its ID
         connection.Users.find_and_modify(
             {"_id": ObjectId(self.user_info.user._id)}, remove=True)
         # TODO: delete related data
-        return "", 204
+        return {
+                   'status': "ok",
+                   'message': "删除成功"
+               }, 204
 
 
 class UserPostsList(Resource):
