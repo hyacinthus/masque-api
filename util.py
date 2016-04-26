@@ -88,7 +88,7 @@ def add_exp(user, exp=None):
     """
     if not exp:
         # 默认经验值是1-5的随机数
-        exp = random.sample([i for i in range(1, 6)], 1)[0]
+        exp = random.randint(1, 5)
     user.exp = user.exp + exp
     e2l = Exp2Level(user.exp)
     if e2l.level_str != user.user_level_id:
