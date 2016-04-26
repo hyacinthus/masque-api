@@ -87,8 +87,10 @@ class CustomMaskList(CustomType):
         """convert type to a mongodb type"""
         if not value:
             # 随机抽取8个头像id填入mask字段
-            return [connection.Masks.find_random()._id for i in range(8) if
-                    connection.Masks.find_random()]
+            sample = connection[MongoConfig.DB][CollectionName.MASKS].aggregate(
+                [{"$sample": {"size": 8}}]
+            )
+            return [str(i['_id']) for i in sample['result']]
         return value
 
     def to_python(self, value):
