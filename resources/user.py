@@ -82,8 +82,11 @@ class User(TokenResource):
         cursor.save()
         return {
                    'status': "ok",
-                   'message': "修改成功"
-               }, 204
+                   'message': "修改成功",
+                   'data': [
+                       cursor
+                   ]
+               }, 200
 
     def delete(self, user_id):  # delete a post by its ID
         connection.Users.find_and_modify(
