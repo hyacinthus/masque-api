@@ -26,47 +26,29 @@
 
 - 方法 **GET**
 
-- URI `/masks/random`
+- URI `/masks/random?size=3`
 
-- 参数
+- curl
 
-type: single 或者 multi (默认multi, 返回随机头像列表)
+```
+curl -X GET -H "Authorization: Bearer hu3p34wnvkdoWbxp479Z1ek0LJjI3E" "http://test.jiamian.im/masks/random?size=3"
+```
 
-type=single时返回一个随机头像id
+> 参数可不填, 默认为1
 
-
-- 正常输出
-
-随机调取系统头像库中的 uuid, 插入到用户头像列表的第一位, 其他顺延, 最后一项删除
+- 输出
 
 ```
 {
-  "message": "头像排序完毕",
+  "status": "ok",
+  "message": "成功生成随机头像列表",
   "data": {
     "masks": [
-      "9dd30cf2f59911e5bf52b083fe4eaa62",
-      "a2974a5af59911e5bf52b083fe4eaa62",
-      "9dd30cf2f59911e5bf52b083fe4eaa62",
-      "a4eaf77ef59911e5bf52b083fe4eaa62",
-      "a0247544f59911e5bf52b083fe4eaa62",
-      "9b723ce5f59911e5bf52b083fe4eaa62",
-      "a3b9c8bcf59911e5bf52b083fe4eaa62",
-      "9f000f3ef59911e5bf52b083fe4eaa62"
+      "dc3b5b68fefc11e5bf320017fa00a596",
+      "4fd0acd8fefb11e5bf320017fa00a596",
+      "2005b326fefc11e5bf320017fa00a596"
     ]
-  },
-  "status": "ok"
-}
-```
-
-type=single时返回示例
-
-```
-{
-  "message": "成功生成随机头像",
-  "data": {
-    "mask_id": "9dd30cf2f59911e5bf52b083fe4eaa62"
-  },
-  "status": "ok"
+  }
 }
 ```
 

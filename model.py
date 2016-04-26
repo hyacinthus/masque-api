@@ -1011,3 +1011,106 @@ class Detections(RootDocument):
     default_values = {
         "archived": False,
     }
+
+
+@connection.register
+class PostLog(RootDocument):
+    __collection__ = CollectionName.POST_LOG
+    structure = {
+        "_id": CustomObjectId(),
+        "theme_id": str,
+        "post_id": str,
+        "user_id": str,
+        "_created": CustomDate(),
+    }
+    required_fields = [
+        'user_id', 'theme_id', 'post_id'
+    ]
+    default_values = {
+        "user_id": '',
+        "theme_id": '',
+        "post_id": '',
+    }
+
+
+@connection.register
+class CommentLog(RootDocument):
+    __collection__ = CollectionName.COMMENT_LOG
+    structure = {
+        "_id": CustomObjectId(),
+        "theme_id": str,
+        "post_id": str,
+        "comment_id": str,
+        "user_id": str,
+        "_created": CustomDate(),
+    }
+    required_fields = [
+        'user_id', 'theme_id', 'post_id', 'comment_id'
+    ]
+    default_values = {
+        "user_id": '',
+        "theme_id": '',
+        "post_id": '',
+        "comment_id": ''
+    }
+
+
+@connection.register
+class SignUpLog(RootDocument):
+    __collection__ = CollectionName.SIGN_UP_LOG
+    structure = {
+        "_id": CustomObjectId(),
+        "device_id": str,
+        "user_id": str,
+        "_created": CustomDate(),
+    }
+    required_fields = [
+        'user_id', 'device_id'
+    ]
+    default_values = {
+        "user_id": '',
+        "device_id": '',
+    }
+
+
+@connection.register
+class SignInLog(RootDocument):
+    __collection__ = CollectionName.SIGN_IN_LOG
+    structure = {
+        "_id": CustomObjectId(),
+        "device_id": str,
+        "user_id": str,
+        "_created": CustomDate(),
+    }
+    required_fields = [
+        'user_id', 'device_id'
+    ]
+    default_values = {
+        "user_id": '',
+        "device_id": '',
+    }
+
+
+@connection.register
+class GeoRequestLog(RootDocument):
+    __collection__ = CollectionName.GEO_REQUEST_LOG
+    structure = {
+        "_id": CustomObjectId(),
+        "user_id": str,
+        "location": {
+            "nation": str,
+            "province": str,
+            "city": str,
+            "district": str
+        },
+        "_created": CustomDate(),
+    }
+    required_fields = [
+        'user_id'
+    ]
+    default_values = {
+        "location.nation": "中国",
+        "location.province": "",
+        "location.city": "",
+        "location.district": ""
+    }

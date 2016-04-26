@@ -4,6 +4,7 @@ import uuid
 from bson.objectid import ObjectId
 from flask_restful import request, reqparse
 
+from config import MongoConfig, CollectionName
 from model import connection, TokenResource
 
 log = logging.getLogger("masque.mask")
@@ -54,72 +55,23 @@ class Mask(TokenResource):
 class RandomMask(TokenResource):
     """随机取一个 mask_id 放在原列表第一位, 删掉原列表最末位"""
 
-    def find_random(self):
-        """
-        return one random document from the masks collection
-        """
-        import random
-        count = connection.Masks.find(
-            {
-                "category": {
-                    "$in": ["user", "system"]
-                }
-            }
-        ).count()
-        if count:
-            num = random.randint(0, count - 1)
-            return connection.Masks.find(
-                {
-                    "category": {
-                        "$in": ["system"]
-                    }
-                }
-            ).skip(num).next()
-
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('type',
-                            type=str,
-                            help='默认返回随机列表, type=single表示返回单个头像随机ID')
+        parser.add_argument('size',
+                            type=int,
+                            help='可不填, 默认返回一个头像id')
         args = parser.parse_args()
-        mask_type = args['type'] if args['type'] else 'multi'
-        current_user_id = self.user_info.user._id
-        user_info = connection.Users.find_one(
-            {"_id": ObjectId(current_user_id)}
+        mask_size = args['size'] if args['size'] else 1
+        sample = connection[MongoConfig.DB][CollectionName.MASKS].aggregate(
+            [{"$sample": {"size": mask_size}}]
         )
-        mask_list = user_info.masks
-        first_item = self.find_random()._id
-        # 随机一个原列表里没有的项
-        while first_item in mask_list:
-            first_item = self.find_random()._id
-        if mask_type == 'single':
-            # 返回单个头像ID
-            return {
-                "status": "ok",
-                "message": "成功生成随机头像",
-                "data": {
-                    "mask_id": first_item
-                }
+        return {
+            "status": "ok",
+            "message": "成功生成随机头像列表",
+            "data": {
+                "masks": [str(i['_id']) for i in sample['result']]
             }
-        else:
-            # 拼装新头像列表
-            new_mask_list = [first_item] + mask_list
-            # 写入数据库
-            connection.Users.find_and_modify(
-                {"_id": ObjectId(current_user_id)},
-                {
-                    "$set": {
-                        "masks": new_mask_list[:-1]
-                    }
-                }
-            )
-            return {
-                "status": "ok",
-                "message": "头像排序完毕",
-                "data": {
-                    "masks": new_mask_list[:-1]
-                }
-            }
+        }
 
 
 class UploadMask(TokenResource):

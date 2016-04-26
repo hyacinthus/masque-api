@@ -84,3 +84,8 @@ class CollectionName:
     REPORT_COMMENTS = "report_comments"
     USER_IMAGES = "user_images"
     DETECTIONS = "detections"
+    POST_LOG = "post_log"
+    COMMENT_LOG = "comment_log"
+    SIGN_UP_LOG = "sign_up_log"
+    SIGN_IN_LOG = "sign_in_log"
+    GEO_REQUEST_LOG = "geo_request_log"
