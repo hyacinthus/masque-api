@@ -51,7 +51,7 @@ class RequestSmsCode(Resource):
             return {
                        "status": "error",
                        'message': '号码输入有误，请重新输入'
-                   }, 422
+                   }, 403
         verify_code = generate_verification_code(4)  # 生成4位随机数验证码
         resp = send_sms(cellphone, verify_code)
         if resp and resp["alibaba_aliqin_fc_sms_num_send_response"]["result"][
@@ -86,7 +86,7 @@ class VerifySmsCode(Resource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 422
+                   }, 403
         parser = reqparse.RequestParser()
         parser.add_argument('code',
                             type=str,
@@ -120,7 +120,7 @@ class BoundPhone(TokenResource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 422
+                   }, 403
         current_user_id = self.user_info.user._id
         cursor = connection.Users.find_one(
             {"cellphone": cellphone}
@@ -133,13 +133,6 @@ class BoundPhone(TokenResource):
                            "status": "error",
                            'message': '你已经绑定过这个号码了'
                        }, 403
-            old_device_id = connection.Devices.find_one({"user_id": cursor._id})
-            if old_device_id and old_device_id._id != self.user_info.device_id:
-                # 设备跟先前绑定设备不一致, 拒绝绑定
-                return {
-                           "status": "error",
-                           'message': '当前号码已经绑定到别的设备，请注销先前设备再试'
-                       }, 403
             # 把先前绑定手机用户id赋给当前设备
             connection.Devices.find_and_modify(
                 {"_id": self.user_info.device_id},
@@ -150,6 +143,11 @@ class BoundPhone(TokenResource):
                 }
             )
             user = connection.Users.find_one({"_id": ObjectId(cursor._id)})
+            return {
+                       "status": "ok",
+                       "data": user,
+                       "message": "欢迎回来,将为您恢复此手机之前关联的资料"
+                   }, 201
         else:
             # 没有绑定过手机, 将cellphone填入当前user_id.cellphone字段
             connection.Users.find_and_modify(
@@ -162,11 +160,11 @@ class BoundPhone(TokenResource):
             # 绑定手机加 20 经验
             add_exp(user, 20)
             user.save()
-        return {
-                   "status": "ok",
-                   "data": user,
-                   "message": "手机号码绑定成功"
-               }, 201
+            return {
+                       "status": "ok",
+                       "data": user,
+                       "message": "手机号码绑定成功"
+                   }, 201
 
 
 class ChangePhone(TokenResource):
@@ -177,7 +175,7 @@ class ChangePhone(TokenResource):
             return {
                        'message': '号码输入有误，请重新输入',
                        "status": "error"
-                   }, 422
+                   }, 403
         current_user_id = self.user_info.user._id
         cursor = connection.Users.find_one({"cellphone": cellphone})
         if cursor:
@@ -211,7 +209,7 @@ class DeRegister(TokenResource):
             return {
                        'message': '手机号码输入有误，请重新输入',
                        "status": "error"
-                   }, 422
+                   }, 403
         current_user_id = self.user_info.user._id
         cursor = connection.Users.find_one(
             {"_id": ObjectId(current_user_id)}
@@ -220,15 +218,15 @@ class DeRegister(TokenResource):
             return {
                        "status": "error",
                        'message': '您的设备没有绑定手机, 不需要注销'
-                   }, 422
+                   }, 403
         if cursor.cellphone != cellphone:
             return {
                        "status": "error",
                        'message': '当前设备关联的手机号码不一致, 无法注销'
-                   }, 422
+                   }, 403
         cursor = connection.Devices.find_one(
             {
-                "user_id": current_user_id
+                "_id": self.user_info.device_id
             }
         )
         if cursor.user_id == cursor.origin_user_id:
