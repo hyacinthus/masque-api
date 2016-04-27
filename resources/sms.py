@@ -50,7 +50,7 @@ class RequestSmsCode(Resource):
         if not verify_phone(cellphone):
             return {
                        "status": "error",
-                       'message': '号码输入有误，请重新输入'
+                       'message': '手机号码格式错误，请重新输入'
                    }, 403
         verify_code = generate_verification_code(4)  # 生成4位随机数验证码
         resp = send_sms(cellphone, verify_code)
@@ -71,20 +71,20 @@ class RequestSmsCode(Resource):
             else:
                 return {
                            "status": "error",
-                           "message": "短信验证服务出错, 请稍后再试"
-                       }, 500
+                           "message": "短信验证服务出错，请稍后再试"
+                       }, 403
         else:
             return {
                        "status": "error",
-                       "message": "短信验证服务出错, 请稍后再试"
-                   }, 500
+                       "message": "短信验证服务出错，请稍后再试"
+                   }, 403
 
 
 class VerifySmsCode(Resource):
     def post(self, cellphone):
         if not verify_phone(cellphone):
             return {
-                       'message': '号码输入有误，请重新输入',
+                       'message': '手机号码格式错误，请重新输入',
                        "status": "error"
                    }, 403
         parser = reqparse.RequestParser()
@@ -108,7 +108,7 @@ class VerifySmsCode(Resource):
         else:
             return {
                        "status": "error",
-                       "message": "验证码不正确"
+                       "message": "验证码错误，请重试"
                    }, 403
 
 
@@ -118,7 +118,7 @@ class BoundPhone(TokenResource):
     def post(self, cellphone):
         if not verify_phone(cellphone):
             return {
-                       'message': '号码输入有误，请重新输入',
+                       'message': '手机号码格式错误，请重新输入',
                        "status": "error"
                    }, 403
         current_user_id = self.user_info.user._id
@@ -173,7 +173,7 @@ class ChangePhone(TokenResource):
     def post(self, cellphone):
         if not verify_phone(cellphone):
             return {
-                       'message': '号码输入有误，请重新输入',
+                       'message': '手机号码格式错误，请重新输入',
                        "status": "error"
                    }, 403
         current_user_id = self.user_info.user._id
@@ -207,7 +207,7 @@ class DeRegister(TokenResource):
     def post(self, cellphone):
         if not verify_phone(cellphone):
             return {
-                       'message': '手机号码输入有误，请重新输入',
+                       'message': '手机手机号码格式错误，请重新输入',
                        "status": "error"
                    }, 403
         current_user_id = self.user_info.user._id
@@ -217,12 +217,12 @@ class DeRegister(TokenResource):
         if not cursor.cellphone:
             return {
                        "status": "error",
-                       'message': '您的设备没有绑定手机, 不需要注销'
+                       'message': '您的设备没有绑定手机，不需要注销'
                    }, 403
         if cursor.cellphone != cellphone:
             return {
                        "status": "error",
-                       'message': '当前设备关联的手机号码不一致, 无法注销'
+                       'message': '当前设备关联的手机号码不一致，无法注销'
                    }, 403
         cursor = connection.Devices.find_one(
             {
@@ -254,5 +254,5 @@ class DeRegister(TokenResource):
         return {
                    "status": "ok",
                    "data": result,
-                   "message": "设备已注销"
+                   "message": "设备注销成功"
                }, 201

@@ -24,7 +24,11 @@ class UsersList(Resource):
                 continue
             doc[item] = resp[item]
         doc.save()
-        return {"_id": doc['_id']}, 201
+        return {
+                   "status": "ok",
+                   "message": "",
+                   "data": doc
+               }, 201
 
 
 class DeviceUser(Resource):
@@ -92,10 +96,7 @@ class User(TokenResource):
         connection.Users.find_and_modify(
             {"_id": ObjectId(self.user_info.user._id)}, remove=True)
         # TODO: delete related data
-        return {
-                   'status': "ok",
-                   'message': "删除成功"
-               }, 204
+        return '', 204
 
 
 class UserPostsList(Resource):
@@ -147,7 +148,7 @@ class UserCommentsList(Resource):
         result = []
         cursor = connection.UserComments.find({"user_id": user_id})
         if cursor.count() == 0:
-            return {'message': 'Not found'}, 404
+            return 404
         for doc in cursor:
             collection = connection[MongoConfig.DB][
                 "comments_" + doc['theme_id']]

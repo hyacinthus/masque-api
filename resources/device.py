@@ -15,7 +15,10 @@ class DevicesList(Resource):
         for item in resp:
             doc[item] = resp[item]
         doc.save()
-        return '', 201
+        return {
+                   "status": "ok",
+                   "message": ""
+               }, 201
 
 
 class Device(Resource):

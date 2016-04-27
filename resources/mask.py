@@ -11,45 +11,57 @@ log = logging.getLogger("masque.mask")
 
 
 class MasksList(TokenResource):
-    def get(self):  # get all posts
+    def get(self):
         cursor = connection.Masks.find()
         return cursor
 
-    def post(self):  # add a new post
+    def post(self):
         resp = request.get_json(force=True)
         doc = connection.Masks()
         for item in resp:
             if item == "_id":
-                continue  # skip if post have an _id item
+                continue
             doc[item] = resp[item]
         doc.save()
-        return None, 201
+        return {
+                   "status": "ok",
+                   "message": "",
+                   "data": doc
+               }, 201
 
 
 class Mask(TokenResource):
-    def get(self, mask_id):  # get a post by its ID
+    def get(self, mask_id):
         cursor = connection.Masks.find_one({"_id": ObjectId(mask_id)})
-        return cursor
+        return {
+            "status": "ok",
+            "message": "",
+            "data": cursor
+        }
 
-    def put(self, mask_id):  # update a post by its ID
+    def put(self, mask_id):
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
         elif ("_id" or "_created") in resp:
             resp = {i: resp[i] for i in resp if i not in ("_id", "_created")}
-        connection.Masks.find_and_modify(
+        cursor = connection.Masks.find_and_modify(
             {"_id": ObjectId(mask_id)},
             {
                 "$set": resp
             }
         )
-        return None, 204
+        return {
+            "status": "ok",
+            "message": "",
+            "data": cursor
+        }
 
-    def delete(self, mask_id):  # delete a post by its ID
+    def delete(self, mask_id):
         connection.Masks.find_and_modify(
             {"_id": ObjectId(mask_id)}, remove=True)
         # TODO: delete related data 
-        return None, 204
+        return '', 204
 
 
 class RandomMask(TokenResource):
@@ -110,4 +122,8 @@ class UploadMask(TokenResource):
         mask = connection.Masks()
         mask._id = mask_uuid
         mask.save()
-        return '', 201
+        return {
+                   "status": "ok",
+                   "message": "头像上传成功",
+                   "data": mask
+               }, 201

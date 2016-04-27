@@ -66,7 +66,6 @@ class SchoolsList(Resource):
                 address["regeocode"]["aois"] else None
             }
             pois = address["regeocode"]["pois"]
-
         else:
             return {'message': 'Amap API Server Error!'}, 500
         get_school = (addr["keyword"],) if addr["keyword"] else ()
@@ -135,4 +134,10 @@ class SchoolsList(Resource):
                 }
             }
         ) for i in schools)
-        return result
+        return {
+            'status': 'ok',
+            'message': '学校列表筛选完毕',
+            'data': {
+                'schools': list(result)
+            }
+        }

@@ -5,25 +5,37 @@ from model import connection
 
 
 class MessagesList(Resource):
-    def get(self):  # get all posts
+    def get(self):
         cursor = connection.Messages.find()
-        return cursor
+        return {
+            "status": "ok",
+            "message": "",
+            "data": cursor
+        }
 
-    def post(self):  # add a new post
+    def post(self):
         resp = request.get_json(force=True)
         doc = connection.Messages()
         for item in resp:
             if item == "_id":
-                continue  # skip if post have an _id item
+                continue
             doc[item] = resp[item]
         doc.save()
-        return None, 201
+        return {
+                   "status": "ok",
+                   "message": "",
+                   "data": doc
+               }, 201
 
 
 class Message(Resource):
     def get(self, message_id):  # get a post by its ID
         cursor = connection.Messages.find_one({"_id": ObjectId(message_id)})
-        return cursor
+        return {
+            "status": "ok",
+            "message": "",
+            "data": cursor
+        }
 
     def put(self, message_id):  # update a post by its ID
         resp = request.get_json(force=True)
@@ -31,16 +43,20 @@ class Message(Resource):
             return {'message': 'No input data provided!'}, 400
         elif ("_id" or "_created") in resp:
             resp = {i: resp[i] for i in resp if i not in ("_id", "_created")}
-        connection.Messages.find_and_modify(
+        cursor = connection.Messages.find_and_modify(
             {"_id": ObjectId(message_id)},
             {
                 "$set": resp
             }
         )
-        return None, 204
+        return {
+            "status": "ok",
+            "message": "",
+            "data": cursor
+        }
 
     def delete(self, message_id):  # delete a post by its ID
         connection.Messages.find_and_modify(
             {"_id": ObjectId(message_id)}, remove=True)
         # TODO: delete related data
-        return None, 204
+        return '', 204
