@@ -45,6 +45,7 @@ class Paginate:
             }
         else:
             return {
+                       "status": "error",
                        "message": "page number out of range"
                    }, 400
 
@@ -64,5 +65,6 @@ class Paginate:
             }
         else:
             return {
+                       "status": "error",
                        "message": "page number out of range"
                    }, 400

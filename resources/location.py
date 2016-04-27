@@ -53,7 +53,10 @@ class SchoolsList(Resource):
                     'extensions=all&' \
                     'batch=false&' \
                     'roadlevel=1'.format(key, args['lon'], args['lat'])
-        address = requests.get(regeo_url).json()
+        try:
+            address = requests.get(regeo_url).json()
+        except:
+            return {'message': 'Amap API Server No Response!'}, 504
         if not address:
             return {'message': 'Amap API Server No Response!'}, 504
         if address['status'] == "1":
