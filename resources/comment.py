@@ -32,8 +32,14 @@ class CommentsList(TokenResource):
             sort=[("_created", -1)],
             max_scan=APIConfig.MAX_SCAN
         )
-        paged_cursor = Paginate(cursor, page, limit)
-        return paged_cursor.data
+        if cursor.count() == 0:
+            return {
+                       'status': 'error',
+                       'message': '什么都没找到,我有罪'
+                   }, 404
+        else:
+            paged_cursor = Paginate(cursor, page, limit)
+            return paged_cursor.data
 
     def post(self, theme_id):  # add a new comment
         # 每条评论加 1 经验, 每日上限 10
@@ -144,8 +150,14 @@ class PostComments(TokenResource):
             },
             max_scan=APIConfig.MAX_SCAN
         )
-        paged_cursor = Paginate(cursor, page, limit)
-        return paged_cursor.data
+        if cursor.count() == 0:
+            return {
+                       'status': 'error',
+                       'message': '咦,貌似没人评论,抢个沙发吧!'
+                   }, 404
+        else:
+            paged_cursor = Paginate(cursor, page, limit)
+            return paged_cursor.data
 
 
 class ReportComment(TokenResource):

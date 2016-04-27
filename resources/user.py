@@ -132,8 +132,15 @@ class UserPostsList(Resource):
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
-        sorted_list = sorted(result, key=lambda k: k["_updated"], reverse=True)
-        return Paginate(sorted_list, page, limit).data
+        if len(result) == 0:
+            return {
+                       'status': 'error',
+                       'message': '什么都没找到啊'
+                   }, 404
+        else:
+            sorted_list = sorted(result, key=lambda k: k["_updated"],
+                                 reverse=True)
+            return Paginate(sorted_list, page, limit).data
 
 
 class UserCommentsList(Resource):
@@ -165,8 +172,15 @@ class UserCommentsList(Resource):
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
-        sorted_list = sorted(result, key=lambda k: k["_created"], reverse=True)
-        return Paginate(sorted_list, page, limit).data
+        if len(result) == 0:
+            return {
+                       'status': 'error',
+                       'message': '什么都没找到啊'
+                   }, 404
+        else:
+            sorted_list = sorted(result, key=lambda k: k["_created"],
+                                 reverse=True)
+            return Paginate(sorted_list, page, limit).data
 
 
 class UserStarsList(Resource):
@@ -194,5 +208,12 @@ class UserStarsList(Resource):
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
-        sorted_list = sorted(result, key=lambda k: k["_updated"], reverse=True)
-        return Paginate(sorted_list, page, limit).data
+        if len(result) == 0:
+            return {
+                       'status': 'error',
+                       'message': '你好像还没关注过什么'
+                   }, 404
+        else:
+            sorted_list = sorted(result, key=lambda k: k["_updated"],
+                                 reverse=True)
+            return Paginate(sorted_list, page, limit).data
