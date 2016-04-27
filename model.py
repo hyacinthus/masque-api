@@ -733,29 +733,6 @@ class Masks(RootDocument):
 
 
 @connection.register
-class BoardPosts(RootDocument):
-    __collection__ = CollectionName.BOARD_POSTS
-    structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
-    }
-
-
-@connection.register
-class BoardComments(BoardPosts):
-    __collection__ = CollectionName.BOARD_COMMENTS
-
-
-@connection.register
 class Parameters(RootDocument):
     __collection__ = CollectionName.PARAMETERS
     structure = {

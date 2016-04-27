@@ -122,15 +122,6 @@ api.add_resource(RandomMask, '/masks/random', endpoint='random_mask')
 api.add_resource(UploadMask, '/mask/upload', endpoint='upload_mask')
 api.add_resource(Mask, '/mask/<string:mask_id>', endpoint='mask')
 
-api.add_resource(BoardPostsList, '/board_posts', endpoint='board_posts')
-api.add_resource(BoardPost, '/board_post/<string:board_post_id>',
-                 endpoint='board_post')
-
-api.add_resource(BoardCommentsList, '/board_comments',
-                 endpoint='board_comments')
-api.add_resource(BoardComment, '/board_comment/<string:board_comment_id>',
-                 endpoint='board_comment')
-
 api.add_resource(ParametersList, '/parameters', endpoint='parameters')
 api.add_resource(Parameter, '/parameter/<string:parameter_id>',
                  endpoint='parameter')
