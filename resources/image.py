@@ -74,10 +74,15 @@ def compose_url(RoleSessionName):
 def http_request(site='sts.aliyuncs.com', url=""):
     conn = http.client.HTTPSConnection(site)
     conn.request("GET", url)
-    res = conn.getresponse()
+    try:
+        res = conn.getresponse()
+    except:
+        return '', 500
     if res:
         data = res.read().decode(encoding='utf-8')
         return json.loads(data), res.status
+    else:
+        return '', 500
 
 
 class GetToken(TokenResource):

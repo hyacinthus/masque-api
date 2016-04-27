@@ -5,42 +5,58 @@ from model import connection
 
 
 class ParametersList(Resource):
-    def get(self):  # get all posts
+    def get(self):
         cursor = connection.Parameters.find()
-        return cursor
+        return {
+            "status": "ok",
+            "message": "",
+            "data": cursor
+        }
 
-    def post(self):  # add a new post
+    def post(self):
         resp = request.get_json(force=True)
         doc = connection.Parameters()
         for item in resp:
             if item == "_id":
-                continue  # skip if post have an _id item
+                continue
             doc[item] = resp[item]
         doc.save()
-        return None, 201
+        return {
+                   "status": "ok",
+                   "message": "",
+                   "data": doc
+               }, 201
 
 
 class Parameter(Resource):
-    def get(self, parameter_id):  # get a post by its ID
+    def get(self, parameter_id):
         cursor = connection.Parameters.find_one({"_id": ObjectId(parameter_id)})
-        return cursor
+        return {
+            "status": "ok",
+            "message": "",
+            "data": cursor
+        }
 
-    def put(self, parameter_id):  # update a post by its ID
+    def put(self, parameter_id):
         resp = request.get_json(force=True)
         if not resp:
             return {'message': 'No input data provided!'}, 400
         elif ("_id" or "_created") in resp:
             resp = {i: resp[i] for i in resp if i not in ("_id", "_created")}
-        connection.Parameters.find_and_modify(
+        cursor = connection.Parameters.find_and_modify(
             {"_id": ObjectId(parameter_id)},
             {
                 "$set": resp
             }
         )
-        return None, 204
+        return {
+            "status": "ok",
+            "message": "",
+            "data": cursor
+        }
 
-    def delete(self, parameter_id):  # delete a post by its ID
+    def delete(self, parameter_id):
         connection.Parameters.find_and_modify(
             {"_id": ObjectId(parameter_id)}, remove=True)
         # TODO: delete related data
-        return None, 204
+        return '', 204

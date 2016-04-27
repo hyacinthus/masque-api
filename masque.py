@@ -31,7 +31,12 @@ def output_json(data, code, headers=None):
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'message': 'Not found'}), 404)
+    return make_response(jsonify(
+        {
+            'status': 'error',
+            'message': '什么都没找到'
+        }
+    ), 404)
 
 
 @app.teardown_request

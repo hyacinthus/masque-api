@@ -29,7 +29,10 @@ class Paginate:
         """列表分页"""
         if len(sorted_list) == 0:
             # 页码为零, 返回 404
-            return "", 404
+            return {
+                       'status': 'error',
+                       'message': '什么都没找到'
+                   }, 404
         elif len(sorted_list) % limit != 0:
             num_pages = len(sorted_list) // limit + 1
         else:
@@ -37,6 +40,8 @@ class Paginate:
         # 判断页码是否超出范围
         if page <= num_pages:
             return {
+                "status": "ok",
+                "message": "",
                 "data": sorted_list[limit * (page - 1):limit * page],
                 "paging": {
                     "num_pages": num_pages,
@@ -45,7 +50,8 @@ class Paginate:
             }
         else:
             return {
-                       "message": "page number out of range"
+                       "status": "error",
+                       "message": "页码超出范围"
                    }, 400
 
     def cursor_paging(self, cursor, page, limit):
@@ -53,9 +59,14 @@ class Paginate:
         paged_cursor = Paginator(cursor, page, limit)
         if paged_cursor.num_pages == 0:
             # 页码为零, 返回 404
-            return "", 404
+            return {
+                       'status': 'error',
+                       'message': '什么都没找到'
+                   }, 404
         elif page <= paged_cursor.num_pages:
             return {
+                "status": "ok",
+                "message": "",
                 "data": [i for i in paged_cursor.items],
                 "paging": {
                     "num_pages": paged_cursor.num_pages,
@@ -64,5 +75,6 @@ class Paginate:
             }
         else:
             return {
-                       "message": "page number out of range"
+                       "status": "error",
+                       "message": "页码超出范围"
                    }, 400
