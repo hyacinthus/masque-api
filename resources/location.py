@@ -137,7 +137,5 @@ class SchoolsList(Resource):
         return {
             'status': 'ok',
             'message': '学校列表筛选完毕',
-            'data': {
-                'schools': list(result)
-            }
+            'data': list(result)
         }
