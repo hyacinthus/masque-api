@@ -50,11 +50,8 @@ def access_token():
     return None
 
 
-api.add_resource(PostsList, '/theme/<string:theme_id>/posts',
-                 '/theme/<string:theme_id>/posts/',
-                 endpoint='posts')
+api.add_resource(PostsList, '/theme/<string:theme_id>/posts', endpoint='posts')
 api.add_resource(Post, '/theme/<string:theme_id>/post/<string:post_id>',
-                 '/theme/<string:theme_id>/post/<string:post_id>/',
                  endpoint='post')
 # 举报帖子
 api.add_resource(ReportPost,
@@ -63,23 +60,18 @@ api.add_resource(ReportPost,
 
 api.add_resource(Hearts,
                  '/theme/<string:theme_id>/post/<string:post_id>/hearts',
-                 '/theme/<string:theme_id>/post/<string:post_id>/hearts/',
                  endpoint='hearts')
 api.add_resource(FavorPost,
                  '/theme/<string:theme_id>/post/<string:post_id>/star',
-                 '/theme/<string:theme_id>/post/<string:post_id>/star/',
                  endpoint='post_star')
 
 api.add_resource(CommentsList, '/theme/<string:theme_id>/comments',
-                 '/theme/<string:theme_id>/comments/',
                  endpoint='comments')
 api.add_resource(PostComments,
                  '/theme/<string:theme_id>/post/<string:post_id>/comments',
-                 '/theme/<string:theme_id>/post/<string:post_id>/comments/',
                  endpoint='post_comment')
 api.add_resource(Comment,
                  '/theme/<string:theme_id>/comment/<string:comment_id>',
-                 '/theme/<string:theme_id>/comment/<string:comment_id>/',
                  endpoint='comment')
 # 举报评论
 api.add_resource(ReportComment,
@@ -91,30 +83,23 @@ api.add_resource(CommentHeart,
                  '/theme/<string:theme_id>/comment/<string:comment_id>/heart',
                  endpoint='heart_comment')
 
-api.add_resource(UsersList, '/users', '/users/', endpoint='users')
-api.add_resource(User, '/user/<string:user_id>', '/user/<string:user_id>/',
-                 endpoint='user')
+api.add_resource(UsersList, '/users', endpoint='users')
+api.add_resource(User, '/user/<string:user_id>', endpoint='user')
 api.add_resource(DeviceUser, '/device/<string:device_id>/user',
-                 '/device/<string:device_id>/user/',
                  endpoint='device_user')
 
 api.add_resource(UserPostsList, '/user/<string:user_id>/posts',
-                 '/user/<string:user_id>/posts/',
                  endpoint='user_posts')
 api.add_resource(UserCommentsList, '/user/<string:user_id>/comments',
-                 '/user/<string:user_id>/comments/',
                  endpoint='user_comments')
 api.add_resource(UserStarsList, '/user/<string:user_id>/stars',
-                 '/user/<string:user_id>/stars/',
                  endpoint='user_stars')
 
 api.add_resource(ThemesList, '/themes', endpoint='themes')
-api.add_resource(Theme, '/theme/<string:theme_id>',
-                 endpoint='theme')
+api.add_resource(Theme, '/theme/<string:theme_id>', endpoint='theme')
 
 api.add_resource(DevicesList, '/devices', endpoint='devices')
-api.add_resource(Device, '/device/<string:device_id>',
-                 endpoint='device')
+api.add_resource(Device, '/device/<string:device_id>', endpoint='device')
 
 api.add_resource(UserLevelsList, '/user_levels', endpoint='user_levels')
 api.add_resource(UserLevel, '/user_level/<string:user_level_id>',
