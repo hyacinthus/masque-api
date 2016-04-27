@@ -49,7 +49,7 @@ class SchoolsList(Resource):
                     'key={}&' \
                     'location={},{}&' \
                     'poitype=141201|141202|141203&' \
-                    'radius=300&' \
+                    'radius=400&' \
                     'extensions=all&' \
                     'batch=false&' \
                     'roadlevel=1'.format(key, args['lon'], args['lat'])
