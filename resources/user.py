@@ -61,12 +61,20 @@ class DeviceUser(Resource):
                     result.hearts_owned += 1
             result._updated = None
             result.save()
-        return result
+        return {
+            "status": "ok",
+            "message": "",
+            "data": result
+        }
 
 
 class User(TokenResource):
     def get(self, user_id):  # get user info by its ID
-        return self.user_info.user
+        return {
+            "status": "ok",
+            "message": "",
+            "data": self.user_info.user
+        }
 
     def put(self, user_id):  # update user info by its ID
         # 处理客户端请求数据
