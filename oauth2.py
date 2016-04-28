@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from flask_oauthlib.provider import OAuth2Provider
 
 from model import Client, Grant, Token, connection
+from tasks import logger
 
 log = logging.getLogger("masque.oauth")
 oauth = OAuth2Provider()
@@ -80,6 +81,8 @@ def get_user(username, password, *args, **kwargs):
     if device:
         if device.user_id:
             user = connection.Users.find_one({"_id": ObjectId(device.user_id)})
+            # 登录日志
+            logger.sign_in_log.delay(device.user_id, device._id)
             if not user:
                 log.error("Device user %s is not exists in Users" %
                           device.user_id)
@@ -91,6 +94,8 @@ def get_user(username, password, *args, **kwargs):
             device.user_id = user._id
             device.origin_user_id = user._id
             device.save()
+            # 注册日志
+            logger.sign_up_log.delay(device.user_id, device._id)
         return user
     else:
         log.error("Create device %s failed." % username)

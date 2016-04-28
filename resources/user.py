@@ -24,7 +24,11 @@ class UsersList(Resource):
                 continue
             doc[item] = resp[item]
         doc.save()
-        return {"_id": doc['_id']}, 201
+        return {
+                   "status": "ok",
+                   "message": "",
+                   "data": doc
+               }, 201
 
 
 class DeviceUser(Resource):
@@ -57,12 +61,20 @@ class DeviceUser(Resource):
                     result.hearts_owned += 1
             result._updated = None
             result.save()
-        return result
+        return {
+            "status": "ok",
+            "message": "",
+            "data": result
+        }
 
 
 class User(TokenResource):
     def get(self, user_id):  # get user info by its ID
-        return self.user_info.user
+        return {
+            "status": "ok",
+            "message": "",
+            "data": self.user_info.user
+        }
 
     def put(self, user_id):  # update user info by its ID
         # 处理客户端请求数据
@@ -92,10 +104,7 @@ class User(TokenResource):
         connection.Users.find_and_modify(
             {"_id": ObjectId(self.user_info.user._id)}, remove=True)
         # TODO: delete related data
-        return {
-                   'status': "ok",
-                   'message': "删除成功"
-               }, 204
+        return '', 204
 
 
 class UserPostsList(Resource):
@@ -123,8 +132,15 @@ class UserPostsList(Resource):
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
-        sorted_list = sorted(result, key=lambda k: k["_updated"], reverse=True)
-        return Paginate(sorted_list, page, limit).data
+        if len(result) == 0:
+            return {
+                       'status': 'error',
+                       'message': '什么都没找到啊'
+                   }, 404
+        else:
+            sorted_list = sorted(result, key=lambda k: k["_updated"],
+                                 reverse=True)
+            return Paginate(sorted_list, page, limit).data
 
 
 class UserCommentsList(Resource):
@@ -147,7 +163,7 @@ class UserCommentsList(Resource):
         result = []
         cursor = connection.UserComments.find({"user_id": user_id})
         if cursor.count() == 0:
-            return {'message': 'Not found'}, 404
+            return 404
         for doc in cursor:
             collection = connection[MongoConfig.DB][
                 "comments_" + doc['theme_id']]
@@ -156,8 +172,15 @@ class UserCommentsList(Resource):
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
-        sorted_list = sorted(result, key=lambda k: k["_created"], reverse=True)
-        return Paginate(sorted_list, page, limit).data
+        if len(result) == 0:
+            return {
+                       'status': 'error',
+                       'message': '什么都没找到啊'
+                   }, 404
+        else:
+            sorted_list = sorted(result, key=lambda k: k["_created"],
+                                 reverse=True)
+            return Paginate(sorted_list, page, limit).data
 
 
 class UserStarsList(Resource):
@@ -185,5 +208,12 @@ class UserStarsList(Resource):
             if cur:
                 cur["theme_id"] = doc["theme_id"]
                 result.append(cur)
-        sorted_list = sorted(result, key=lambda k: k["_updated"], reverse=True)
-        return Paginate(sorted_list, page, limit).data
+        if len(result) == 0:
+            return {
+                       'status': 'error',
+                       'message': '你好像还没关注过什么'
+                   }, 404
+        else:
+            sorted_list = sorted(result, key=lambda k: k["_updated"],
+                                 reverse=True)
+            return Paginate(sorted_list, page, limit).data

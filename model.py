@@ -278,6 +278,7 @@ class CheckPermission:
             "user:{}:daily_count".format(self.user_id), "exp", value
         )
 
+
 # Oauth2 model
 class Client():
     """A client is the app which want to use the resource of a user.
@@ -648,7 +649,8 @@ class Themes(RootDocument):
 
     structure = {
         "_id": CustomObjectId(),
-        "category": IS("school", "city", "district", "virtual", "private", "system"),
+        "category": IS("school", "city", "district", "virtual", "private",
+                       "system"),
         "subcate": str,
         "short_name": str,
         "full_name": str,
@@ -681,7 +683,7 @@ class Devices(RootDocument):
         "origin_user_id": str,
     }
     required_fields = [
-        '_id', 'user_id', 'origin_user_id'
+        '_id',
     ]
     default_values = {
         "name": ""
@@ -1077,19 +1079,19 @@ class GeoRequestLog(RootDocument):
         "_id": CustomObjectId(),
         "user_id": str,
         "location": {
-            "nation": str,
-            "province": str,
-            "city": str,
-            "district": str
+            "coordinates": [
+                OR(int, float),
+                OR(int, float)
+            ],
+            "type": IS("Point", "None")
         },
         "_created": CustomDate(),
+        "schools": list
     }
     required_fields = [
         'user_id'
     ]
     default_values = {
-        "location.nation": "中国",
-        "location.province": "",
-        "location.city": "",
-        "location.district": ""
+        "location.coordinates": [108.947001, 34.259458],
+        "location.type": "Point",
     }
