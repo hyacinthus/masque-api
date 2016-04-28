@@ -45,10 +45,11 @@ class Theme(Resource):
                                   "private", "system"):
             # 如果没有用户反馈表, 新建一个
             if theme_id == "用户反馈":
-                feedback = connection.Themes.find({"full_name": theme_id})
-                if feedback.count() != 0 and not redisdb.exists(
-                        "cache:feedback_id"):
-                    redisdb.set("cache:feedback_id", list(feedback)[0]["_id"])
+                feedback = connection.Themes.find({"full_name": "用户反馈"})
+                if feedback.count() != 0:
+                    if not redisdb.exists("cache:feedback_id"):
+                        redisdb.set("cache:feedback_id",
+                                    list(feedback)[0]["_id"])
                 else:
                     doc = connection.Themes()
                     doc["category"] = "system"

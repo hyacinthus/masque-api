@@ -154,7 +154,8 @@ api.add_resource(DeRegister, '/deregister/<string:cellphone>',
 api.add_resource(Notifications, '/notifications', endpoint='notifications')
 
 # 单个通知
-api.add_resource(Notification, '/notification/', endpoint='notification')
+api.add_resource(Notification, '/notification/<string:notifi_id>',
+                 endpoint='notification')
 
 if __name__ == '__main__':
     app.run(host=DebugConfig.HOST, port=DebugConfig.PORT)

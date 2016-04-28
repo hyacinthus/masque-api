@@ -15,18 +15,9 @@ expire = RedisConfig.NOTIFI_EXPIRE * 3600
 
 def save2redis(notifi):
     # 通知暂存到 Redis
-    hmap = {
-        '_id': notifi._id,
-        'title': "",
-        'type': notifi.type,
-        'content': notifi.content,
-        'theme_id': notifi.theme_id,
-        'post_id': notifi.post_id,
-        'comment_id': notifi.comment_id,
-        '_created': notifi._created
-    }
-    hkey = "notification:{}:user:{}".format(notifi._id,
-                                            notifi.user_id)
+    redisdb.lpush("user:{}:notifications".format(notifi.user_id), notifi._id)
+    hmap = notifi.copy()
+    hkey = "notification:{}".format(notifi._id)
     redisdb.hmset(hkey, hmap)
     redisdb.expire(hkey, expire)  # 设置提醒过期时间
     log.info("Hash key %s has been saved in redis" % hkey)
