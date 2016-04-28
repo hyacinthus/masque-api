@@ -54,6 +54,8 @@ class RedisConfig:
     HOST = os.getenv("REDIS_HOST", "localhost")
     PORT = int(os.getenv("REDIS_PORT", "6379"))
     DB = int(os.getenv("REDIS_DB", "8"))
+    # 新提醒过期时间, 单位: 小时
+    NOTIFI_EXPIRE = int(os.getenv("NOTIFI_EXPIRE", "24"))
 
 
 class APIConfig:
@@ -71,8 +73,6 @@ class CollectionName:
     DEVICES = "devices"
     USER_LEVELS = "user_levels"
     MASKS = "masks"
-    BOARD_POSTS = "board_posts"
-    BOARD_COMMENTS = "board_comments"
     PARAMETERS = "parameters"
     DEVICE_TRACE = "device_trace"
     MESSAGES = "messages"

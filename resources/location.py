@@ -1,11 +1,16 @@
+import logging
+from json import dumps
+
 import requests
-from flask_restful import Resource, reqparse
+from flask_restful import reqparse
 
 from config import APIConfig
-from model import connection
+from model import connection, TokenResource
+from tasks import logger
 
 # 需要过滤的黑名单
 black_list = ('网络教育', '继续教育', '远程教育', '仙桃学院', '纺织服装学院', '教学部', '分部', '小学')
+log = logging.getLogger("masque.location")
 
 
 def guolv(t):
@@ -32,7 +37,7 @@ def rm_duplicates(data=None):
     return data[:index + 1]
 
 
-class SchoolsList(Resource):
+class SchoolsList(TokenResource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('lon',
@@ -49,7 +54,7 @@ class SchoolsList(Resource):
                     'key={}&' \
                     'location={},{}&' \
                     'poitype=141201|141202|141203&' \
-                    'radius=300&' \
+                    'radius=400&' \
                     'extensions=all&' \
                     'batch=false&' \
                     'roadlevel=1'.format(key, args['lon'], args['lat'])
@@ -66,7 +71,6 @@ class SchoolsList(Resource):
                 address["regeocode"]["aois"] else None
             }
             pois = address["regeocode"]["pois"]
-
         else:
             return {'message': 'Amap API Server Error!'}, 500
         get_school = (addr["keyword"],) if addr["keyword"] else ()
@@ -127,7 +131,7 @@ class SchoolsList(Resource):
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
                 doc.save()  # 新建不存在的主题
-        result = (connection.Themes.find_one(
+        result = list(connection.Themes.find_one(
             {
                 "full_name": i,
                 "category": {
@@ -135,4 +139,20 @@ class SchoolsList(Resource):
                 }
             }
         ) for i in schools)
-        return result
+        # 位置记录
+        loc_log = dumps(
+            {
+                "user_id": self.user_info.user._id,
+                "location": {
+                    "coordinates": [float(args['lon']), float(args['lat'])],
+                    "type": "Point"
+                },
+                "schools": result
+            }
+        )
+        logger.geo_request_log.delay(loc_log)
+        return {
+            'status': 'ok',
+            'message': '学校列表筛选完毕',
+            'data': result
+        }
