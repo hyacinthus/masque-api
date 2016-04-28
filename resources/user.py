@@ -31,36 +31,20 @@ class UsersList(Resource):
                }, 201
 
 
-class DeviceUser(Resource):
+class DeviceUser(TokenResource):
     def get(self, device_id):
-        cursor = connection.Devices.find_one({"_id": device_id})
-        if not cursor:
-            # 没有查到 device_id 对应信息, 视为新用户, 为其初始化devices/users信息
-            user = connection.Users()
-            user.save()
-            user_id = user['_id']
-            dev = connection.Devices()
-            dev['_id'] = device_id
-            dev['user_id'] = user_id
-            dev['origin_user_id'] = user_id
-            dev.save()
-            result = connection.Users.find_one({"_id": ObjectId(user_id)})
-        else:
-            # 查到 device_id 对应信息, 返回对应用户信息并刷新用户登录时间
-            result = connection.Users.find_one(
-                {"_id": ObjectId(cursor['user_id'])}
-            )
-            perm = CheckPermission(result._id)
-            if perm.is_first_login:
-                # 当天初次登录随机加 1-5 经验
-                add_exp(result)
-                e2l = Exp2Level(result.exp)
-                log.debug("当前等级:{}".format(e2l.level_str))
-                # 每天第一次登录拥有感谢数加 1
-                if result.hearts_owned < e2l.heart_limit:
-                    result.hearts_owned += 1
-            result._updated = None
-            result.save()
+        result = self.user_info.user
+        perm = CheckPermission(result._id)
+        if perm.is_first_login:
+            # 当天初次登录随机加 1-5 经验
+            add_exp(result)
+            e2l = Exp2Level(result.exp)
+            log.debug("当前等级:{}".format(e2l.level_str))
+            # 每天第一次登录拥有感谢数加 1
+            if result.hearts_owned < e2l.heart_limit:
+                result.hearts_owned += 1
+        result._updated = None
+        result.save()
         return {
             "status": "ok",
             "message": "",

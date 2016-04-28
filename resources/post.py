@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig, APIConfig
-from model import connection, TokenResource, CheckPermission
+from model import connection, redisdb, TokenResource, CheckPermission
 from paginate import Paginate
 from util import add_exp, post_heart, is_chinese
 
@@ -33,13 +33,20 @@ class PostsList(TokenResource):
             max_scan=APIConfig.MAX_SCAN,
             sort=[("_updated", -1)]
         )  # 按回帖时间排序
+        if cursor.count() == 0:
+            return {
+                       'status': 'error',
+                       'message': '这里暂时没人发帖哦\n\a要不要发一个试试?'
+                   }, 404
         paged_cursor = Paginate(cursor, page, limit)
         return paged_cursor.data
 
     def post(self, theme_id):  # add a new post
         # 权限检测
         perm = CheckPermission(self.user_info.user._id)
-        if theme_id != "用户反馈":
+        feedback_id = redisdb.get("cache:feedback_id") if redisdb.exists(
+            "cache:feedback_id") else None
+        if theme_id != feedback_id:
             if perm.post < self.limit_info.post_limit:
                 # 经验限制(每发一帖经验加5, 每日上限10)
                 if perm.exp <= 5:
@@ -51,7 +58,7 @@ class PostsList(TokenResource):
             else:
                 return {
                            "status": "error",
-                           "message": "今日发帖数量已到上限, 大侠还请明日再来"
+                           "message": "今天发帖数已达当前等级上限\n\t\t\t\t\a先四处评论灌灌水吧"
                        }, 403
         else:
             # 反馈帖只限制增长经验, 不限制发帖次数
@@ -199,7 +206,7 @@ class Hearts(TokenResource):
         else:
             return {
                        "status": "error",
-                       "message": "感谢数不足, 无法送出感谢"
+                       "message": "感谢数不足,无法送出感谢"
                    }, 403
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         cursor = collection.Posts.find_one({"_id": ObjectId(post_id)})

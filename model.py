@@ -789,6 +789,7 @@ class Notifications(RootDocument):
         "_id": CustomObjectId(),
         "_created": CustomDate(),
         "user_id": str,
+        "title": str,
         "type": str,
         "content": str,
         "theme_id": str,
@@ -798,6 +799,7 @@ class Notifications(RootDocument):
     }
     default_values = {
         "user_id": '',
+        "title": '',
         "type": '',
         "content": '',
         "theme_id": '',
