@@ -146,7 +146,7 @@ class BoundPhone(TokenResource):
             return {
                        "status": "ok",
                        "data": user,
-                       "message": "欢迎回来,将为您恢复此手机之前关联的资料"
+                       "message": "欢迎回来，将为您恢复此手机之前关联的资料"
                    }, 201
         else:
             # 没有绑定过手机, 将cellphone填入当前user_id.cellphone字段
