@@ -1,7 +1,7 @@
 import logging
 
 from bson.objectid import ObjectId
-from flask_restful import reqparse
+from flask_restful import request, reqparse
 
 from config import APIConfig
 from model import connection, TokenResource, redisdb
@@ -72,17 +72,36 @@ class Notifications(TokenResource):
                             help='all/new 选其一, 默认为new')
         args = parser.parse_args()
         notifi_type = args['type'] if args['type'] else "new"
-        if notifi_type == "all":
-            connection.Notifications.collection.remove(
-                {"user_id": self.user_info.user._id}
-            )
-        else:
+        resp = request.get_json(force=True)
+        if not resp:
+            # 不提供待删除通知列表视为删除全部
+            if notifi_type == "all":
+                connection.Notifications.collection.remove(
+                    {"user_id": self.user_info.user._id}
+                )
+            else:
+                key = "user:{}:notifications".format(self.user_info.user._id)
+                if redisdb.exists(key):
+                    for i in redisdb.lrange(key, 0, -1):
+                        if redisdb.exists("notification:{}".format(i)):
+                            redisdb.delete("notification:{}".format(i))
+                    redisdb.delete(key)
+        elif "notifications" in resp:
+            # 提供待删除通知列表则只删除列表内的通知
+            lst = resp['notifications']
             key = "user:{}:notifications".format(self.user_info.user._id)
             if redisdb.exists(key):
-                for i in redisdb.lrange(key, 0, -1):
+                for i in lst:
                     if redisdb.exists("notification:{}".format(i)):
                         redisdb.delete("notification:{}".format(i))
-                redisdb.delete(key)
+                    if i in redisdb.lrange(key, 0, -1):
+                        redisdb.lrem(key, 0, i)
+        else:
+            # 其他异常输入, 返回400
+            return {
+                       "status": "error",
+                       "message": "请提供合法的待删除通知列表"
+                   }, 400
         return '', 204
 
 
@@ -95,9 +114,11 @@ class Notification(TokenResource):
         args = parser.parse_args()
         notifi_type = args['type'] if args['type'] else "new"
         if notifi_type == "all":
-            connection.Notifications.collection.remove(
-                {"_id": ObjectId(notifi_id)}
-            )
+            if connection.Notifications.find(
+                    {"_id": ObjectId(notifi_id)}).count != 0:
+                connection.Notifications.collection.remove(
+                    {"_id": ObjectId(notifi_id)}
+                )
         else:
             key = "user:{}:notifications".format(self.user_info.user._id)
             if redisdb.exists(key) and notifi_id in redisdb.lrange(key, 0, -1):

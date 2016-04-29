@@ -54,7 +54,7 @@ class SchoolsList(TokenResource):
                     'key={}&' \
                     'location={},{}&' \
                     'poitype=141201|141202|141203&' \
-                    'radius=400&' \
+                    'radius=500&' \
                     'extensions=all&' \
                     'batch=false&' \
                     'roadlevel=1'.format(key, args['lon'], args['lat'])
