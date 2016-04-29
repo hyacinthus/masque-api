@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
-from model import connection
+from model import connection, redisdb
 
 
 class ThemesList(Resource):
@@ -43,9 +43,14 @@ class Theme(Resource):
                                theme_id)}, 400
         elif args['category'] in ("school", "district", "virtual",
                                   "private", "system"):
-            # 如果没有用户反馈记录, 新建一个
+            # 如果没有用户反馈表, 新建一个
             if theme_id == "用户反馈":
-                if not connection.Themes.find_one({"full_name": theme_id}):
+                feedback = connection.Themes.find({"full_name": "用户反馈"})
+                if feedback.count() != 0:
+                    if not redisdb.exists("cache:feedback_id"):
+                        redisdb.set("cache:feedback_id",
+                                    list(feedback)[0]["_id"])
+                else:
                     doc = connection.Themes()
                     doc["category"] = "system"
                     doc["short_name"] = theme_id
@@ -54,6 +59,7 @@ class Theme(Resource):
                     doc["locale"]["city"] = "西安市"
                     doc["locale"]["district"] = "雁塔区"
                     doc.save()
+                    redisdb.set("cache:feedback_id", doc._id)
             cursor = connection.Themes.find_one(
                 {
                     "full_name": theme_id,

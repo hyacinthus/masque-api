@@ -2,14 +2,25 @@ import logging
 
 from bson.objectid import ObjectId
 
-from config import MongoConfig
-from model import connection
+from config import MongoConfig, RedisConfig
+from model import connection, redisdb
 from tasks import app
 from tools import detection
 from tools.oss import OssConnection
 
 oc = OssConnection()
 log = logging.getLogger("masque.task.notifications")
+expire = RedisConfig.NOTIFI_EXPIRE * 3600
+
+
+def save2redis(notifi):
+    # 通知暂存到 Redis
+    redisdb.lpush("user:{}:notifications".format(notifi.user_id), notifi._id)
+    hmap = notifi.copy()
+    hkey = "notification:{}".format(notifi._id)
+    redisdb.hmset(hkey, hmap)
+    redisdb.expire(hkey, expire)  # 设置提醒过期时间
+    log.info("Hash key %s has been saved in redis" % hkey)
 
 
 @app.task
@@ -22,6 +33,7 @@ def new_reply(author_id, theme_id, post_id, comment_id):
         content = "Your post %s have a new comment %s" % (post_id, comment_id)
         log.info(content)
         notifi = connection.Notifications()
+        notifi.title = "您的帖子有新评论啦"
         notifi.type = "comment"
         notifi.theme_id = theme_id
         notifi.post_id = post_id
@@ -29,6 +41,7 @@ def new_reply(author_id, theme_id, post_id, comment_id):
         notifi.comment_id = comment_id
         notifi.content = content
         notifi.save()
+        save2redis(notifi)
 
 
 @app.task
@@ -47,6 +60,7 @@ def star_new_reply(author_id, theme_id, post_id, comment_id):
         notifi.user_id = author_id
         notifi.content = content
         notifi.save()
+        save2redis(notifi)
 
 
 @app.task
@@ -77,6 +91,7 @@ def new_heart(author_id, theme_id, post_id):
         notifi.post_id = post_id
         notifi.content = content
         notifi.save()
+        save2redis(notifi)
 
 
 @app.task
@@ -92,6 +107,7 @@ def comment_new_heart(user_id, theme_id, post_id, comment_id):
         notifi.post_id = post_id
         notifi.content = content
         notifi.save()
+        save2redis(notifi)
 
 
 @app.task
@@ -103,6 +119,7 @@ def level_up(user_id, user_level):
     notifi.user_id = user_id
     notifi.content = content
     notifi.save()
+    save2redis(notifi)
 
 
 @app.task
@@ -277,4 +294,3 @@ def publish_porn_image(user_id, image_id):
     notifi.content = content
     notifi.user_id = user_id
     notifi.save()
-
