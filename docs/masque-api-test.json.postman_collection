@@ -19,32 +19,6 @@
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c"
 		},
 		{
-			"id": "53320eca-adaf-d9ac-714c-5db84b6deb07",
-			"name": "公告贴",
-			"description": "",
-			"order": [
-				"29efc1ff-a11b-ff5d-3448-bb95f26de06c",
-				"1a40ea00-5338-e9a2-a9b8-915208b69893",
-				"305ae646-e361-1e9e-ba72-c3046afe59fd",
-				"ec202b9f-9611-5ee9-5902-9f61662fb6d9",
-				"16e5a6e9-d7a1-724b-b98c-9c03025146ec"
-			],
-			"owner": "349297"
-		},
-		{
-			"id": "e7c7cd58-f9f8-3f72-13c1-7d30ea787ace",
-			"name": "公告贴评论",
-			"description": "",
-			"order": [
-				"fdf80c25-6fc0-6240-a7da-0518dce2681e",
-				"94edec90-eed8-a917-5060-a9606ef8645b",
-				"815fa0c4-f566-5073-b21a-4552ef091959",
-				"6def855a-f54f-f506-ecda-27742433edfb",
-				"904cffa6-5f70-4ad5-f6f9-55994cdd3887"
-			],
-			"owner": "349297"
-		},
-		{
 			"id": "303766a2-3bad-88fb-b17c-968ec43c6c01",
 			"name": "参数表",
 			"description": "## 系统头像\n\n用来给新用户随机分配",
@@ -84,25 +58,11 @@
 			"owner": "349297"
 		},
 		{
-			"id": "1aeb03e7-0aae-57db-79dc-9fea0e7b2142",
-			"name": "手机短信相关",
-			"description": "",
-			"order": [
-				"9d2768ea-1631-34b9-a399-67713cc2a3d1",
-				"29687bcf-b856-2968-92fd-9c835aba9a2d",
-				"8f82550a-1695-97cf-38c8-a8812912d413",
-				"143b1c5e-4795-10a1-8ae4-1c26dcf31bc4",
-				"dfa1ea65-4150-a80e-7f33-84ef8a151d2f"
-			],
-			"owner": "349297",
-			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c"
-		},
-		{
 			"owner": "349297",
 			"lastUpdatedBy": "349297",
 			"lastRevision": 162984859,
 			"id": "a325b5de-77e1-2c52-e105-d1895cc6a5e7",
-			"name": "普通贴",
+			"name": "帖子",
 			"description": "",
 			"order": [
 				"b1f5f66e-1107-72c9-4776-a116864f6aa7",
@@ -118,21 +78,29 @@
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c"
 		},
 		{
-			"id": "c3fa24a7-bc75-8592-72f9-8a8b97c0e034",
-			"name": "普通贴评论",
+			"id": "1aeb03e7-0aae-57db-79dc-9fea0e7b2142",
+			"name": "手机短信相关",
 			"description": "",
 			"order": [
-				"654547c1-36ca-4c25-64f8-33879b647ff7",
-				"ca71999c-dd83-a755-98a9-023ef16c62a6",
-				"d9f6c413-0aea-b678-cf63-bd86923889cf",
-				"99b0526b-6d74-9f52-2826-102949dc68fa",
-				"e2a27a42-a11a-a533-3fd3-88e5b6c781f9",
-				"8a655131-298a-fd3e-a743-b675fb18634b",
-				"2201310b-aa19-5d73-4dcc-f294c36817d1",
-				"564e4548-2717-94f6-8210-7d764ae58085"
+				"9d2768ea-1631-34b9-a399-67713cc2a3d1",
+				"29687bcf-b856-2968-92fd-9c835aba9a2d",
+				"8f82550a-1695-97cf-38c8-a8812912d413",
+				"143b1c5e-4795-10a1-8ae4-1c26dcf31bc4",
+				"dfa1ea65-4150-a80e-7f33-84ef8a151d2f"
 			],
 			"owner": "349297",
 			"collectionId": "ffd39b21-dfbd-817a-2190-384c96b6c74c"
+		},
+		{
+			"id": "490c531f-dc9d-5eb8-d6f3-b47d5fa657c9",
+			"name": "消息通知",
+			"description": "",
+			"order": [
+				"1e834968-9d7e-5d23-73f9-ff0764802c5b",
+				"c445c589-e9a6-9c75-7556-0b9a52ddc690",
+				"3c8908e3-2904-02f7-103d-daa2054ab524"
+			],
+			"owner": "349297"
 		},
 		{
 			"id": "667cc2f1-68f7-64f1-226e-4ca484c3847b",
@@ -186,6 +154,23 @@
 				"0fabaa09-ff00-7d90-686c-2e8a0f380a14"
 			],
 			"owner": "349297"
+		},
+		{
+			"id": "c3fa24a7-bc75-8592-72f9-8a8b97c0e034",
+			"name": "评论",
+			"description": "",
+			"order": [
+				"654547c1-36ca-4c25-64f8-33879b647ff7",
+				"ca71999c-dd83-a755-98a9-023ef16c62a6",
+				"d9f6c413-0aea-b678-cf63-bd86923889cf",
+				"99b0526b-6d74-9f52-2826-102949dc68fa",
+				"e2a27a42-a11a-a533-3fd3-88e5b6c781f9",
+				"8a655131-298a-fd3e-a743-b675fb18634b",
+				"2201310b-aa19-5d73-4dcc-f294c36817d1",
+				"564e4548-2717-94f6-8210-7d764ae58085"
+			],
+			"owner": "349297",
+			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396"
 		}
 	],
 	"timestamp": 1456449010751,
@@ -380,48 +365,25 @@
 			"folder": "1aeb03e7-0aae-57db-79dc-9fea0e7b2142"
 		},
 		{
-			"id": "16e5a6e9-d7a1-724b-b98c-9c03025146ec",
-			"headers": "Content-Type: application/json\n",
-			"url": "http://test.jiamian.im/board_posts/56d92a4d7fe9e30ec00a52d5",
+			"id": "1e834968-9d7e-5d23-73f9-ff0764802c5b",
+			"headers": "Authorization: Bearer HnV81MMX7EWGILf0tt5InFKhYnOJj1\n",
+			"url": "http://test.jiamian.im/notifications",
 			"pathVariables": {},
 			"preRequestScript": "",
-			"method": "DELETE",
+			"method": "GET",
 			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
 			"data": [],
-			"dataMode": "raw",
-			"name": "DEL 删除公告帖",
-			"description": "",
+			"dataMode": "params",
+			"name": "GET 获取通知",
+			"description": "- 参数\n\npage 页码 count 每页内容数 type 类型, new为默认, 表示新消息, all表示所有(历史)消息\n\n- 输出示例\n\n```\n{\n  \"status\": \"ok\",\n  \"message\": \"\",\n  \"data\": [\n    {\n      \"theme_id\": \"5704dff11072f13b6ec359a9\",\n      \"user_id\": \"57202fd17fe9e31d4a143cf9\",\n      \"type\": \"message\",\n      \"comment_id\": \"\",\n      \"content\": \"Your post 5722ccf97fe9e31d6b840fd6 have a new heart\",\n      \"post_id\": \"5722ccf97fe9e31d6b840fd6\",\n      \"message_id\": \"\",\n      \"_id\": \"5722d9ee7fe9e317d681a4af\",\n      \"title\": \"\",\n      \"_created\": \"1461873006.0\"\n    },\n    {\n      \"theme_id\": \"5704dff11072f13b6ec359a9\",\n      \"type\": \"comment\",\n      \"user_id\": \"57202fd17fe9e31d4a143cf9\",\n      \"comment_id\": \"5722d9407fe9e3251c964fd7\",\n      \"content\": \"Your post 5722ccf97fe9e31d6b840fd6 have a new comment 5722d9407fe9e3251c964fd7\",\n      \"post_id\": \"5722ccf97fe9e31d6b840fd6\",\n      \"message_id\": \"\",\n      \"_id\": \"5722d9407fe9e317d781a4ae\",\n      \"title\": \"您的帖子有新评论啦\",\n      \"_created\": \"1461872832.0\"\n    },\n    {\n      \"theme_id\": \"\",\n      \"user_id\": \"57202fd17fe9e31d4a143cf9\",\n      \"type\": \"levelup\",\n      \"comment_id\": \"\",\n      \"content\": \"Level up! your new level is level2\",\n      \"post_id\": \"\",\n      \"message_id\": \"\",\n      \"_id\": \"5722cc967fe9e317d681a4ac\",\n      \"title\": \"\",\n      \"_created\": \"1461869590.0\"\n    }\n  ],\n  \"paging\": {\n    \"current_page\": 1,\n    \"num_pages\": 1\n  }\n}\n```",
 			"descriptionFormat": "html",
-			"time": 1457072997762,
+			"time": 1461901874255,
 			"version": 2,
 			"responses": [],
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"folder": "53320eca-adaf-d9ac-714c-5db84b6deb07",
-			"rawModeData": ""
-		},
-		{
-			"id": "1a40ea00-5338-e9a2-a9b8-915208b69893",
-			"headers": "Content-Type: application/json\n",
-			"url": "http://test.jiamian.im/board_posts",
-			"pathVariables": {},
-			"preRequestScript": "",
-			"method": "POST",
-			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"data": [],
-			"dataMode": "raw",
-			"name": "POST 添加公告帖",
-			"description": "- 数据结构\n\n```\n_id\n作者：author (user._id)\n内容：content\n感谢：hearts[]\n    用户：user_id\n    面具：mask_id\n时间：_created\n面具：mask_id（发帖时的用户面具_id）\n\nstructure = {\n        \"_id\": CustomObjectId(),\n        \"_created\": CustomDate(),\n        \"mask_id\": str,\n        \"hearts\": [\n            {\n                \"mask_id\": str,\n                \"user_id\": str\n            }\n        ],\n        \"content\": str,\n        \"author\": str\n    }\n```",
-			"descriptionFormat": "html",
-			"time": 1457072741335,
-			"version": 2,
-			"responses": [],
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"folder": "53320eca-adaf-d9ac-714c-5db84b6deb07",
-			"rawModeData": "{}"
+			"folder": "490c531f-dc9d-5eb8-d6f3-b47d5fa657c9"
 		},
 		{
 			"id": "2201310b-aa19-5d73-4dcc-f294c36817d1",
@@ -464,45 +426,25 @@
 			"folder": "1aeb03e7-0aae-57db-79dc-9fea0e7b2142"
 		},
 		{
-			"id": "29efc1ff-a11b-ff5d-3448-bb95f26de06c",
-			"headers": "",
-			"url": "http://test.jiamian.im/board_posts",
+			"id": "3c8908e3-2904-02f7-103d-daa2054ab524",
+			"headers": "Authorization: Bearer 9xx3gPscrAsA5utKBywkszfsaYiXjr\n",
+			"url": "http://test.jiamian.im/notification/5722e52c7fe9e317d881a4af",
 			"pathVariables": {},
-			"preRequestScript": "",
-			"method": "GET",
+			"preRequestScript": null,
+			"method": "DELETE",
 			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"data": [],
+			"data": null,
 			"dataMode": "params",
-			"name": "GET 获取公告列表",
-			"description": "- 数据结构\n\n```\n_id\n作者：author (user._id)\n内容：content\n感谢：hearts[]\n    用户：user_id\n    面具：mask_id\n时间：_created\n面具：mask_id（发帖时的用户面具_id）\n\nstructure = {\n        \"_id\": CustomObjectId(),\n        \"_created\": CustomDate(),\n        \"mask_id\": str,\n        \"hearts\": [\n            {\n                \"mask_id\": str,\n                \"user_id\": str\n            }\n        ],\n        \"content\": str,\n        \"author\": str\n    }\n```",
+			"name": "DEL 删除某条消息通知",
+			"description": "只要匹配到, 不管新旧一起删除",
 			"descriptionFormat": "html",
-			"time": 1457072571112,
+			"time": 1461911776320,
 			"version": 2,
 			"responses": [],
-			"tests": "",
+			"tests": null,
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"folder": "53320eca-adaf-d9ac-714c-5db84b6deb07"
-		},
-		{
-			"id": "305ae646-e361-1e9e-ba72-c3046afe59fd",
-			"headers": "",
-			"url": "http://test.jiamian.im/board_post/56d92a4d7fe9e30ec00a52d5",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "GET",
-			"data": [],
-			"dataMode": "params",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1458246109264,
-			"name": "GET 查看公告帖",
-			"description": "",
-			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"responses": [],
-			"folder": "53320eca-adaf-d9ac-714c-5db84b6deb07"
+			"folder": "490c531f-dc9d-5eb8-d6f3-b47d5fa657c9"
 		},
 		{
 			"id": "42c8e271-04ed-06eb-4df0-c23e0015d93f",
@@ -671,27 +613,6 @@
 			"folder": "8a01c1c0-54dc-509e-b273-b0015d1d94dd"
 		},
 		{
-			"id": "6def855a-f54f-f506-ecda-27742433edfb",
-			"headers": "Content-Type: application/json\n",
-			"url": "http://test.jiamian.im/board_comment/56d92bad7fe9e30ec00a535a",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "PUT",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1458246548763,
-			"name": "PUT 更新公告帖评论",
-			"description": "",
-			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"responses": [],
-			"rawModeData": "{\n  \"content\": \"什么东西\",\n  \"hearts\": [],\n  \"_created\": 1457044269.747,\n  \"author\": null,\n  \"mask_id\": null\n}",
-			"folder": "e7c7cd58-f9f8-3f72-13c1-7d30ea787ace"
-		},
-		{
 			"id": "71ccd11a-bd48-95a9-be47-d0179109f519",
 			"headers": "Content-Type: application/json\n",
 			"url": "http://test.jiamian.im/theme/56d59bd4294d90ac3d8749d8/post/56df88ab7fe9e310478b934e/hearts",
@@ -776,26 +697,6 @@
 			"responses": [],
 			"rawModeData": "{\n  \"_id\": \"56d922da7fe9e30ec00a52d2\",\n  \"short_name\": null,\n  \"category\": null,\n  \"full_name\": null,\n  \"locale\": {\n    \"county\": \"大理\",\n    \"city\": \"昆明\",\n    \"nation\": \"中国\",\n    \"province\": \"云南\"\n  }\n}",
 			"folder": "e1d7ca51-afb9-5a54-9870-475eff866c04"
-		},
-		{
-			"id": "815fa0c4-f566-5073-b21a-4552ef091959",
-			"headers": "Content-Type: application/json\n",
-			"url": "http://test.jiamian.im/board_comment/56d92bad7fe9e30ec00a535a",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "GET",
-			"data": [],
-			"dataMode": "params",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1458246483268,
-			"name": "GET 查看一个公告帖评论",
-			"description": "",
-			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"responses": [],
-			"folder": "e7c7cd58-f9f8-3f72-13c1-7d30ea787ace"
 		},
 		{
 			"id": "848ab672-0ca4-8a45-53ee-d8b2a2ca7e65",
@@ -899,27 +800,6 @@
 			"folder": "b360d7b2-2bd5-7474-b6b4-5c9834619b90"
 		},
 		{
-			"id": "904cffa6-5f70-4ad5-f6f9-55994cdd3887",
-			"headers": "Content-Type: application/json\n",
-			"url": "http://test.jiamian.im/board_comments/56d92bad7fe9e30ec00a535a",
-			"pathVariables": {},
-			"preRequestScript": "",
-			"method": "DELETE",
-			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"data": [],
-			"dataMode": "params",
-			"name": "DEL 删除公告帖评论",
-			"description": "",
-			"descriptionFormat": "html",
-			"time": 1457073260783,
-			"version": 2,
-			"responses": [],
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"folder": "e7c7cd58-f9f8-3f72-13c1-7d30ea787ace"
-		},
-		{
 			"id": "93afa0f6-bbec-b947-76fe-8db3100f61d7",
 			"headers": "",
 			"url": "http://test.jiamian.im/users/56d3b1c07fe9e3165feb1e40",
@@ -938,28 +818,6 @@
 			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
 			"responses": [],
 			"folder": "667cc2f1-68f7-64f1-226e-4ca484c3847b"
-		},
-		{
-			"id": "94edec90-eed8-a917-5060-a9606ef8645b",
-			"headers": "Content-Type: application/json\n",
-			"url": "http://test.jiamian.im/board_comments",
-			"pathVariables": {},
-			"preRequestScript": "",
-			"method": "POST",
-			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"data": [],
-			"dataMode": "raw",
-			"name": "POST 新建一个公告帖评论",
-			"description": "- 数据结构\n\n```\n_id\n原帖：post_id（帖子id）\n作者：author\n内容：content\n感谢：hearts[]\n    用户：user_id\n    面具：mask_id\n时间：_created\n面具：mask_id\n`\nstructure = {\n        \"_id\": CustomObjectId(),\n        \"_created\": CustomDate(),\n        \"mask_id\": str,\n        \"hearts\": [\n            {\n                \"mask_id\": str,\n                \"user_id\": str\n            }\n        ],\n        \"content\": str,\n        \"author\": str\n    }\n```",
-			"descriptionFormat": "html",
-			"time": 1457073082614,
-			"version": 2,
-			"responses": [],
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"folder": "e7c7cd58-f9f8-3f72-13c1-7d30ea787ace",
-			"rawModeData": "{}"
 		},
 		{
 			"id": "98578cf6-ee01-8b9f-84fa-943aae4a8893",
@@ -1251,6 +1109,27 @@
 			"folder": "a325b5de-77e1-2c52-e105-d1895cc6a5e7"
 		},
 		{
+			"id": "c445c589-e9a6-9c75-7556-0b9a52ddc690",
+			"headers": "Authorization: Bearer HnV81MMX7EWGILf0tt5InFKhYnOJj1\n",
+			"url": "http://test.jiamian.im/notifications",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "DELETE",
+			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
+			"data": [],
+			"dataMode": "params",
+			"name": "DEL 删除通知",
+			"description": "- 参数\n\ntype 类型 默认 new 删除新消息 all 则是删除所有历史消息\n\n- 输入\n\n留空默认删除全部, 如果要删除指定一个或者多个(非全部)通知, 输入示例如下:\n\n```\n{\n    \"notifications\": [\"这里可以填一个或者多个通知id\"]\n}\n```\n\n- 输出 无, 返回码 204",
+			"descriptionFormat": "html",
+			"time": 1461902250457,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": "490c531f-dc9d-5eb8-d6f3-b47d5fa657c9"
+		},
+		{
 			"id": "ca71999c-dd83-a755-98a9-023ef16c62a6",
 			"headers": "Content-Type: application/json\n",
 			"url": "http://test.jiamian.im/theme/56d59bd4294d90ac3d8749d8/comments",
@@ -1415,27 +1294,6 @@
 			"rawModeData": "{\n  \"report_limit\": 100,\n  \"colors\": [],\n  \"text_post\": null,\n  \"photo_post\": null,\n  \"exp\": null,\n  \"vote_post\": null,\n  \"_id\": \"56d92fb27fe9e30ec00a535c\",\n  \"heart_limit\": null,\n  \"message_limit\": null,\n  \"post_limit\": null\n}"
 		},
 		{
-			"id": "ec202b9f-9611-5ee9-5902-9f61662fb6d9",
-			"headers": "Content-Type: application/json\n",
-			"url": "http://test.jiamian.im/board_post/56d92a4d7fe9e30ec00a52d5",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "PUT",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1458246118072,
-			"name": "PUT 更新公告帖",
-			"description": "- 数据结构\n\n```\n_id\n作者：author (user._id)\n内容：content\n感谢：hearts[]\n    用户：user_id\n    面具：mask_id\n时间：_created\n面具：mask_id（发帖时的用户面具_id）\n\nstructure = {\n        \"_id\": CustomObjectId(),\n        \"_created\": CustomDate(),\n        \"mask_id\": str,\n        \"hearts\": [\n            {\n                \"mask_id\": str,\n                \"user_id\": str\n            }\n        ],\n        \"content\": str,\n        \"author\": str\n    }\n```",
-			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"responses": [],
-			"rawModeData": "{\n  \"content\": \"测试\",\n  \"author\": null,\n  \"hearts\": [],\n  \"_id\": \"56d92a4d7fe9e30ec00a52d5\",\n  \"_created\": 1457043917.529,\n  \"mask_id\": null\n}",
-			"folder": "53320eca-adaf-d9ac-714c-5db84b6deb07"
-		},
-		{
 			"id": "f04cfa61-1a93-c46b-6ce9-80f596d812af",
 			"headers": "",
 			"url": "http://test.jiamian.im/devices",
@@ -1497,27 +1355,6 @@
 			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
 			"responses": [],
 			"folder": "a325b5de-77e1-2c52-e105-d1895cc6a5e7"
-		},
-		{
-			"id": "fdf80c25-6fc0-6240-a7da-0518dce2681e",
-			"headers": "Content-Type: application/json\n",
-			"url": "http://test.jiamian.im/board_comments",
-			"pathVariables": {},
-			"preRequestScript": "",
-			"method": "GET",
-			"collectionId": "0ad39a39-0f14-f9ce-cc4a-93b3a6b45396",
-			"data": [],
-			"dataMode": "params",
-			"name": "GET 获取所有公告帖评论列表",
-			"description": "- 数据结构\n\n```\n_id\n原帖：post_id（帖子id）\n作者：author\n内容：content\n感谢：hearts[]\n    用户：user_id\n    面具：mask_id\n时间：_created\n面具：mask_id\n`\nstructure = {\n        \"_id\": CustomObjectId(),\n        \"_created\": CustomDate(),\n        \"mask_id\": str,\n        \"hearts\": [\n            {\n                \"mask_id\": str,\n                \"user_id\": str\n            }\n        ],\n        \"content\": str,\n        \"author\": str\n    }\n```",
-			"descriptionFormat": "html",
-			"time": 1457073052086,
-			"version": 2,
-			"responses": [],
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"folder": "e7c7cd58-f9f8-3f72-13c1-7d30ea787ace"
 		}
 	]
 }

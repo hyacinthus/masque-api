@@ -119,7 +119,7 @@ class UserPostsList(Resource):
         if len(result) == 0:
             return {
                        'status': 'error',
-                       'message': '什么都没找到啊'
+                       'message': '你好像还没发过帖子呢'
                    }, 404
         else:
             sorted_list = sorted(result, key=lambda k: k["_updated"],
@@ -159,7 +159,7 @@ class UserCommentsList(Resource):
         if len(result) == 0:
             return {
                        'status': 'error',
-                       'message': '什么都没找到啊'
+                       'message': '你好像还没发表过任何评论呢'
                    }, 404
         else:
             sorted_list = sorted(result, key=lambda k: k["_created"],
