@@ -129,50 +129,65 @@ Authorization: Bearer Mt1zAWuH3pORrL4IiSWatXZ3YemPOq
 
 ```
 
-## DEL 删除公告帖
+## GET 获取通知
 
-- 方法 **DELETE**
+- 方法 **GET**
 
-- URI `/board_posts/56d92a4d7fe9e30ec00a52d5`
+- URI `/notifications`
 
-## POST 添加公告帖
+- 参数
 
-- 方法 **POST**
+page 页码 count 每页内容数 type 类型, new为默认, 表示新消息, all表示所有(历史)消息
 
-- URI `/board_posts`
-
-- 数据结构
+- 输出示例
 
 ```
-_id
-作者：author (user._id)
-内容：content
-感谢：hearts[]
-    用户：user_id
-    面具：mask_id
-时间：_created
-面具：mask_id（发帖时的用户面具_id）
-
-structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
+{
+  "status": "ok",
+  "message": "",
+  "data": [
+    {
+      "theme_id": "5704dff11072f13b6ec359a9",
+      "user_id": "57202fd17fe9e31d4a143cf9",
+      "type": "message",
+      "comment_id": "",
+      "content": "Your post 5722ccf97fe9e31d6b840fd6 have a new heart",
+      "post_id": "5722ccf97fe9e31d6b840fd6",
+      "message_id": "",
+      "_id": "5722d9ee7fe9e317d681a4af",
+      "title": "",
+      "_created": "1461873006.0"
+    },
+    {
+      "theme_id": "5704dff11072f13b6ec359a9",
+      "type": "comment",
+      "user_id": "57202fd17fe9e31d4a143cf9",
+      "comment_id": "5722d9407fe9e3251c964fd7",
+      "content": "Your post 5722ccf97fe9e31d6b840fd6 have a new comment 5722d9407fe9e3251c964fd7",
+      "post_id": "5722ccf97fe9e31d6b840fd6",
+      "message_id": "",
+      "_id": "5722d9407fe9e317d781a4ae",
+      "title": "您的帖子有新评论啦",
+      "_created": "1461872832.0"
+    },
+    {
+      "theme_id": "",
+      "user_id": "57202fd17fe9e31d4a143cf9",
+      "type": "levelup",
+      "comment_id": "",
+      "content": "Level up! your new level is level2",
+      "post_id": "",
+      "message_id": "",
+      "_id": "5722cc967fe9e317d681a4ac",
+      "title": "",
+      "_created": "1461869590.0"
     }
-```
-
-- Body: 
-
-```
-{}
-
+  ],
+  "paging": {
+    "current_page": 1,
+    "num_pages": 1
+  }
+}
 ```
 
 ## PUT 更新一条评论
@@ -234,44 +249,13 @@ structure = {
 }
 ```
 
-## GET 获取公告列表
+## DEL 删除某条消息通知
 
-- 方法 **GET**
+- 方法 **DELETE**
 
-- URI `/board_posts`
+- URI `/notification/5722e52c7fe9e317d881a4af`
 
-- 数据结构
-
-```
-_id
-作者：author (user._id)
-内容：content
-感谢：hearts[]
-    用户：user_id
-    面具：mask_id
-时间：_created
-面具：mask_id（发帖时的用户面具_id）
-
-structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
-    }
-```
-
-## GET 查看公告帖
-
-- 方法 **GET**
-
-- URI `/board_post/56d92a4d7fe9e30ec00a52d5`
+只要匹配到, 不管新旧一起删除
 
 ## POST 添加主题
 
@@ -434,25 +418,6 @@ None 201
 
 ```
 
-## PUT 更新公告帖评论
-
-- 方法 **PUT**
-
-- URI `/board_comment/56d92bad7fe9e30ec00a535a`
-
-- Body: 
-
-```
-{
-  "content": "什么东西",
-  "hearts": [],
-  "_created": 1457044269.747,
-  "author": null,
-  "mask_id": null
-}
-
-```
-
 ## POST 给指定普通帖子添加感谢
 
 - 方法 **POST**
@@ -554,12 +519,6 @@ structure = {
 
 ```
 
-## GET 查看一个公告帖评论
-
-- 方法 **GET**
-
-- URI `/board_comment/56d92bad7fe9e30ec00a535a`
-
 ## GET 获取某用户发的评论
 
 - 方法 **GET**
@@ -622,58 +581,11 @@ Content-Type: application/json
 
 - URI `/user_levels/56d92fb27fe9e30ec00a535c`
 
-## DEL 删除公告帖评论
-
-- 方法 **DELETE**
-
-- URI `/board_comments/56d92bad7fe9e30ec00a535a`
-
 ## DEL 删除用户
 
 - 方法 **DELETE**
 
 - URI `/users/56d3b1c07fe9e3165feb1e40`
-
-## POST 新建一个公告帖评论
-
-- 方法 **POST**
-
-- URI `/board_comments`
-
-- 数据结构
-
-```
-_id
-原帖：post_id（帖子id）
-作者：author
-内容：content
-感谢：hearts[]
-    用户：user_id
-    面具：mask_id
-时间：_created
-面具：mask_id
-`
-structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
-    }
-```
-
-- Body: 
-
-```
-{}
-
-```
 
 ## GET 图片上传临时token
 
@@ -1039,6 +951,28 @@ endpoint
 
 ```
 
+## DEL 删除通知
+
+- 方法 **DELETE**
+
+- URI `/notifications`
+
+- 参数
+
+type 类型 默认 new 删除新消息 all 则是删除所有历史消息
+
+- 输入
+
+留空默认删除全部, 如果要删除指定一个或者多个(非全部)通知, 输入示例如下:
+
+```
+{
+    "notifications": ["这里可以填一个或者多个通知id"]
+}
+```
+
+- 输出 无, 返回码 204
+
 ## POST 添加一条普通帖评论
 
 - 方法 **POST**
@@ -1206,53 +1140,6 @@ endpoint
 
 ```
 
-## PUT 更新公告帖
-
-- 方法 **PUT**
-
-- URI `/board_post/56d92a4d7fe9e30ec00a52d5`
-
-- 数据结构
-
-```
-_id
-作者：author (user._id)
-内容：content
-感谢：hearts[]
-    用户：user_id
-    面具：mask_id
-时间：_created
-面具：mask_id（发帖时的用户面具_id）
-
-structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
-    }
-```
-
-- Body: 
-
-```
-{
-  "content": "测试",
-  "author": null,
-  "hearts": [],
-  "_id": "56d92a4d7fe9e30ec00a52d5",
-  "_created": 1457043917.529,
-  "mask_id": null
-}
-
-```
-
 ## GET 获取所有设备信息列表
 
 - 方法 **GET**
@@ -1314,38 +1201,4 @@ _id （这个_id主动插入，详见设计文档）
 >> 提示已经举报过此贴, 返回码 422
     
 >> 举报帖子被删除, 返回码 404
-
-## GET 获取所有公告帖评论列表
-
-- 方法 **GET**
-
-- URI `/board_comments`
-
-- 数据结构
-
-```
-_id
-原帖：post_id（帖子id）
-作者：author
-内容：content
-感谢：hearts[]
-    用户：user_id
-    面具：mask_id
-时间：_created
-面具：mask_id
-`
-structure = {
-        "_id": CustomObjectId(),
-        "_created": CustomDate(),
-        "mask_id": str,
-        "hearts": [
-            {
-                "mask_id": str,
-                "user_id": str
-            }
-        ],
-        "content": str,
-        "author": str
-    }
-```
 
