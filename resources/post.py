@@ -58,7 +58,7 @@ class PostsList(TokenResource):
             else:
                 return {
                            "status": "error",
-                           "message": "今天发帖数已达当前等级上限\n\t\t\t\t\a先四处评论灌灌水吧"
+                           "message": "今天发帖数已达当前等级上限\n\a\a\a\a找找好玩的帖子灌灌水吧"
                        }, 403
         else:
             # 反馈帖只限制增长经验, 不限制发帖次数
