@@ -65,12 +65,22 @@ class CustomObjectId(CustomType):
     init_type = None  # optional, fill the first empty value
 
     def to_bson(self, value):
-        """convert type to a mongodb type"""
-        return ObjectId(value)
+        """convert type to a mongodb type
+        只有符合 ObjectId 类型的才转换
+        """
+        if ObjectId.is_valid(value):
+            return ObjectId(value)
+        else:
+            return value
 
     def to_python(self, value):
-        """convert type to a python type"""
-        return str(value)
+        """convert type to a python type
+        已经是 str 类型的直接输出, 不转换
+        """
+        if isinstance(value, str):
+            return value
+        else:
+            return str(value)
 
     def validate(self, value, path):
         """OPTIONAL : useful to add a validation layer"""
@@ -517,7 +527,7 @@ class RootDocument(Document):
     __database__ = MongoConfig.DB
     structure = {}
     use_schemaless = True
-    skip_validation = False
+    skip_validation = True
     use_dot_notation = True
 
 
