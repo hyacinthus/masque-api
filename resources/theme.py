@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
-from model import connection, redisdb
+from model import connection
 
 
 class ThemesList(Resource):
@@ -29,37 +29,22 @@ class ThemesList(Resource):
 
 
 class Theme(Resource):
-    def get(self, theme_id):  # get a theme by its ID
+    def get(self, theme_id):  # get a theme by its ID or full_name
         parser = reqparse.RequestParser()
         parser.add_argument('category', type=str)
         args = parser.parse_args()
         if not args['category']:
             if ObjectId.is_valid(theme_id):
                 cursor = connection.Themes.find_one({"_id": ObjectId(theme_id)})
+            elif isinstance(theme_id, str):
+                cursor = connection.Themes.find_one({"_id": theme_id})
             else:
                 return {
                            'status': "error",
-                           'message': '{} is not a valid ObjectId'.format(
-                               theme_id)}, 400
+                           'message': '输入错误, 请确认数据类型是str或者ObjectId'
+                       }, 400
         elif args['category'] in ("school", "district", "virtual",
                                   "private", "system"):
-            # 如果没有用户反馈表, 新建一个
-            if theme_id == "用户反馈":
-                feedback = connection.Themes.find({"full_name": "用户反馈"})
-                if feedback.count() != 0:
-                    if not redisdb.exists("cache:feedback_id"):
-                        redisdb.set("cache:feedback_id",
-                                    list(feedback)[0]["_id"])
-                else:
-                    doc = connection.Themes()
-                    doc["category"] = "system"
-                    doc["short_name"] = theme_id
-                    doc["full_name"] = theme_id
-                    doc["locale"]["province"] = "陕西省"
-                    doc["locale"]["city"] = "西安市"
-                    doc["locale"]["district"] = "雁塔区"
-                    doc.save()
-                    redisdb.set("cache:feedback_id", doc._id)
             cursor = connection.Themes.find_one(
                 {
                     "full_name": theme_id,

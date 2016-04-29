@@ -68,7 +68,7 @@ class CustomObjectId(CustomType):
         """convert type to a mongodb type
         只有符合 ObjectId 类型的才转换
         """
-        if ObjectId.is_valid(value):
+        if not value or ObjectId.is_valid(value):
             return ObjectId(value)
         else:
             return value

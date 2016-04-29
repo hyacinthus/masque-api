@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
 
 from config import MongoConfig, APIConfig
-from model import connection, redisdb, TokenResource, CheckPermission
+from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
 from util import add_exp, post_heart, is_chinese
 
@@ -44,15 +44,13 @@ class PostsList(TokenResource):
     def post(self, theme_id):  # add a new post
         # 权限检测
         perm = CheckPermission(self.user_info.user._id)
-        feedback_id = redisdb.get("cache:feedback_id") if redisdb.exists(
-            "cache:feedback_id") else None
-        if theme_id != feedback_id:
+        if theme_id != "feedback":
             if perm.post < self.limit_info.post_limit:
                 # 经验限制(每发一帖经验加5, 每日上限10)
                 if perm.exp <= 5:
                     user = self.user_info.user
                     add_exp(user, 5)
-                    perm.exp = 5  # 经验记数加 5
+                    perm.exp = 5
                     user.save()
                 perm.post = 1  # 没有超额, 允许发帖, 同时发帖数加 1
             else:
