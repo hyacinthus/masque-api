@@ -48,8 +48,28 @@ class SchoolsList(TokenResource):
                             type=str,
                             required=True,
                             help='lat not found!')
+        parser.add_argument('coordinate',
+                            type=str,
+                            help='coordinate not found!')
         args = parser.parse_args()
         key = APIConfig.AMAP_AKEY
+        if args['coordinate'] == 'gps':
+            convert_url = 'http://restapi.amap.com/v3/assistant/coordinate/convert?' \
+                          'locations={},{}&' \
+                          'coordsys=gps&' \
+                          'output=json&' \
+                          'key={}'.format(args['lon'], args['lat'], key)
+            try:
+                convert_location = requests.get(convert_url).json()
+            except:
+                return {'message': 'Amap API Server No Response!'}, 504
+
+            if not convert_location:
+                return {'message': 'Amap API Server No Response!'}, 504
+            if convert_location['status'] == "1":
+                args['lon'], args['lat'] = convert_location['locations'].split(',')[0],\
+                                           convert_location['locations'].split(',')[1]
+
         regeo_url = 'http://restapi.amap.com/v3/geocode/regeo?' \
                     'key={}&' \
                     'location={},{}&' \
