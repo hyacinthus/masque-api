@@ -48,12 +48,12 @@ class SchoolsList(TokenResource):
                             type=str,
                             required=True,
                             help='lat not found!')
-        parser.add_argument('coordinate',
+        parser.add_argument('coordsys',
                             type=str,
                             help='coordinate not found!')
         args = parser.parse_args()
         key = APIConfig.AMAP_AKEY
-        if args['coordinate'] == 'gps':
+        if args['coordsys'] == 'gps':
             convert_url = 'http://restapi.amap.com/v3/assistant/coordinate/convert?' \
                           'locations={},{}&' \
                           'coordsys=gps&' \
