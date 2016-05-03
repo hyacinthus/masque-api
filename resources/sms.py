@@ -1,42 +1,14 @@
 import logging
-import random
 import re
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, reqparse
 
-import top.api
-from config import AliConfig
 from model import redisdb, connection, TokenResource
+from tasks import sms
 from util import add_exp
 
 log = logging.getLogger("masque.sms")
-
-
-def send_sms(phone, code):
-    """发送验证码"""
-    req = top.api.AlibabaAliqinFcSmsNumSendRequest()
-    req.set_app_info(top.appinfo(AliConfig.SMS_IKEY, AliConfig.SMS_AKEY))
-    req.sms_type = AliConfig.SMS_TYPE
-    req.rec_num = phone
-    req.sms_template_code = AliConfig.SMS_TEMPLATE_CODE
-    req.sms_free_sign_name = AliConfig.SMS_FREE_SIGN_NAME
-    req.sms_param = {
-        "code": code,
-        "product": AliConfig.APP_NAME,
-        "ttl": str(AliConfig.SMS_TTL)
-    }
-    try:
-        resp = req.getResponse()
-    except:
-        return None
-    return resp
-
-
-def generate_verification_code(code_length=6):
-    """生成任意位随机数"""
-    code_list = random.sample([str(i) for i in range(10)], code_length)
-    return "".join(code_list)
 
 
 def verify_phone(phone):
@@ -52,32 +24,11 @@ class RequestSmsCode(Resource):
                        "status": "error",
                        'message': '手机号码格式错误，请重新输入'
                    }, 403
-        verify_code = generate_verification_code(4)  # 生成4位随机数验证码
-        resp = send_sms(cellphone, verify_code)
-        if resp and resp["alibaba_aliqin_fc_sms_num_send_response"]["result"][
-            "err_code"] == "0":
-            if redisdb.lpush(
-                    "sms_verify:{}".format(cellphone),
-                    verify_code
-            ):
-                if redisdb.ttl("sms_verify:{}".format(cellphone)) == -1:
-                    # 设置超时时间
-                    redisdb.expire("sms_verify:{}".format(cellphone),
-                                   AliConfig.SMS_TTL * 60)
-                return {
-                           "status": "ok",
-                           "message": "验证码已发送"
-                       }, 201
-            else:
-                return {
-                           "status": "error",
-                           "message": "短信验证服务出错，请稍后再试"
-                       }, 403
-        else:
-            return {
-                       "status": "error",
-                       "message": "短信验证服务出错，请稍后再试"
-                   }, 403
+        sms.send_sms.delay(cellphone)
+        return {
+                   "status": "ok",
+                   "message": "验证码已发送"
+               }, 201
 
 
 class VerifySmsCode(Resource):
