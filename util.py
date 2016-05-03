@@ -212,3 +212,9 @@ def is_chinese(text):
     sample: is_chinese('一') == True, is_chinese('我&&你') == False
     """
     return all('\u4e00' <= char <= '\u9fff' for char in text)
+
+
+def generate_random_number(code_length=6):
+    """生成任意位随机数"""
+    code_list = random.sample([str(i) for i in range(10)], code_length)
+    return "".join(code_list)

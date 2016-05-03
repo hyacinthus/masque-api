@@ -1,3 +1,10 @@
 from celery import Celery
 
-app = Celery(broker='amqp://', include=['tasks.notification', 'tasks.logger'])
+app = Celery(
+    broker='amqp://',
+    include=[
+        'tasks.notification',
+        'tasks.logger',
+        'tasks.sms'
+    ]
+)
