@@ -94,41 +94,9 @@ def add_exp(user, exp=None):
     if e2l.level_str != user.user_level_id:
         user.user_level_id = e2l.level_str
         if exp > 0:
-            notification.level_up.delay(user._id, user.user_level_id)
+            notification.level_up.delay(user._id, e2l.level_int)
         else:
-            notification.level_down.delay(user._id, user.user_level_id)
-
-
-def new_remark(comment):
-    """post have a new comment
-    input:  User instance
-            Comment instance
-    """
-    # 发的帖子有新评论
-    cursor = connection.UserComments.find_one({"comment_id": comment._id})
-    notification.new_reply.delay(comment.author, cursor.theme_id,
-                                 comment.post_id, comment._id)
-    # 关注的帖子有新评论
-    user_stars = list(
-        connection.UserStars.find({'post_id': comment.post_id}))
-    for star in user_stars:
-        notification.star_new_reply.delay(
-            star['user_id'], star['theme_id'], star['post_id'], comment._id)
-
-
-def post_heart(post):
-    """post have a new heart
-    input:Post instance"""
-    cursor = connection.UserPosts.find_one({"post_id": post._id})
-    notification.new_heart.delay(post.author, cursor.theme_id, post._id)
-
-
-def comment_heart(comment):
-    """comment have a new heart
-    input: Comment instance"""
-    cursor = connection.UserComments.find_one({"comment_id": comment._id})
-    notification.comment_new_heart.delay(comment.author, cursor.theme_id,
-                                         comment.post_id, comment._id)
+            notification.level_down.delay(user._id, e2l.level_int)
 
 
 def valid_feedback(feedback, exp=10):

@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from json import dumps
 
 from bson.objectid import ObjectId
 from flask_restful import Resource, request, reqparse
@@ -7,7 +8,8 @@ from flask_restful import Resource, request, reqparse
 from config import MongoConfig, APIConfig
 from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
-from util import add_exp, post_heart, is_chinese
+from tasks import notification
+from util import add_exp, is_chinese
 
 log = logging.getLogger("masque.comment")
 
@@ -240,7 +242,14 @@ class Hearts(TokenResource):
         add_exp(user, 10)
         user.save()
         # 发送感谢通知
-        post_heart(cursor)
+        dump_doc = dumps(
+            {
+                "author": cursor.author,
+                "_id": cursor._id,
+                "content": cursor.content.text[:50]
+            }
+        )
+        notification.new_heart.delay(dump_doc)
         return {
                    "status": "ok",
                    "message": "感谢成功送出"

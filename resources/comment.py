@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from json import dumps
 
 from bson.objectid import ObjectId
 from flask_restful import request, reqparse
@@ -7,7 +8,8 @@ from flask_restful import request, reqparse
 from config import MongoConfig, APIConfig
 from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
-from util import add_exp, new_remark, comment_heart
+from tasks import notification
+from util import add_exp
 
 log = logging.getLogger("masque.comment")
 
@@ -102,7 +104,16 @@ class CommentsList(TokenResource):
                 }
             }
         )
-        new_remark(doc)  # 回帖提醒
+        dump_doc = dumps(
+            {
+                "_id": doc._id,
+                "post_id": doc.post_id,
+                "author": doc.author,
+                "content": doc.content[:50]  # 只取评论内容前50字
+            }
+        )
+        notification.new_reply.delay(dump_doc)  # 发的帖子有新评论
+        notification.star_new_reply.delay(dump_doc)  # 关注的帖子有新评论
         return {
                    "status": "ok",
                    "message": "评论成功",
@@ -292,7 +303,15 @@ class CommentHeart(TokenResource):
         user.exp += 10
         user.save()
         # 通知评论作者
-        comment_heart(cursor)
+        dump_doc = dumps(
+            {
+                "_id": cursor._id,
+                "post_id": cursor.post_id,
+                "author": cursor.author,
+                "content": cursor.content[:50]  # 只取评论内容前50字
+            }
+        )
+        notification.comment_new_heart.delay(dump_doc)
         return {
                    "status": "ok",
                    "message": "感谢已送出, 谢谢支持"
