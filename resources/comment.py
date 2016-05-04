@@ -45,7 +45,6 @@ class CommentsList(TokenResource):
 
     def post(self, theme_id):  # add a new comment
         # 每条评论加 1 经验, 每日上限 10
-        is_self_comment = False
         perm = CheckPermission(self.user_info.user._id)
         if perm.exp < 10:
             user = self.user_info.user
@@ -82,7 +81,6 @@ class CommentsList(TokenResource):
             if cursor["author"] == self.user_info.user._id:
                 # 楼主回帖, 头像不变
                 doc["mask_id"] = cursor["mask_id"]
-                is_self_comment = True
             else:
                 doc['mask_id'] = self.user_info.user.masks[0]
         doc.save()
@@ -107,18 +105,18 @@ class CommentsList(TokenResource):
             }
         )
         # 回帖通知
-        if not is_self_comment:
-            # 自己回复自己, 不通知
-            dump_doc = dumps(
-                {
-                    "_id": doc._id,
-                    "post_id": doc.post_id,
-                    "author": doc.author,
-                    "content": doc.content[:50]  # 只取评论内容前50字
-                }
-            )
+        dump_doc = dumps(
+            {
+                "_id": doc._id,
+                "post_id": doc.post_id,
+                "author": doc.author,
+                "content": doc.content[:50]  # 只取评论内容前50字
+            }
+        )
+        if doc.author != self.user_info.user._id:
+            # 非楼主评论才发通知
             notification.new_reply.delay(dump_doc)  # 发的帖子有新评论
-            notification.star_new_reply.delay(dump_doc)  # 关注的帖子有新评论
+        notification.star_new_reply.delay(dump_doc)  # 关注的帖子有新评论
         return {
                    "status": "ok",
                    "message": "评论成功",
