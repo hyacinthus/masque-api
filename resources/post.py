@@ -246,7 +246,7 @@ class Hearts(TokenResource):
             {
                 "author": cursor.author,
                 "_id": cursor._id,
-                "mask_id": self.user_info.user.mask_id,
+                "mask_id": self.user_info.user.masks[0],
                 "theme_id": theme_id,
                 "content": cursor.content.text[:50]
             }

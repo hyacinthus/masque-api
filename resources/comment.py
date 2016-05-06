@@ -314,7 +314,7 @@ class CommentHeart(TokenResource):
                 "_id": cursor._id,
                 "post_id": cursor.post_id,
                 "theme_id": theme_id,
-                "mask_id": self.user_info.user.mask_id,
+                "mask_id": self.user_info.user.masks[0],
                 "author": cursor.author,
                 "content": cursor.content[:50]  # 只取评论内容前50字
             }
