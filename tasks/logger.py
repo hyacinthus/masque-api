@@ -60,3 +60,14 @@ def geo_request_log(geo_info):
     content = "user %s update location" % (geo.user_id)
     log.info(content)
 
+
+@app.task
+def posts_delete_log(theme_id):
+    pdl = connection.Posts_Delete_Log()
+    pdl.theme_id = theme_id
+    pass
+
+
+@app.task
+def comments_ban_log():
+    pass
