@@ -576,7 +576,8 @@ class Posts(Common):
             "color": str
         },
         "comment_count": int,
-        "_updated": CustomDate()
+        "_updated": CustomDate(),
+        "school": str
     }
     # required_fields = [
     #     "content.text"
@@ -589,6 +590,7 @@ class Posts(Common):
         "label.name": "",
         "label.color": "",
         "comment_count": 0,
+        "school": ""
     }
 
 

@@ -90,6 +90,7 @@ class PostsList(TokenResource):
         doc['_updated'] = utctime
         doc['mask_id'] = self.user_info.user.masks[0]
         doc['author'] = self.user_info.user._id
+        doc['school'] = self.user_info.user.home.short_name
         doc.save()
         # save a record
         user_posts = connection.UserPosts()
