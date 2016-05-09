@@ -6,7 +6,7 @@ from resources.image import GetToken
 from resources.location import SchoolsList
 from resources.mask import Mask, MasksList, RandomMask, UploadMask
 from resources.message import Message, MessagesList
-from resources.notification import Notification, Notifications
+from resources.notification import DelNotification, Notifications
 from resources.parameter import Parameter, ParametersList
 from resources.post import Post, PostsList, FavorPost, Hearts, Feedback, \
     ReportPost

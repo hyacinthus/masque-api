@@ -153,9 +153,9 @@ api.add_resource(DeRegister, '/deregister/<string:cellphone>',
 # 通知列表
 api.add_resource(Notifications, '/notifications', endpoint='notifications')
 
-# 单个通知
-api.add_resource(Notification, '/notification/<string:notifi_id>',
-                 endpoint='notification')
+# 删除单个或多个通知
+api.add_resource(DelNotification, '/notifications/multi',
+                 endpoint='del_notifi')
 
 if __name__ == '__main__':
     app.run(host=DebugConfig.HOST, port=DebugConfig.PORT)
