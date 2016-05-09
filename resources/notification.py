@@ -87,7 +87,7 @@ class Notifications(TokenResource):
 
 
 class DelNotification(TokenResource):
-    def delete(self):
+    def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('type',
                             type=str,
@@ -111,7 +111,10 @@ class DelNotification(TokenResource):
                         connection.Notifications.collection.remove(
                             {"_id": ObjectId(i)}
                         )
-            return '', 204
+            return {
+                       "status": "ok",
+                       "message": "选定消息已清空"
+                   }, 201
         else:
             # 其他异常输入, 返回400
             return {
