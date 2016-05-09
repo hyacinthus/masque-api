@@ -27,8 +27,8 @@ def send_sms(phone):
     }
     try:
         resp = req.getResponse()
-    except:
-        log.error("Remote sms service error")
+    except Exception as e:
+        log.error(e)
     if resp and resp["alibaba_aliqin_fc_sms_num_send_response"]["result"][
         "err_code"] == "0":
         if redisdb.lpush(
