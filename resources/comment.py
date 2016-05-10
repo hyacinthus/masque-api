@@ -111,6 +111,7 @@ class CommentsList(TokenResource):
                 "theme_id": theme_id,
                 "post_id": doc.post_id,
                 "author": post["author"],
+                "current_user": self.user_info.user._id,
                 "mask_id": doc.mask_id,
                 "index": doc['index'],
                 "content": doc.content[:50]  # 只取评论内容前50字

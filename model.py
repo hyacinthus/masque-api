@@ -800,6 +800,7 @@ class Notifications(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
+        "current_user": str,
         "user_id": str,
         "mask_id": str,
         "title": str,
@@ -813,6 +814,7 @@ class Notifications(RootDocument):
     }
     default_values = {
         "user_id": '',
+        "current_user": '',
         "mask_id": "",
         "title": '',
         "type": '',

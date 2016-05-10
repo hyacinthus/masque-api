@@ -58,8 +58,9 @@ def star_new_reply(dump_doc):
         notifi_user = connection.Users.find_one(
             {"_id": ObjectId(star['user_id'])}
         )
-        if notifi_user.options.star_comment:
-            # 只有用户允许通知才会提醒
+        if notifi_user._id != doc[
+            'current_user'] and notifi_user.options.star_comment:
+            # 只有用户允许, 且回复者不是关注者本人才通知才会提醒
             log.info("There are new comments %s for the post %s you marked" % (
                 doc["_id"], doc["post_id"]))
             notifi = connection.Notifications()
