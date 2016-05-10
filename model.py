@@ -576,7 +576,8 @@ class Posts(Common):
             "color": str
         },
         "comment_count": int,
-        "_updated": CustomDate()
+        "_updated": CustomDate(),
+        "school": str
     }
     # required_fields = [
     #     "content.text"
@@ -589,6 +590,7 @@ class Posts(Common):
         "label.name": "",
         "label.color": "",
         "comment_count": 0,
+        "school": ""
     }
 
 
@@ -800,7 +802,9 @@ class Notifications(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
+        "current_user": str,
         "user_id": str,
+        "mask_id": str,
         "title": str,
         "type": str,
         "content": str,
@@ -808,17 +812,21 @@ class Notifications(RootDocument):
         "theme_id": str,
         "comment_id": str,
         "post_id": str,
-        "message_id": str
+        "message_id": str,
+        "index": int,
     }
     default_values = {
         "user_id": '',
+        "current_user": '',
+        "mask_id": "",
         "title": '',
         "type": '',
         "content": '',
         "theme_id": '',
         "post_id": '',
         "message_id": '',
-        "comment_id": ''
+        "comment_id": '',
+        "index": 1,
     }
 
 

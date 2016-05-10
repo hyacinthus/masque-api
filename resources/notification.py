@@ -72,57 +72,52 @@ class Notifications(TokenResource):
                             help='all/new 选其一, 默认为new')
         args = parser.parse_args()
         notifi_type = args['type'] if args['type'] else "new"
-        resp = request.get_json(force=True)
-        if not resp:
-            # 不提供待删除通知列表视为删除全部
-            if notifi_type == "all":
-                connection.Notifications.collection.remove(
-                    {"user_id": self.user_info.user._id}
-                )
-            else:
-                key = "user:{}:notifications".format(self.user_info.user._id)
-                if redisdb.exists(key):
-                    for i in redisdb.lrange(key, 0, -1):
-                        if redisdb.exists("notification:{}".format(i)):
-                            redisdb.delete("notification:{}".format(i))
-                    redisdb.delete(key)
-        elif "notifications" in resp:
-            # 提供待删除通知列表则只删除列表内的通知
-            lst = resp['notifications']
+        if notifi_type == "all":
+            connection.Notifications.collection.remove(
+                {"user_id": self.user_info.user._id}
+            )
+        else:
             key = "user:{}:notifications".format(self.user_info.user._id)
             if redisdb.exists(key):
-                for i in lst:
+                for i in redisdb.lrange(key, 0, -1):
                     if redisdb.exists("notification:{}".format(i)):
                         redisdb.delete("notification:{}".format(i))
-                    if i in redisdb.lrange(key, 0, -1):
-                        redisdb.lrem(key, 0, i)
-        else:
-            # 其他异常输入, 返回400
-            return {
-                       "status": "error",
-                       "message": "请提供合法的待删除通知列表"
-                   }, 400
+                redisdb.delete(key)
         return '', 204
 
 
-class Notification(TokenResource):
-    def delete(self, notifi_id):
+class DelNotification(TokenResource):
+    def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('type',
                             type=str,
                             help='all/new 选其一, 默认为new')
         args = parser.parse_args()
         notifi_type = args['type'] if args['type'] else "new"
-        if notifi_type == "all":
-            if connection.Notifications.find(
-                    {"_id": ObjectId(notifi_id)}).count != 0:
-                connection.Notifications.collection.remove(
-                    {"_id": ObjectId(notifi_id)}
-                )
+        resp = request.get_json(force=True)
+        if resp and "notifications" in resp:
+            lst = resp['notifications']
+            if notifi_type == "new":
+                key = "user:{}:notifications".format(self.user_info.user._id)
+                if redisdb.exists(key):
+                    for i in lst:
+                        if redisdb.exists("notification:{}".format(i)):
+                            redisdb.delete("notification:{}".format(i))
+                        if i in redisdb.lrange(key, 0, -1):
+                            redisdb.lrem(key, 0, i)
+            else:
+                for i in lst:
+                    if ObjectId.is_valid(i):
+                        connection.Notifications.collection.remove(
+                            {"_id": ObjectId(i)}
+                        )
+            return {
+                       "status": "ok",
+                       "message": "选定消息已清空"
+                   }, 201
         else:
-            key = "user:{}:notifications".format(self.user_info.user._id)
-            if redisdb.exists(key) and notifi_id in redisdb.lrange(key, 0, -1):
-                redisdb.lrem(key, 0, notifi_id)
-            if redisdb.exists("notification:{}".format(notifi_id)):
-                redisdb.delete("notification:{}".format(notifi_id))
-        return '', 204
+            # 其他异常输入, 返回400
+            return {
+                       "status": "error",
+                       "message": "请提供合法的待删除通知列表"
+                   }, 400

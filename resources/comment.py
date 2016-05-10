@@ -93,7 +93,7 @@ class CommentsList(TokenResource):
         user_comments.save()
         # comment_count +1 when a new comment posted
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
-        collection.find_and_modify(
+        post = collection.find_and_modify(
             {"_id": ObjectId(resp['post_id'])},
             {
                 "$inc": {
@@ -108,14 +108,19 @@ class CommentsList(TokenResource):
         dump_doc = dumps(
             {
                 "_id": doc._id,
+                "theme_id": theme_id,
                 "post_id": doc.post_id,
-                "author": doc.author,
+                "author": post["author"],
+                "current_user": self.user_info.user._id,
+                "mask_id": doc.mask_id,
+                "index": doc['index'],
                 "content": doc.content[:50]  # 只取评论内容前50字
             }
         )
-        if doc.author != self.user_info.user._id:
-            # 非楼主评论才发通知
-            notification.new_reply.delay(dump_doc)  # 发的帖子有新评论
+        collection = connection[MongoConfig.DB]["posts_" + theme_id]
+        cursor = collection.find_one({"_id": ObjectId(resp['post_id'])})
+        if cursor["author"] != self.user_info.user._id:
+            notification.new_reply.delay(dump_doc)
         notification.star_new_reply.delay(dump_doc)  # 关注的帖子有新评论
         return {
                    "status": "ok",
@@ -314,6 +319,8 @@ class CommentHeart(TokenResource):
             {
                 "_id": cursor._id,
                 "post_id": cursor.post_id,
+                "theme_id": theme_id,
+                "mask_id": self.user_info.user.masks[0],
                 "author": cursor.author,
                 "content": cursor.content[:50]  # 只取评论内容前50字
             }
