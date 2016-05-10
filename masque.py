@@ -7,6 +7,7 @@ from log import app_log
 from model import connection
 from oauth2 import oauth
 from resources import *
+from resources.inspect import Inspection
 
 
 def create_app():
@@ -156,6 +157,10 @@ api.add_resource(Notifications, '/notifications', endpoint='notifications')
 # 单个通知
 api.add_resource(Notification, '/notification/<string:notifi_id>',
                  endpoint='notification')
+
+# 审查举报帖
+api.add_resource(Inspection, '/inspection/<string:report_id>',
+                 endpoint='inspection')
 
 if __name__ == '__main__':
     app.run(host=DebugConfig.HOST, port=DebugConfig.PORT)

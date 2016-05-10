@@ -62,12 +62,35 @@ def geo_request_log(geo_info):
 
 
 @app.task
-def posts_delete_log(theme_id):
-    pdl = connection.Posts_Delete_Log()
-    pdl.theme_id = theme_id
-    pass
+def posts_delete_log(dump_doc, exp_reduce, ban_days, admin, reason):
+    report = loads(dump_doc)
+    content = "user %s have reduced exp %s and banned post %s days" % \
+              (report["author"], exp_reduce, ban_days)
+    log.info(content)
+    pdl = connection.PostsDeleteLog()
+    pdl.theme_id = report["theme_id"]
+    pdl.post_id = report["post_id"]
+    pdl.author = report["author"]
+    pdl.admin = admin
+    pdl.reason = reason
+    pdl.exp_reduce = exp_reduce
+    pdl.ban_days = ban_days
+    pdl.save()
 
 
 @app.task
-def comments_ban_log():
-    pass
+def comments_ban_log(dump_doc, exp_reduce, ban_days, admin, reason):
+    report = loads(dump_doc)
+    content = "user %s have reduced exp %s and banned post %s days" % \
+              (report["author"], exp_reduce, ban_days)
+    log.info(content)
+    cbl = connection.CommentsBanLog()
+    cbl.theme_id = report["theme_id"]
+    cbl.post_id = report["post_id"]
+    cbl.comment_id = report["comment_id"]
+    cbl.author = report["author"]
+    cbl.admin = admin
+    cbl.reason = reason
+    cbl.exp_reduce = exp_reduce
+    cbl.ban_days = ban_days
+    cbl.save()
