@@ -43,6 +43,7 @@ def new_reply(dump_doc):
         notifi.comment_id = doc["_id"]
         notifi.content = doc["content"]
         notifi.mask_id = doc["mask_id"]
+        notifi.index = doc["index"]
         notifi.save()
         save2redis(notifi)
 

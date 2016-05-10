@@ -808,7 +808,8 @@ class Notifications(RootDocument):
         "theme_id": str,
         "comment_id": str,
         "post_id": str,
-        "message_id": str
+        "message_id": str,
+        "index": int,
     }
     default_values = {
         "user_id": '',
@@ -819,7 +820,8 @@ class Notifications(RootDocument):
         "theme_id": '',
         "post_id": '',
         "message_id": '',
-        "comment_id": ''
+        "comment_id": '',
+        "index": 1,
     }
 
 
