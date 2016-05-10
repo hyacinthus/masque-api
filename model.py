@@ -576,7 +576,8 @@ class Posts(Common):
             "color": str
         },
         "comment_count": int,
-        "_updated": CustomDate()
+        "_updated": CustomDate(),
+        "school": str
     }
     # required_fields = [
     #     "content.text"
@@ -589,6 +590,7 @@ class Posts(Common):
         "label.name": "",
         "label.color": "",
         "comment_count": 0,
+        "school": ""
     }
 
 
@@ -598,13 +600,15 @@ class Comments(Common):
         "content": str,
         "post_id": str,
         "index": int,
+        "deleted": bool
     }
     required_fields = [
         "post_id",
         "content",
     ]
     default_values = {
-        "index": 1
+        "index": 1,
+        "deleted": False
     }
 
 
@@ -798,24 +802,31 @@ class Notifications(RootDocument):
     structure = {
         "_id": CustomObjectId(),
         "_created": CustomDate(),
+        "current_user": str,
         "user_id": str,
+        "mask_id": str,
         "title": str,
         "type": str,
         "content": str,
+        "mask_id": str,
         "theme_id": str,
         "comment_id": str,
         "post_id": str,
-        "message_id": str
+        "message_id": str,
+        "index": int,
     }
     default_values = {
         "user_id": '',
+        "current_user": '',
+        "mask_id": "",
         "title": '',
         "type": '',
         "content": '',
         "theme_id": '',
         "post_id": '',
         "message_id": '',
-        "comment_id": ''
+        "comment_id": '',
+        "index": 1,
     }
 
 
@@ -957,6 +968,7 @@ class ReportComments(RootDocument):
         "author": str,
         "reporters": list,
         "theme_id": str,
+        "post_id": str,
         "comment_id": str,
         "archived": bool,
         "_created": CustomDate(),
@@ -969,6 +981,22 @@ class ReportComments(RootDocument):
     ]
     default_values = {
         "archived": False,
+    }
+
+
+@connection.register
+class TrashPosts(Posts):
+    __collection__ = CollectionName.TRASH_POSTS
+    structure = {
+        "_id": str
+    }
+
+
+@connection.register
+class TrashComments(Comments):
+    __collection__ = CollectionName.TRASH_COMMENTS
+    structure = {
+        "_id": str
     }
 
 
@@ -1106,4 +1134,45 @@ class GeoRequestLog(RootDocument):
     default_values = {
         "location.coordinates": [108.947001, 34.259458],
         "location.type": "Point",
+    }
+
+
+@connection.register
+class PostsDeleteLog(RootDocument):
+    __collection__ = CollectionName.POSTS_DELETE_LOG
+    structure = {
+        "_id": CustomObjectId(),
+        "theme_id": str,
+        "post_id": str,
+        "author ": str,
+        "admin": str,
+        "reason": str,
+        "exp_reduce": int,
+        "ban_days": int,
+        "ban_account": int,
+    }
+    default_values = {
+        "admin": "",
+        "reason": ""
+    }
+
+
+@connection.register
+class CommentsBanLog(RootDocument):
+    __collection__ = CollectionName.COMMENTS_BAN_LOG
+    structure = {
+        "_id": CustomObjectId(),
+        "theme_id": str,
+        "post_id": str,
+        "comment_id": str,
+        "author ": str,
+        "admin": str,
+        "reason": str,
+        "exp_reduce": int,
+        "ban_days": int,
+        "ban_account": int,
+    }
+    default_values = {
+        "admin": "",
+        "reason": ""
     }

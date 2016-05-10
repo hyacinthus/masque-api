@@ -7,6 +7,7 @@ from log import app_log
 from model import connection
 from oauth2 import oauth
 from resources import *
+from resources.inspect import Inspection
 
 
 def create_app():
@@ -153,9 +154,13 @@ api.add_resource(DeRegister, '/deregister/<string:cellphone>',
 # 通知列表
 api.add_resource(Notifications, '/notifications', endpoint='notifications')
 
-# 单个通知
-api.add_resource(Notification, '/notification/<string:notifi_id>',
-                 endpoint='notification')
+# 删除单个或多个通知
+api.add_resource(DelNotification, '/notifications/multi',
+                 endpoint='del_notifi')
+
+# 审查举报帖
+api.add_resource(Inspection, '/inspection/<string:report_id>',
+                 endpoint='inspection')
 
 if __name__ == '__main__':
     app.run(host=DebugConfig.HOST, port=DebugConfig.PORT)

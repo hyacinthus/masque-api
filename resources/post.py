@@ -11,7 +11,7 @@ from paginate import Paginate
 from tasks import notification
 from util import add_exp, is_chinese
 
-log = logging.getLogger("masque.comment")
+log = logging.getLogger("masque.post")
 
 
 class PostsList(TokenResource):
@@ -90,6 +90,7 @@ class PostsList(TokenResource):
         doc['_updated'] = utctime
         doc['mask_id'] = self.user_info.user.masks[0]
         doc['author'] = self.user_info.user._id
+        doc['school'] = self.user_info.user.home.short_name
         doc.save()
         # save a record
         user_posts = connection.UserPosts()
@@ -246,6 +247,8 @@ class Hearts(TokenResource):
             {
                 "author": cursor.author,
                 "_id": cursor._id,
+                "mask_id": self.user_info.user.masks[0],
+                "theme_id": theme_id,
                 "content": cursor.content.text[:50]
             }
         )

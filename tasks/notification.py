@@ -24,13 +24,12 @@ def save2redis(notifi):
     log.info("Hash key %s has been saved in redis" % hkey)
 
 
+
 @app.task
 def new_reply(dump_doc):
     # 发的帖子被评论
     doc = loads(dump_doc)
-    cursor = connection.UserComments.find_one({"comment_id": doc["_id"]})
-    theme_id = cursor.theme_id
-    collection = connection[MongoConfig.DB]["posts_" + theme_id]
+    collection = connection[MongoConfig.DB]["posts_" + doc["theme_id"]]
     cursor = collection.Posts.find_one({"_id": ObjectId(doc["post_id"])})
     notifi_user = connection.Users.find_one({"_id": ObjectId(cursor.author)})
     if notifi_user.options.new_comment:
@@ -39,11 +38,13 @@ def new_reply(dump_doc):
         notifi = connection.Notifications()
         notifi.title = "您的帖子有新评论啦"
         notifi.type = "comment"
-        notifi.theme_id = theme_id
+        notifi.theme_id = doc["theme_id"]
         notifi.post_id = doc["post_id"]
         notifi.user_id = doc["author"]
         notifi.comment_id = doc["_id"]
         notifi.content = doc["content"]
+        notifi.mask_id = doc["mask_id"]
+        notifi.index = doc["index"]
         notifi.save()
         save2redis(notifi)
 
@@ -58,18 +59,20 @@ def star_new_reply(dump_doc):
         notifi_user = connection.Users.find_one(
             {"_id": ObjectId(star['user_id'])}
         )
-        if notifi_user.options.star_comment:
-            # 只有用户允许通知才会提醒
+        if notifi_user._id != doc[
+            'current_user'] and notifi_user.options.star_comment:
+            # 只有用户允许, 且回复者不是关注者本人才通知才会提醒
             log.info("There are new comments %s for the post %s you marked" % (
                 doc["_id"], doc["post_id"]))
             notifi = connection.Notifications()
             notifi.title = "您关注的帖子有新评论啦"
             notifi.type = "comment"
-            notifi.theme_id = star['theme_id']
+            notifi.theme_id = doc['theme_id']
             notifi.post_id = star['post_id']
             notifi.comment_id = doc["_id"]
             notifi.user_id = star['user_id']
             notifi.content = doc["content"]
+            notifi.mask_id = doc["mask_id"]
             notifi.save()
             save2redis(notifi)
 
@@ -92,7 +95,6 @@ def comment_new_reply(author_id, theme_id, post_id, comment_id):
 def new_heart(dump_doc):
     # 帖子收到新的感谢
     doc = loads(dump_doc)
-    cursor = connection.UserPosts.find_one({"post_id": doc["_id"]})
     notifi_user = connection.Users.find_one({"_id": ObjectId(doc["author"])})
     if notifi_user.options.post_hearted:
         # 只有用户设置提醒才会有效
@@ -101,9 +103,10 @@ def new_heart(dump_doc):
         notifi.title = "您的帖子收到一个新的感谢"
         notifi.type = "message"
         notifi.user_id = doc["author"]
-        notifi.theme_id = cursor.theme_id
+        notifi.theme_id = doc["theme_id"]
         notifi.post_id = doc["_id"]
         notifi.content = doc["content"]
+        notifi.mask_id = doc["mask_id"]
         notifi.save()
         save2redis(notifi)
 
@@ -112,7 +115,6 @@ def new_heart(dump_doc):
 def comment_new_heart(dump_doc):
     # 评论收到新的感谢
     doc = loads(dump_doc)
-    cursor = connection.UserComments.find_one({"comment_id": doc["_id"]})
     notifi_user = connection.Users.find_one({"_id": ObjectId(doc["author"])})
     if notifi_user.options.comment_hearted:
         log.info(
@@ -121,9 +123,10 @@ def comment_new_heart(dump_doc):
         notifi.title = "您的评论收到一个新的感谢"
         notifi.type = "message"
         notifi.user_id = doc["author"]
-        notifi.theme_id = cursor.theme_id
+        notifi.theme_id = doc["theme_id"]
         notifi.post_id = doc["post_id"]
         notifi.content = doc["content"]
+        notifi.mask_id = doc["mask_id"]
         notifi.save()
         save2redis(notifi)
 

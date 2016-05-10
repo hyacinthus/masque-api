@@ -88,7 +88,7 @@ class SchoolsList(TokenResource):
             # 无意义的坐标(如原点或负数坐标)输入高德API并不会报错, 所以需要处理
             return {
                        'status': "error",
-                       'message': 'Your coordinate is invalid!'
+                       'message': '抱歉，暂不支持非大陆地区'
                    }, 400
         if address['status'] == "1":
             ac = address["regeocode"]["addressComponent"]

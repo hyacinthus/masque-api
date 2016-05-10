@@ -93,7 +93,7 @@ class CommentsList(TokenResource):
         user_comments.save()
         # comment_count +1 when a new comment posted
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
-        collection.find_and_modify(
+        post = collection.find_and_modify(
             {"_id": ObjectId(resp['post_id'])},
             {
                 "$inc": {
@@ -108,14 +108,19 @@ class CommentsList(TokenResource):
         dump_doc = dumps(
             {
                 "_id": doc._id,
+                "theme_id": theme_id,
                 "post_id": doc.post_id,
-                "author": doc.author,
+                "author": post["author"],
+                "current_user": self.user_info.user._id,
+                "mask_id": doc.mask_id,
+                "index": doc['index'],
                 "content": doc.content[:50]  # 只取评论内容前50字
             }
         )
-        if doc.author != self.user_info.user._id:
-            # 非楼主评论才发通知
-            notification.new_reply.delay(dump_doc)  # 发的帖子有新评论
+        collection = connection[MongoConfig.DB]["posts_" + theme_id]
+        cursor = collection.find_one({"_id": ObjectId(resp['post_id'])})
+        if cursor["author"] != self.user_info.user._id:
+            notification.new_reply.delay(dump_doc)
         notification.star_new_reply.delay(dump_doc)  # 关注的帖子有新评论
         return {
                    "status": "ok",
@@ -127,7 +132,8 @@ class CommentsList(TokenResource):
 class Comment(TokenResource):
     def get(self, theme_id, comment_id):  # get a comment by its ID
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id),
+                                               'deleted': False})
         return {
             "status": "ok",
             "message": "成功获得评论",
@@ -187,15 +193,17 @@ class ReportComment(TokenResource):
                    }, 403
         # 判断被举报的评论存在与否
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id),
+                                               'deleted': False})
         if not cursor:
             return {
                        "status": "error",
                        "message": "您举报的内容已被删除, 谢谢支持!"
                    }, 404
         else:
-            # 存在则取到author值
+            # 存在则取到author, post_id值
             author = cursor.author
+            post_id = cursor.post_id
         current_user = self.user_info.user._id
         # 检查是否有此举报
         cursor = connection.ReportComments.find_one(
@@ -209,6 +217,7 @@ class ReportComment(TokenResource):
             new_report = connection.ReportComments()
             new_report.author = author
             new_report.theme_id = theme_id
+            new_report.post_id = post_id
             new_report.comment_id = comment_id
             new_report.reporters = [current_user]
             new_report.save()
@@ -310,6 +319,8 @@ class CommentHeart(TokenResource):
             {
                 "_id": cursor._id,
                 "post_id": cursor.post_id,
+                "theme_id": theme_id,
+                "mask_id": self.user_info.user.masks[0],
                 "author": cursor.author,
                 "content": cursor.content[:50]  # 只取评论内容前50字
             }
