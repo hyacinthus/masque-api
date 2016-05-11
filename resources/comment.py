@@ -132,8 +132,7 @@ class CommentsList(TokenResource):
 class Comment(TokenResource):
     def get(self, theme_id, comment_id):  # get a comment by its ID
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id),
-                                               'deleted': False})
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
         return {
             "status": "ok",
             "message": "成功获得评论",
@@ -193,8 +192,7 @@ class ReportComment(TokenResource):
                    }, 403
         # 判断被举报的评论存在与否
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id),
-                                               'deleted': False})
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
         if not cursor:
             return {
                        "status": "error",
