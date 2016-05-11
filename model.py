@@ -965,6 +965,7 @@ class ReportComments(RootDocument):
         "author": str,
         "reporters": list,
         "theme_id": str,
+        "post_id": str,
         "comment_id": str,
         "archived": bool,
         "_created": CustomDate(),

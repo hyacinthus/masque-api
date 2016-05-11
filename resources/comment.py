@@ -203,17 +203,18 @@ class ReportComment(TokenResource):
             author = cursor.author
         current_user = self.user_info.user._id
         # 检查是否有此举报
-        cursor = connection.ReportComments.find_one(
+        rp_cursor = connection.ReportComments.find_one(
             {
                 "theme_id": theme_id,
                 "comment_id": comment_id
             }
         )
-        if not cursor:
+        if not rp_cursor:
             # 不存在就新建
             new_report = connection.ReportComments()
             new_report.author = author
             new_report.theme_id = theme_id
+            new_report.post_id = cursor.post_id
             new_report.comment_id = comment_id
             new_report.reporters = [current_user]
             new_report.save()
@@ -221,7 +222,7 @@ class ReportComment(TokenResource):
                        "status": "ok",
                        "message": "举报成功, 谢谢支持",
                    }, 201
-        elif current_user not in cursor.reporters:
+        elif current_user not in rp_cursor.reporters:
             # 当前用户没有举报则可以举报
             connection.ReportComments.find_and_modify(
                 {
