@@ -59,13 +59,10 @@ class CommentsList(TokenResource):
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         doc = collection.Comments()
         for item in resp:
+            if item in ("author",):
+                continue
             doc[item] = resp[item]
-
-        if not doc['_created']:
-            doc['_created'] = utctime
-        if not doc['_updated']:
-            doc['_updated'] = utctime
-        if not doc['mask_id']:
+        if "mask_id" in doc and not doc['mask_id']:
             doc['mask_id'] = self.user_info.user.masks[0]
         doc['author'] = self.user_info.user._id
         # 记录评论序号

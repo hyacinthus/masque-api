@@ -74,6 +74,8 @@ class PostsList(TokenResource):
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         doc = collection.Posts()
         for item in resp:
+            if item in ('author',):
+                continue
             if item == 'label':
                 # 增加label.name字段，接受4个汉字，8个英文字母以内的字符串
                 # label.color字段, 用以标示帖子颜色, 暂不作限制
@@ -84,11 +86,7 @@ class PostsList(TokenResource):
                     doc[item] = resp[item]
                 continue
             doc[item] = resp[item]
-        if not doc['_created']:
-            doc['_created'] = utctime
-        if not doc['_updated']:
-            doc['_updated'] = utctime
-        if not doc['mask_id']:
+        if 'mask_id' in doc and not doc['mask_id']:
             doc['mask_id'] = self.user_info.user.masks[0]
         doc['author'] = self.user_info.user._id
         doc['school'] = self.user_info.user.home.short_name
