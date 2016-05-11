@@ -11,7 +11,7 @@ from paginate import Paginate
 from tasks import notification
 from util import add_exp, is_chinese
 
-log = logging.getLogger("masque.comment")
+log = logging.getLogger("masque.post")
 
 
 class PostsList(TokenResource):

@@ -132,7 +132,8 @@ class CommentsList(TokenResource):
 class Comment(TokenResource):
     def get(self, theme_id, comment_id):  # get a comment by its ID
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id),
+                                               'deleted': False})
         return {
             "status": "ok",
             "message": "成功获得评论",
@@ -192,7 +193,8 @@ class ReportComment(TokenResource):
                    }, 403
         # 判断被举报的评论存在与否
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id),
+                                               'deleted': False})
         if not cursor:
             return {
                        "status": "error",
@@ -201,20 +203,21 @@ class ReportComment(TokenResource):
         else:
             # 存在则取到author值
             author = cursor.author
+            post_id = cursor.post_id
         current_user = self.user_info.user._id
         # 检查是否有此举报
-        rp_cursor = connection.ReportComments.find_one(
+        cursor = connection.ReportComments.find_one(
             {
                 "theme_id": theme_id,
                 "comment_id": comment_id
             }
         )
-        if not rp_cursor:
+        if not cursor:
             # 不存在就新建
             new_report = connection.ReportComments()
             new_report.author = author
             new_report.theme_id = theme_id
-            new_report.post_id = cursor.post_id
+            new_report.post_id = post_id
             new_report.comment_id = comment_id
             new_report.reporters = [current_user]
             new_report.save()
@@ -222,7 +225,7 @@ class ReportComment(TokenResource):
                        "status": "ok",
                        "message": "举报成功, 谢谢支持",
                    }, 201
-        elif current_user not in rp_cursor.reporters:
+        elif current_user not in cursor.reporters:
             # 当前用户没有举报则可以举报
             connection.ReportComments.find_and_modify(
                 {
