@@ -59,10 +59,14 @@ class CommentsList(TokenResource):
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         doc = collection.Comments()
         for item in resp:
-            if item in ("_created", "mask_id", "author"):
-                continue
             doc[item] = resp[item]
-        doc['_created'] = utctime
+
+        if not doc['_created']:
+            doc['_created'] = utctime
+        if not doc['_updated']:
+            doc['_updated'] = utctime
+        if not doc['mask_id']:
+            doc['mask_id'] = self.user_info.user.masks[0]
         doc['author'] = self.user_info.user._id
         # 记录评论序号
         doc['index'] = collection.find({"post_id": resp["post_id"]}).count() + 1
@@ -89,7 +93,7 @@ class CommentsList(TokenResource):
         user_comments['user_id'] = self.user_info.user._id
         user_comments['theme_id'] = theme_id
         user_comments['comment_id'] = doc['_id']
-        user_comments['_created'] = utctime
+        user_comments['_created'] = doc['_created']
         user_comments.save()
         # comment_count +1 when a new comment posted
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
