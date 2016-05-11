@@ -101,7 +101,7 @@ def new_heart(dump_doc):
         log.info("Your post %s have a new heart" % doc["_id"])
         notifi = connection.Notifications()
         notifi.title = "您的帖子收到一个新的感谢"
-        notifi.type = "message"
+        notifi.type = "heart"
         notifi.user_id = doc["author"]
         notifi.theme_id = doc["theme_id"]
         notifi.post_id = doc["_id"]
@@ -121,7 +121,7 @@ def comment_new_heart(dump_doc):
             "There are new hearts for the comment %s you remarked" % doc["_id"])
         notifi = connection.Notifications()
         notifi.title = "您的评论收到一个新的感谢"
-        notifi.type = "message"
+        notifi.type = "heart"
         notifi.user_id = doc["author"]
         notifi.theme_id = doc["theme_id"]
         notifi.post_id = doc["post_id"]
@@ -135,7 +135,7 @@ def comment_new_heart(dump_doc):
 def level_up(user_id, user_level):
     log.info("Level up! user %s new level is %s" % (user_id, user_level))
     notifi = connection.Notifications()
-    notifi.type = "levelup"
+    notifi.type = "user"
     notifi.user_id = user_id
     notifi.title = "您升到了%s级" % user_level
     notifi.content = "加油!"
@@ -147,7 +147,7 @@ def level_up(user_id, user_level):
 def level_down(user_id, user_level):
     log.info("Level down! user %s new level is %s" % (user_id, user_level))
     notifi = connection.Notifications()
-    notifi.type = "punishment"
+    notifi.type = "user"
     notifi.user_id = user_id
     notifi.title = "您的等级掉到了%s级" % user_level
     notifi.content = "加油!"
@@ -159,7 +159,7 @@ def encourage_valid_feedback(user_id, exp, name):
     content = "Thanks, your feedback %s have solved, exp +%s" % (name, exp)
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "encourage"
+    notifi.type = "system"
     notifi.user_id = user_id
     notifi.content = content
     notifi.save()
@@ -170,7 +170,7 @@ def publish_forbid_post(user_id, expiry=7 * 24 * 3600):
     content = "Warning! you are prohibited to post %s" % expiry
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "punishment"
+    notifi.type = "system"
     notifi.user_id = user_id
     notifi.content = content
     notifi.save()
@@ -181,7 +181,7 @@ def publish_invalid_report_post(author_id, theme_id, post_id, exp):
     content = "you give us a invalid report %s, exp %s" % (post_id, exp)
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "punishment"
+    notifi.type = "system"
     notifi.user_id = author_id
     notifi.theme_id = theme_id
     notifi.post_id = post_id
@@ -194,7 +194,7 @@ def publish_invalid_report_comment(author_id, theme_id, comment_id, exp):
     content = "you give us a invalid report %s, exp %s" % (comment_id, exp)
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "punishment"
+    notifi.type = "system"
     notifi.user_id = author_id
     notifi.theme_id = theme_id
     notifi.post_id = comment_id
@@ -207,7 +207,7 @@ def publish_illegal_post(user_id, theme_id, post_id):
     content = "you post a illegal post %s" % post_id
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "punishment"
+    notifi.type = "system"
     notifi.user_id = user_id
     notifi.theme_id = theme_id
     notifi.post_id = post_id
@@ -220,7 +220,7 @@ def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
     content = "you post a illegal comment %s" % comment_id
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "punishment"
+    notifi.type = "system"
     notifi.user_id = user_id
     notifi.theme_id = theme_id
     notifi.post_id = post_id
@@ -234,7 +234,7 @@ def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
     content = "you post a illegal comment %s" % comment_id
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "punishment"
+    notifi.type = "system"
     notifi.user_id = user_id
     notifi.theme_id = theme_id
     notifi.post_id = post_id
@@ -248,18 +248,7 @@ def frozen_user(user_id):
     content = "Warning! your account has been frozen "
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "punishment"
-    notifi.user_id = user_id
-    notifi.content = content
-    notifi.save()
-
-
-@app.task
-def exp_up(user_id, user_exp):
-    content = "Congratulation! your exp up to %s " % user_exp
-    log.info(content)
-    notifi = connection.Notifications()
-    notifi.type = "encourage"
+    notifi.type = "system"
     notifi.user_id = user_id
     notifi.content = content
     notifi.save()
@@ -270,7 +259,7 @@ def update_system(user_id, version):
     content = "Great news, you have a new version %s can be updated" % version
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "message"
+    notifi.type = "system"
     notifi.user_id = user_id
     notifi.content = content
     notifi.save()
@@ -289,7 +278,7 @@ def check_image(bucket, image_id, author):
         detect.save()
         log.info(content)
         notifi = connection.Notifications()
-        notifi.type = "message"
+        notifi.type = "system"
         notifi.user_id = author
         notifi.content = content
         notifi.save()
@@ -300,7 +289,7 @@ def bind_cellphone(user_id, cellphone):
     content = "you have binded cellphone %s" % cellphone
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "message"
+    notifi.type = "system"
     notifi.content = content
     notifi.user_id = user_id
     notifi.save()
@@ -311,7 +300,7 @@ def publish_porn_image(user_id, image_id):
     content = "you post a illegal porn image %s" % image_id
     log.info(content)
     notifi = connection.Notifications()
-    notifi.type = "publish"
+    notifi.type = "system"
     notifi.content = content
     notifi.user_id = user_id
     notifi.save()

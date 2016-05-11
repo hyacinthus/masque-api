@@ -74,7 +74,7 @@ class PostsList(TokenResource):
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
         doc = collection.Posts()
         for item in resp:
-            if item in ('mask_id', 'author', '_created', '_updated'):
+            if item in ('author',):
                 continue
             if item == 'label':
                 # 增加label.name字段，接受4个汉字，8个英文字母以内的字符串
@@ -86,18 +86,18 @@ class PostsList(TokenResource):
                     doc[item] = resp[item]
                 continue
             doc[item] = resp[item]
-        doc['_created'] = utctime
-        doc['_updated'] = utctime
-        doc['mask_id'] = self.user_info.user.masks[0]
+        if 'mask_id' in doc and not doc['mask_id']:
+            doc['mask_id'] = self.user_info.user.masks[0]
         doc['author'] = self.user_info.user._id
         doc['school'] = self.user_info.user.home.short_name
+        print(doc)
         doc.save()
         # save a record
         user_posts = connection.UserPosts()
         user_posts['user_id'] = doc['author']
         user_posts['theme_id'] = theme_id
         user_posts['post_id'] = doc['_id']
-        user_posts['_created'] = utctime
+        user_posts['_created'] = doc['_created']
         user_posts.save()
         return {
                    'status': 'ok',

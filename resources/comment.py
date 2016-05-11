@@ -59,10 +59,11 @@ class CommentsList(TokenResource):
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
         doc = collection.Comments()
         for item in resp:
-            if item in ("_created", "mask_id", "author"):
+            if item in ("author",):
                 continue
             doc[item] = resp[item]
-        doc['_created'] = utctime
+        if "mask_id" in doc and not doc['mask_id']:
+            doc['mask_id'] = self.user_info.user.masks[0]
         doc['author'] = self.user_info.user._id
         # 记录评论序号
         doc['index'] = collection.find({"post_id": resp["post_id"]}).count() + 1
@@ -89,7 +90,7 @@ class CommentsList(TokenResource):
         user_comments['user_id'] = self.user_info.user._id
         user_comments['theme_id'] = theme_id
         user_comments['comment_id'] = doc['_id']
-        user_comments['_created'] = utctime
+        user_comments['_created'] = doc['_created']
         user_comments.save()
         # comment_count +1 when a new comment posted
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
@@ -132,8 +133,7 @@ class CommentsList(TokenResource):
 class Comment(TokenResource):
     def get(self, theme_id, comment_id):  # get a comment by its ID
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id),
-                                               'deleted': False})
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
         return {
             "status": "ok",
             "message": "成功获得评论",
@@ -193,15 +193,14 @@ class ReportComment(TokenResource):
                    }, 403
         # 判断被举报的评论存在与否
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
-        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id),
-                                               'deleted': False})
+        cursor = collection.Comments.find_one({"_id": ObjectId(comment_id)})
         if not cursor:
             return {
                        "status": "error",
                        "message": "您举报的内容已被删除, 谢谢支持!"
                    }, 404
         else:
-            # 存在则取到author, post_id值
+            # 存在则取到author值
             author = cursor.author
             post_id = cursor.post_id
         current_user = self.user_info.user._id
