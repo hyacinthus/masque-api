@@ -57,7 +57,7 @@ def geo_request_log(geo_info):
     for i in geo_info:
         geo[i] = geo_info[i]
     geo.save()
-    content = "user %s update location" % (geo.user_id)
+    content = "user %s update location" % geo.user_id
     log.info(content)
 
 

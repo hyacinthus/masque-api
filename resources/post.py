@@ -68,7 +68,6 @@ class PostsList(TokenResource):
                 perm.exp = 5  # 经验记数加 5
                 user.save()
             perm.post = 1
-        utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
         # save a post
         collection = connection[MongoConfig.DB]["posts_" + theme_id]

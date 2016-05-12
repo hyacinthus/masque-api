@@ -53,7 +53,6 @@ class CommentsList(TokenResource):
             user.save()
         # 当日评论数加 1
         perm.comment = 1
-        utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
         # save a comment
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
