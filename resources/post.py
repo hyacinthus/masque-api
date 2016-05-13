@@ -85,7 +85,7 @@ class PostsList(TokenResource):
                     doc[item] = resp[item]
                 continue
             doc[item] = resp[item]
-        if 'mask_id' in doc and not doc['mask_id']:
+        if "mask_id" not in doc or not doc['mask_id']:
             doc['mask_id'] = self.user_info.user.masks[0]
         doc['author'] = self.user_info.user._id
         doc['school'] = self.user_info.user.home.short_name
