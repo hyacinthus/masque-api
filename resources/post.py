@@ -8,7 +8,7 @@ from flask_restful import Resource, request, reqparse
 from config import MongoConfig, APIConfig
 from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
-from tasks import notification
+from tasks import notification, logger
 from util import add_exp, is_chinese
 
 log = logging.getLogger("masque.post")
@@ -91,13 +91,16 @@ class PostsList(TokenResource):
         doc['school'] = self.user_info.user.home.short_name
         print(doc)
         doc.save()
-        # save a record
-        user_posts = connection.UserPosts()
-        user_posts['user_id'] = doc['author']
-        user_posts['theme_id'] = theme_id
-        user_posts['post_id'] = doc['_id']
-        user_posts['_created'] = doc['_created']
-        user_posts.save()
+        dump_doc = dumps(
+            {
+                'user_id': doc['author'],
+                'theme_id': theme_id,
+                'post_id': doc['_id'],
+                '_created': doc['_created']
+            }
+        )
+        logger.user_post.delay(dump_doc)  # 用户帖子表
+        logger.post_log.delay(dump_doc)  # 用户发帖记录
         return {
                    'status': 'ok',
                    'message': '发帖成功，颜值 +5',
