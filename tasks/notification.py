@@ -6,7 +6,6 @@ from bson.objectid import ObjectId
 from config import MongoConfig, RedisConfig
 from model import connection, redisdb
 from tasks import app
-from datetime import datetime, timedelta
 from tools import detection
 from tools.oss import OssConnection
 from util import Exp2Level
@@ -24,7 +23,6 @@ def save2redis(notifi):
     redisdb.hmset(hkey, hmap)
     redisdb.expire(hkey, expire)  # 设置提醒过期时间
     log.info("Hash key %s has been saved in redis" % hkey)
-
 
 
 @app.task
@@ -61,8 +59,7 @@ def star_new_reply(dump_doc):
         notifi_user = connection.Users.find_one(
             {"_id": ObjectId(star['user_id'])}
         )
-        if notifi_user._id != doc[
-            'current_user'] and notifi_user.options.star_comment:
+        if notifi_user._id != doc['current_user'] and notifi_user.options.star_comment:
             # 只有用户允许, 且回复者不是关注者本人才通知才会提醒
             log.info("There are new comments %s for the post %s you marked" % (
                 doc["_id"], doc["post_id"]))
@@ -263,7 +260,7 @@ def ban_user(user_id, ban_days):
     if ban_days:
         notifi.title = "您已被禁言%s天" % ban_days
         notifi.content = "下次注意!"
-        unban_user.delay(user_id, eta=datetime.utcnow() + timedelta(days=ban_days))
+        unban_user.delay(user_id, countdown=ban_days*24*3600)
     else:
         notifi.title = "您已被永久禁言"
         notifi.content = ""
