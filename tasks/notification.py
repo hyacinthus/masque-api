@@ -6,8 +6,10 @@ from bson.objectid import ObjectId
 from config import MongoConfig, RedisConfig
 from model import connection, redisdb
 from tasks import app
+from datetime import datetime, timedelta
 from tools import detection
 from tools.oss import OssConnection
+from util import Exp2Level
 
 oc = OssConnection()
 log = logging.getLogger("masque.task.notifications")
@@ -244,14 +246,45 @@ def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
 
 
 @app.task
-def frozen_user(user_id):
-    content = "Warning! your account has been frozen "
-    log.info(content)
+def ban_user(user_id, ban_days):
+    """封禁用户"""
+    log.info("Warning! user %s has been frozen " % user_id)
+    connection.Users.find_and_modify(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "user_level_id": "ban"
+            }
+        }
+    )
     notifi = connection.Notifications()
     notifi.type = "system"
     notifi.user_id = user_id
-    notifi.content = content
+    if ban_days:
+        notifi.title = "您已被禁言%s天" % ban_days
+        notifi.content = "下次注意!"
+        unban_user.delay(user_id, eta=datetime.utcnow() + timedelta(days=ban_days))
+    else:
+        notifi.title = "您已被永久禁言"
+        notifi.content = ""
     notifi.save()
+
+
+@app.task
+def unban_user(user_id):
+    """解锁封禁用户"""
+    log.info("unblock user %s" % user_id)
+    user = connection.Users.find_one({'_id': ObjectId(user_id)})
+    e2l = Exp2Level(user.exp)
+    user.user_level_id = e2l.level_str
+    user.save()
+    notifi = connection.Notifications()
+    notifi.type = "user"
+    notifi.user_id = user_id
+    notifi.title = "您已被解除禁言"
+    notifi.content = "下次注意!"
+    notifi.save()
+    save2redis(notifi)
 
 
 @app.task

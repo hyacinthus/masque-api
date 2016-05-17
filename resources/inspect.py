@@ -68,6 +68,10 @@ class Inspection(TokenResource):
                 notification.publish_illegal_post.delay(cursor.author,
                                                         cursor.theme_id,
                                                         cursor.post_id)
+                # 禁言
+                notification.ban_user.delay(cursor.author, ban_days)
+
+                # 奖励举报人
 
                 # 删原帖至垃圾箱
                 collection = connection[MongoConfig.DB]["posts_" + cursor.theme_id]
@@ -122,13 +126,17 @@ class Inspection(TokenResource):
                                                            cursor.post_id,
                                                            cursor.comment_id)
 
+                # 禁言
+                notification.ban_user.delay(cursor.author, ban_days)
+
+                # 奖励举报人
+
                 # 改评论属性并扔进垃圾箱
                 trash = connection.TrashComments()
                 for (key, value) in comment.items():
                     trash[key] = value
                 trash._id = "{}:{}".format(cursor.theme_id, cursor.comment_id)
-                trash._created = datetime.timestamp(trash._created)
-                trash._updated = datetime.timestamp(datetime.utcnow())
+                trash._created = datetime.timestamp(datetime.utcnow())
                 trash.save()
                 collection.Comments.find_and_modify(
                     query={"_id": ObjectId(cursor.comment_id)}, update={"$set": {"deleted": True}})

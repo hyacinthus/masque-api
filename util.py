@@ -141,12 +141,6 @@ def illegal_comment(comment):
                                                comment.post_id, comment._id)
 
 
-def frozen_user(user):
-    """frozen user
-    input:User instance"""
-    notification.frozen_user.delay(user._id)
-
-
 def bind_cellphone(user):
     """bind cellphone
     input:User instance"""
