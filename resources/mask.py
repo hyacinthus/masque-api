@@ -97,7 +97,7 @@ class UploadMask(TokenResource):
             return {'message': 'No input data provided!'}, 400
         try:
             uuid.UUID(resp["uuid"])
-        except ValueError:
+        except:
             return {
                        'status': 'error',
                        'message': '%s is not a valid uuid.hex string'

@@ -277,7 +277,7 @@ def check_image(bucket, image_id, author):
         detect.author = author
         detect.bucket = bucket
         detect.save()
-        log.info(content)
+        log.info("rate is %s, image: %s/%s need to be checked again" % (rate, bucket, image_id))
         notifi = connection.Notifications()
         notifi.type = "system"
         notifi.user_id = author
