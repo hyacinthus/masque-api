@@ -6,6 +6,7 @@ from flask_restful import request, reqparse
 
 from config import MongoConfig, CollectionName
 from model import connection, TokenResource
+from tasks import notification
 
 log = logging.getLogger("masque.mask")
 
@@ -75,7 +76,7 @@ class RandomMask(TokenResource):
         args = parser.parse_args()
         mask_size = args['size'] if args['size'] else 1
         sample = connection[MongoConfig.DB][CollectionName.MASKS].aggregate(
-            [{"$sample": {"size": mask_size}}]
+            [{"$match": {"category": "system"}}, {"$sample": {"size": mask_size}}]
         )
         return {
             "status": "ok",
@@ -96,7 +97,7 @@ class UploadMask(TokenResource):
             return {'message': 'No input data provided!'}, 400
         try:
             uuid.UUID(resp["uuid"])
-        except:
+        except ValueError:
             return {
                        'status': 'error',
                        'message': '%s is not a valid uuid.hex string'
@@ -104,23 +105,11 @@ class UploadMask(TokenResource):
                    }, 400
         mask_uuid = resp["uuid"]
         current_user_id = self.user_info.user._id
-        user_info = connection.Users.find_one(
-            {"_id": ObjectId(current_user_id)}
-        )
-        mask_list = user_info.masks
-        new_mask_list = [mask_uuid] + mask_list
-        # 将新传入的头像uuid加入用户头像列表
-        connection.Users.find_and_modify(
-            {"_id": ObjectId(current_user_id)},
-            {
-                "$set": {
-                    "masks": new_mask_list[:-1]
-                }
-            }
-        )
+        notification.check_image('mask', mask_uuid, current_user_id)
         # 将新传入的头像uuid加入masks
         mask = connection.Masks()
         mask._id = mask_uuid
+        mask.category = "user"
         mask.save()
         return {
                    "status": "ok",

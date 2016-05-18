@@ -1023,6 +1023,7 @@ class Detections(RootDocument):
         "author": str,
         "archived": bool,
         "_created": CustomDate(),
+        "_updated": CustomDate(),
     }
     required_fields = [
         "_id",
