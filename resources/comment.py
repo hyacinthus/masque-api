@@ -53,7 +53,6 @@ class CommentsList(TokenResource):
             user.save()
         # 当日评论数加 1
         perm.comment = 1
-        utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
         # save a comment
         collection = connection[MongoConfig.DB]["comments_" + theme_id]
@@ -62,7 +61,7 @@ class CommentsList(TokenResource):
             if item in ("author",):
                 continue
             doc[item] = resp[item]
-        if "mask_id" in doc and not doc['mask_id']:
+        if "mask_id" not in doc or not doc['mask_id']:
             doc['mask_id'] = self.user_info.user.masks[0]
         doc['author'] = self.user_info.user._id
         # 记录评论序号

@@ -268,6 +268,7 @@ def update_system(user_id, version):
 @app.task
 def check_image(bucket, image_id, author):
     content = "check image: %s/%s" % (bucket, image_id)
+    log.info(content)
     img_url = oc.bucket.sign_url("GET", bucket + '/' + image_id, 60)
     label, rate = detection.detect(img_url)
     if label:
@@ -276,11 +277,11 @@ def check_image(bucket, image_id, author):
         detect.author = author
         detect.bucket = bucket
         detect.save()
-        log.info(content)
+        log.info("rate is %s, image: %s/%s need to be checked again" % (rate, bucket, image_id))
         notifi = connection.Notifications()
         notifi.type = "system"
         notifi.user_id = author
-        notifi.content = content
+        notifi.content = "您上传的图片有问题"
         notifi.save()
 
 

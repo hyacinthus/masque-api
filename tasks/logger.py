@@ -8,14 +8,25 @@ log = logging.getLogger("masque.task.logger")
 
 
 @app.task
-def post_log(user_id, theme_id, post_id):
-    content = "user %s have new post %s" % (user_id, post_id)
-    log.info(content)
+def user_post(dump_doc):
+    """用户发帖记录表"""
+    doc = loads(dump_doc)
+    user_posts = connection.UserPosts()
+    for i in doc:
+        user_posts[i] = doc[i]
+    user_posts.save()
+    log.info('user_posts %s has been saved.' % user_posts._id)
+
+
+@app.task
+def post_log(dump_doc):
+    """用户发帖日志"""
+    doc = loads(dump_doc)
     post = connection.PostLog()
-    post.user_id = user_id
-    post.theme_id = theme_id
-    post.post_id = post_id
+    for i in doc:
+        post[i] = doc[i]
     post.save()
+    log.info('user %s has published a new post %s' % (doc['user_id'], post._id))
 
 
 @app.task
@@ -57,7 +68,7 @@ def geo_request_log(geo_info):
     for i in geo_info:
         geo[i] = geo_info[i]
     geo.save()
-    content = "user %s update location" % (geo.user_id)
+    content = "user %s update location" % geo.user_id
     log.info(content)
 
 

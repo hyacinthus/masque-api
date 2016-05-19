@@ -740,11 +740,11 @@ class Masks(RootDocument):
     __collection__ = CollectionName.MASKS
     structure = {
         "_id": str,
-        "category": IS("system", "user")
+        "category": IS("system", "cartoon", "party", "facebook", "art", "other")
     }
     default_values = {
         "_id": uuid.uuid1().hex,
-        "category": "user"
+        "category": "system"
     }
 
 
@@ -1023,6 +1023,7 @@ class Detections(RootDocument):
         "author": str,
         "archived": bool,
         "_created": CustomDate(),
+        "_updated": CustomDate(),
     }
     required_fields = [
         "_id",

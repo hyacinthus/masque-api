@@ -1,3 +1,4 @@
+import uuid
 import logging
 from datetime import datetime
 from json import dumps
@@ -8,7 +9,7 @@ from flask_restful import Resource, request, reqparse
 from config import MongoConfig, APIConfig
 from model import connection, TokenResource, CheckPermission
 from paginate import Paginate
-from tasks import notification
+from tasks import notification, logger
 from util import add_exp, is_chinese
 
 log = logging.getLogger("masque.post")
@@ -68,7 +69,6 @@ class PostsList(TokenResource):
                 perm.exp = 5  # 经验记数加 5
                 user.save()
             perm.post = 1
-        utctime = datetime.timestamp(datetime.utcnow())
         resp = request.get_json(force=True)
         # save a post
         collection = connection[MongoConfig.DB]["posts_" + theme_id]
@@ -86,19 +86,38 @@ class PostsList(TokenResource):
                     doc[item] = resp[item]
                 continue
             doc[item] = resp[item]
-        if 'mask_id' in doc and not doc['mask_id']:
+        if "mask_id" not in doc or not doc['mask_id']:
             doc['mask_id'] = self.user_info.user.masks[0]
+        if resp["content"].get("type") == "photo":
+            # 判断是否是图文贴,如果是,就将新传入的图片uuid加入user_images
+            image_id = resp["content"].get("photo")
+            try:
+                uuid.UUID(image_id)
+            except:
+                return {
+                           'status': 'error',
+                           'message': '%s is not a valid uuid.hex string'
+                                      % image_id
+                       }, 400
+            notification.check_image.delay('photo', image_id, self.user_info.user._id)
+            image = connection.UserImages()
+            image._id = resp["content"].get("photo")
+            image.author = self.user_info.user._id
+            image.category = "post"
+            image.save()
         doc['author'] = self.user_info.user._id
         doc['school'] = self.user_info.user.home.short_name
-        print(doc)
         doc.save()
-        # save a record
-        user_posts = connection.UserPosts()
-        user_posts['user_id'] = doc['author']
-        user_posts['theme_id'] = theme_id
-        user_posts['post_id'] = doc['_id']
-        user_posts['_created'] = doc['_created']
-        user_posts.save()
+        dump_doc = dumps(
+            {
+                'user_id': doc['author'],
+                'theme_id': theme_id,
+                'post_id': doc['_id'],
+                '_created': doc['_created']
+            }
+        )
+        logger.user_post.delay(dump_doc)  # 用户帖子表
+        logger.post_log.delay(dump_doc)  # 用户发帖记录
         return {
                    'status': 'ok',
                    'message': '发帖成功，颜值 +5',
