@@ -1,3 +1,4 @@
+import uuid
 import logging
 from datetime import datetime
 from json import dumps
@@ -87,9 +88,25 @@ class PostsList(TokenResource):
             doc[item] = resp[item]
         if "mask_id" not in doc or not doc['mask_id']:
             doc['mask_id'] = self.user_info.user.masks[0]
+        if resp["content"].get("type") == "photo":
+            # 判断是否是图文贴,如果是,就将新传入的图片uuid加入user_images
+            image_id = resp["content"].get("photo")
+            try:
+                uuid.UUID(image_id)
+            except:
+                return {
+                           'status': 'error',
+                           'message': '%s is not a valid uuid.hex string'
+                                      % image_id
+                       }, 400
+            notification.check_image.delay('photo', image_id, self.user_info.user._id)
+            image = connection.UserImages()
+            image._id = resp["content"].get("photo")
+            image.author = self.user_info.user._id
+            image.category = "post"
+            image.save()
         doc['author'] = self.user_info.user._id
         doc['school'] = self.user_info.user.home.short_name
-        print(doc)
         doc.save()
         dump_doc = dumps(
             {

@@ -24,6 +24,7 @@ class AliConfig:
 
 
 class FlaskConfig:
+    LOCALHOST = os.getenv("MASQUE_API_URL", "https://api.jiamian.im")
     DEBUG = os.getenv("FLASK_DEBUG", "0") in ("True", "TRUE", "true", "1")
     OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 864000
 
