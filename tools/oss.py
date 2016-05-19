@@ -3,8 +3,9 @@ import bcrypt
 import requests
 import datetime
 from model import redisdb
+from config import FlaskConfig
 
-localhost = "http://localhost"
+localhost = FlaskConfig.LOCALHOST
 
 
 class OssConnection:

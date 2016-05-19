@@ -76,7 +76,7 @@ class RandomMask(TokenResource):
         args = parser.parse_args()
         mask_size = args['size'] if args['size'] else 1
         sample = connection[MongoConfig.DB][CollectionName.MASKS].aggregate(
-            [{"$match": {"category": "system"}}, {"$sample": {"size": mask_size}}]
+            [{"$sample": {"size": mask_size}}]
         )
         return {
             "status": "ok",
@@ -105,14 +105,15 @@ class UploadMask(TokenResource):
                    }, 400
         mask_uuid = resp["uuid"]
         current_user_id = self.user_info.user._id
-        notification.check_image('mask', mask_uuid, current_user_id)
-        # 将新传入的头像uuid加入masks
-        mask = connection.Masks()
-        mask._id = mask_uuid
-        mask.category = "user"
-        mask.save()
+        notification.check_image.delay('mask', mask_uuid, current_user_id)
+        # 将新传入的头像uuid加入user_images
+        image = connection.UserImages()
+        image._id = mask_uuid
+        image.author = current_user_id
+        image.category = "mask"
+        image.save()
         return {
                    "status": "ok",
                    "message": "头像上传成功",
-                   "data": mask
+                   "data": image
                }, 201
