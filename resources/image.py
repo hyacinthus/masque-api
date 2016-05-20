@@ -89,3 +89,8 @@ class GetToken(TokenResource):
     def get(self):
         device_id = self.user_info.device_id
         return http_request(host, compose_url(device_id))
+
+
+class GetOssToken:
+    def get(self):
+        return http_request(host, compose_url("admin"))

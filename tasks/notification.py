@@ -24,7 +24,6 @@ def save2redis(notifi):
     log.info("Hash key %s has been saved in redis" % hkey)
 
 
-
 @app.task
 def new_reply(dump_doc):
     # 发的帖子被评论

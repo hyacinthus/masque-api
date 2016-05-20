@@ -1,9 +1,11 @@
 import json
+import logging
 from config import AliConfig
 from aliyunsdkcore import client
 from aliyunsdkgreen.request.v20160308 import ImageDetectionRequest
 
 clt = client.AcsClient(AliConfig.GREEN_IKEY, AliConfig.GREEN_AKEY, AliConfig.REGIONID)
+log = logging.getLogger("masque.detection")
 
 
 def detect(image_url, async=False, scene=['porn']):
