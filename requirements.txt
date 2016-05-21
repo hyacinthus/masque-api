@@ -20,6 +20,7 @@ uwsgi
 celery
 fabric3
 aliyun-python-sdk-green==1.1.0
+oss2
 
 # install the newest mongokit from github
 -e git+https://github.com/namlook/mongokit@development#egg=mongokit
