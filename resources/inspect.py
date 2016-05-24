@@ -72,6 +72,11 @@ class Inspection(TokenResource):
                 notification.ban_user.delay(cursor.author, ban_days)
 
                 # 奖励举报人
+                for reporter in cursor.reporters:
+                    notification.valid_report_post.delay(reporter,
+                                                         cursor.theme_id,
+                                                         cursor.post_id,
+                                                         exp_reduce)
 
                 # 删原帖至垃圾箱
                 collection = connection[MongoConfig.DB]["posts_" + cursor.theme_id]
@@ -130,6 +135,11 @@ class Inspection(TokenResource):
                 notification.ban_user.delay(cursor.author, ban_days)
 
                 # 奖励举报人
+                for reporter in cursor.reporters:
+                    notification.valid_report_comment.delay(reporter,
+                                                            cursor.theme_id,
+                                                            cursor.comment_id,
+                                                            exp_reduce)
 
                 # 改评论属性并扔进垃圾箱
                 trash = connection.TrashComments()

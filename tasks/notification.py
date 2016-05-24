@@ -202,16 +202,48 @@ def publish_invalid_report_comment(author_id, theme_id, comment_id, exp):
 
 
 @app.task
+def valid_report_post(author_id, theme_id, post_id, exp):
+    content = "you give us a valid report %s, exp %s" % (post_id, exp)
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "system"
+    notifi.user_id = author_id
+    notifi.title = "举报有效,获得颜值奖励%s" % exp
+    notifi.theme_id = theme_id
+    notifi.post_id = post_id
+    notifi.content = content
+    notifi.save()
+    save2redis(notifi)
+
+
+@app.task
+def valid_report_comment(author_id, theme_id, comment_id, exp):
+    content = "you give us a valid report %s, exp %s" % (comment_id, exp)
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "system"
+    notifi.user_id = author_id
+    notifi.title = "举报有效,获得颜值奖励%s" % exp
+    notifi.theme_id = theme_id
+    notifi.post_id = comment_id
+    notifi.content = content
+    notifi.save()
+    save2redis(notifi)
+
+
+@app.task
 def publish_illegal_post(user_id, theme_id, post_id):
     content = "you post a illegal post %s" % post_id
     log.info(content)
     notifi = connection.Notifications()
     notifi.type = "system"
     notifi.user_id = user_id
+    notifi.title = "您发了违规帖子"
     notifi.theme_id = theme_id
     notifi.post_id = post_id
     notifi.content = content
     notifi.save()
+    save2redis(notifi)
 
 
 @app.task
@@ -222,10 +254,12 @@ def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
     notifi.type = "system"
     notifi.user_id = user_id
     notifi.theme_id = theme_id
+    notifi.title = "您发了违规评论"
     notifi.post_id = post_id
     notifi.comment_id = comment_id
     notifi.content = content
     notifi.save()
+    save2redis(notifi)
 
 
 @app.task
@@ -265,6 +299,7 @@ def ban_user(user_id, ban_days):
         notifi.title = "您已被永久禁言"
         notifi.content = ""
     notifi.save()
+    save2redis(notifi)
 
 
 @app.task
