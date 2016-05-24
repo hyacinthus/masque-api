@@ -24,7 +24,6 @@ def save2redis(notifi):
     log.info("Hash key %s has been saved in redis" % hkey)
 
 
-
 @app.task
 def new_reply(dump_doc):
     # 发的帖子被评论
@@ -59,8 +58,7 @@ def star_new_reply(dump_doc):
         notifi_user = connection.Users.find_one(
             {"_id": ObjectId(star['user_id'])}
         )
-        if notifi_user._id != doc[
-            'current_user'] and notifi_user.options.star_comment:
+        if notifi_user._id != doc['current_user'] and notifi_user.options.star_comment:
             # 只有用户允许, 且回复者不是关注者本人才通知才会提醒
             log.info("There are new comments %s for the post %s you marked" % (
                 doc["_id"], doc["post_id"]))
@@ -203,16 +201,64 @@ def publish_invalid_report_comment(author_id, theme_id, comment_id, exp):
 
 
 @app.task
+def valid_report_post(author_id, theme_id, post_id, exp):
+    content = "you give us a valid report %s, exp %s" % (post_id, exp)
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "system"
+    notifi.user_id = author_id
+    notifi.title = "举报有效,获得颜值奖励%s" % exp
+    notifi.theme_id = theme_id
+    notifi.post_id = post_id
+    notifi.content = content
+    notifi.save()
+    save2redis(notifi)
+
+
+@app.task
+def valid_report_comment(author_id, theme_id, comment_id, exp):
+    content = "you give us a valid report %s, exp %s" % (comment_id, exp)
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "system"
+    notifi.user_id = author_id
+    notifi.title = "举报有效,获得颜值奖励%s" % exp
+    notifi.theme_id = theme_id
+    notifi.post_id = comment_id
+    notifi.content = content
+    notifi.save()
+    save2redis(notifi)
+
+
+@app.task
 def publish_illegal_post(user_id, theme_id, post_id):
     content = "you post a illegal post %s" % post_id
     log.info(content)
     notifi = connection.Notifications()
     notifi.type = "system"
     notifi.user_id = user_id
+    notifi.title = "您发了违规帖子"
     notifi.theme_id = theme_id
     notifi.post_id = post_id
     notifi.content = content
     notifi.save()
+    save2redis(notifi)
+
+
+@app.task
+def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
+    content = "you post a illegal comment %s" % comment_id
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "system"
+    notifi.user_id = user_id
+    notifi.theme_id = theme_id
+    notifi.title = "您发了违规评论"
+    notifi.post_id = post_id
+    notifi.comment_id = comment_id
+    notifi.content = content
+    notifi.save()
+    save2redis(notifi)
 
 
 @app.task
@@ -230,28 +276,36 @@ def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
 
 
 @app.task
-def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
-    content = "you post a illegal comment %s" % comment_id
-    log.info(content)
+def ban_user(user_id, ban_days):
+    """封禁用户"""
+    log.info("Warning! user %s has been frozen " % user_id)
     notifi = connection.Notifications()
     notifi.type = "system"
     notifi.user_id = user_id
-    notifi.theme_id = theme_id
-    notifi.post_id = post_id
-    notifi.comment_id = comment_id
-    notifi.content = content
+    if ban_days:
+        notifi.title = "您已被禁言%s天" % ban_days
+        notifi.content = "下次注意!"
+    else:
+        notifi.title = "您已被永久禁言"
+        notifi.content = ""
     notifi.save()
+    save2redis(notifi)
 
 
 @app.task
-def frozen_user(user_id):
-    content = "Warning! your account has been frozen "
-    log.info(content)
+def unban_user(user_id, level_str):
+    """解锁封禁用户"""
+    user = connection.Users.find_one({'_id': ObjectId(user_id)})
+    user.user_level_id = level_str
+    user.save()
+    log.info("unblock user %s" % user_id)
     notifi = connection.Notifications()
-    notifi.type = "system"
+    notifi.type = "user"
     notifi.user_id = user_id
-    notifi.content = content
+    notifi.title = "您已被解除禁言"
+    notifi.content = "下次注意!"
     notifi.save()
+    save2redis(notifi)
 
 
 @app.task

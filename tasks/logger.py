@@ -81,7 +81,9 @@ def posts_delete_log(dump_doc, exp_reduce, ban_days, admin, reason):
     pdl = connection.PostsDeleteLog()
     pdl.theme_id = report["theme_id"]
     pdl.post_id = report["post_id"]
+    print(report['author'])
     pdl.author = report["author"]
+    print(report['author'])
     pdl.admin = admin
     pdl.reason = reason
     pdl.exp_reduce = exp_reduce
