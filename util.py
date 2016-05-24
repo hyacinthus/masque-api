@@ -99,6 +99,31 @@ def add_exp(user, exp=None):
             notification.level_down.delay(user._id, e2l.level_int)
 
 
+def lock_user(user_id, ban_days):
+    """封禁用户"""
+    connection.Users.find_and_modify(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "user_level_id": "ban"
+            }
+        }
+    )
+    if ban_days:
+        unlock_user(user_id, ban_days)
+    else:
+        pass
+    notification.ban_user.delay(user_id, ban_days)
+
+
+def unlock_user(user_id, ban_days):
+    """解锁封禁用户"""
+    user = connection.Users.find_one({'_id': ObjectId(user_id)})
+    e2l = Exp2Level(user.exp)
+    notification.unban_user.apply_async(user_id, e2l.level_str,
+                                        countdown=ban_days*24*3600)
+
+
 def valid_feedback(feedback, exp=10):
     """encourage user to feedback the problems of school_name
     input:Feedback instance"""

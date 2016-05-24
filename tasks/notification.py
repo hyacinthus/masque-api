@@ -8,7 +8,6 @@ from model import connection, redisdb
 from tasks import app
 from tools import detection
 from tools.oss import OssConnection
-from util import Exp2Level
 
 oc = OssConnection()
 log = logging.getLogger("masque.task.notifications")
@@ -280,21 +279,12 @@ def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
 def ban_user(user_id, ban_days):
     """封禁用户"""
     log.info("Warning! user %s has been frozen " % user_id)
-    connection.Users.find_and_modify(
-        {"_id": ObjectId(user_id)},
-        {
-            "$set": {
-                "user_level_id": "ban"
-            }
-        }
-    )
     notifi = connection.Notifications()
     notifi.type = "system"
     notifi.user_id = user_id
     if ban_days:
         notifi.title = "您已被禁言%s天" % ban_days
         notifi.content = "下次注意!"
-        unban_user.delay(user_id, countdown=ban_days*24*3600)
     else:
         notifi.title = "您已被永久禁言"
         notifi.content = ""
@@ -303,13 +293,12 @@ def ban_user(user_id, ban_days):
 
 
 @app.task
-def unban_user(user_id):
+def unban_user(user_id, level_str):
     """解锁封禁用户"""
-    log.info("unblock user %s" % user_id)
     user = connection.Users.find_one({'_id': ObjectId(user_id)})
-    e2l = Exp2Level(user.exp)
-    user.user_level_id = e2l.level_str
+    user.user_level_id = level_str
     user.save()
+    log.info("unblock user %s" % user_id)
     notifi = connection.Notifications()
     notifi.type = "user"
     notifi.user_id = user_id
