@@ -63,7 +63,6 @@ class SchoolsList(TokenResource):
                 convert_location = requests.get(convert_url).json()
             except:
                 return {'message': 'Amap API Server No Response!'}, 504
-
             if not convert_location:
                 return {'message': 'Amap API Server No Response!'}, 504
             if convert_location['status'] == "1":
@@ -84,13 +83,14 @@ class SchoolsList(TokenResource):
             return {'message': 'Amap API Server No Response!'}, 504
         if not address:
             return {'message': 'Amap API Server No Response!'}, 504
-        if not address['regeocode']['formatted_address']:
-            # 无意义的坐标(如原点或负数坐标)输入高德API并不会报错, 所以需要处理
-            return {
-                       'status': "error",
-                       'message': '抱歉，暂不支持非大陆地区'
-                   }, 400
+
         if address['status'] == "1":
+            if not address['regeocode'].get('formatted_address'):
+                # 无意义的坐标(如原点或负数坐标)输入高德API并不会报错, 所以需要处理
+                return {
+                           'status': "error",
+                           'message': '抱歉，暂不支持非大陆地区'
+                       }, 400
             ac = address["regeocode"]["addressComponent"]
             addr = {
                 "province": ac["province"],
@@ -101,7 +101,7 @@ class SchoolsList(TokenResource):
             }
             pois = address["regeocode"]["pois"]
         else:
-            return {'message': 'Amap API Server Error!'}, 500
+            return {'message': '%s' % address['info']}, 504
         get_school = (addr["keyword"],) if addr["keyword"] else ()
         # 获取附近地点
         if pois:

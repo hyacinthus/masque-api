@@ -31,11 +31,11 @@ def get_event():
 @task
 def pull():
     resp = get_event()
-    if resp['payload']['ref'] == "refs/heads/master" and resp[
+    if resp['payload']['ref'] == "refs/heads/product" and resp[
         'type'] == "PushEvent":
         push_time = datetime.strptime(resp['created_at'], "%Y-%m-%dT%H:%M:%SZ")
         deltime = nowtime - push_time
-        if deltime.seconds > 330:
+        if deltime.seconds > 24 * 3600:
             do_exit('Nothing to be done')
         else:
             local('git fetch', capture=False)

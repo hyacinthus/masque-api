@@ -6,6 +6,7 @@ from flask_restful import request, reqparse
 
 from config import MongoConfig, CollectionName
 from model import connection, TokenResource
+from tasks import notification
 
 log = logging.getLogger("masque.mask")
 
@@ -104,26 +105,15 @@ class UploadMask(TokenResource):
                    }, 400
         mask_uuid = resp["uuid"]
         current_user_id = self.user_info.user._id
-        user_info = connection.Users.find_one(
-            {"_id": ObjectId(current_user_id)}
-        )
-        mask_list = user_info.masks
-        new_mask_list = [mask_uuid] + mask_list
-        # 将新传入的头像uuid加入用户头像列表
-        connection.Users.find_and_modify(
-            {"_id": ObjectId(current_user_id)},
-            {
-                "$set": {
-                    "masks": new_mask_list[:-1]
-                }
-            }
-        )
-        # 将新传入的头像uuid加入masks
-        mask = connection.Masks()
-        mask._id = mask_uuid
-        mask.save()
+        notification.check_image.delay('mask', mask_uuid, current_user_id)
+        # 将新传入的头像uuid加入user_images
+        image = connection.UserImages()
+        image._id = mask_uuid
+        image.author = current_user_id
+        image.category = "mask"
+        image.save()
         return {
                    "status": "ok",
                    "message": "头像上传成功",
-                   "data": mask
+                   "data": image
                }, 201

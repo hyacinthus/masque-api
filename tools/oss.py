@@ -3,6 +3,9 @@ import bcrypt
 import requests
 import datetime
 from model import redisdb
+from config import FlaskConfig
+
+localhost = FlaskConfig.LOCALHOST
 
 
 class OssConnection:
@@ -11,21 +14,22 @@ class OssConnection:
         self._extime = None
 
     # 获得api_token
-    def get_api_token(self):
+    def get_api_token(self, username='admin'):
         params = {
             'grant_type': 'password',
-            'client_id': 'admin',
-            'username': 'admin',
-            'password': bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode()}
+            'client_id': username,
+            'username': username,
+            'password': bcrypt.hashpw(str.encode(username), bcrypt.gensalt()).decode()}
         headers = {"Content-type": "application/x-www-form-urlencoded"}
-        response = requests.post("http://localhost/token", data=params, headers=headers)
+        response = requests.post("%s/token" % localhost, data=params, headers=headers)
         if response.status_code == 200:
             data = response.json()
             expire_time = data['expires_in']
-            redisdb.setex('admin:{%s}:api_access_token' % 'admin',
+            redisdb.setex('admin:{%s}:api_access_token' % username,
                           expire_time, data['access_token'])
-            redisdb.set('admin:{%s}:api_refresh_token' % 'admin',
+            redisdb.set('admin:{%s}:api_refresh_token' % username,
                         data['refresh_token'])
+
         else:
             raise Exception('Status: {0}, Reason: {1}'.format(response.status_code, response.reason))
         return data['access_token']
@@ -35,14 +39,21 @@ class OssConnection:
         access_token = redisdb.get("admin:{admin}:api_access_token")
         access_token = self.get_api_token() if access_token is None else access_token
         headers = {'authorization': "Bearer " + access_token}
-        res = requests.get("http://localhost/image_token", headers=headers)
+        res = requests.get("%s/image_token" % localhost, headers=headers)
         if res.status_code == 200:
             token = res.json()
-            if token.get('Credentials'):
+            _time = token['Credentials']['Expiration']
+            self._extime = datetime.datetime.strptime(_time, "%Y-%m-%dT%H:%M:%SZ")
+        elif res.status_code == 401:
+            headers = {'authorization': "Bearer " + self.get_api_token()}
+            res = requests.get("%s/image_token" % localhost, headers=headers)
+            if res.status_code == 200:
+                token = res.json()
                 _time = token['Credentials']['Expiration']
                 self._extime = datetime.datetime.strptime(_time, "%Y-%m-%dT%H:%M:%SZ")
             else:
-                raise Exception(token.get('message'))
+                raise Exception('Status: {0}, Reason: {1}'.format(res.status_code, res.reason))
+
         else:
             raise Exception('Status: {0}, Reason: {1}'.format(res.status_code, res.reason))
         auth = oss2.StsAuth(token['Credentials']['AccessKeyId'],
@@ -61,3 +72,8 @@ class OssConnection:
         else:
             pass
         return self._bucket
+
+    def token(self, username):
+        access_token = redisdb.get("admin:{%s}:api_access_token" % username)
+        access_token = self.get_api_token(username) if access_token is None else access_token
+        return access_token
