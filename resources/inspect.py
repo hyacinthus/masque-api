@@ -107,7 +107,7 @@ class Inspection(TokenResource):
                 cursor.archived = True
                 cursor.save()
 
-        else:
+        elif category == 'comment':
             cursor = connection.ReportComments.find_one({'_id': ObjectId(report_id)})
             if not cursor:
                 return {
@@ -161,6 +161,11 @@ class Inspection(TokenResource):
                 # 归档
                 cursor.archived = True
                 cursor.save()
+        else:
+            return {
+                'status': 'error',
+                'message': '%s, the value of category is wrong' % category
+            }, 400
 
         return {
                    'status': 'ok',
