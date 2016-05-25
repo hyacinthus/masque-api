@@ -8,7 +8,7 @@ from flask_restful import reqparse, request
 from config import MongoConfig
 from model import connection, TokenResource
 from tasks import logger, notification
-from util import add_exp
+from util import add_exp, lock_user
 
 log = logging.getLogger("masque.inspect")
 
@@ -30,10 +30,10 @@ class Inspection(TokenResource):
         resp = request.get_json(force=True)
         for item in ['admin', 'reason']:
             if not resp.get(item):
-                return{
-                    'status': 'error',
-                    'message': 'missing required field: %s' % item
-                }, 400
+                return {
+                           'status': 'error',
+                           'message': 'missing required field: %s' % item
+                       }, 400
 
         admin = resp.get('admin')
         reason = resp.get('reason')
@@ -64,12 +64,8 @@ class Inspection(TokenResource):
                 user = connection.Users.find_one({"_id": ObjectId(cursor.author)})
                 add_exp(user, -exp_reduce)
 
-                # 提醒用户发了违规帖子
-                notification.publish_illegal_post.delay(cursor.author,
-                                                        cursor.theme_id,
-                                                        cursor.post_id)
-                # 禁言
-                notification.ban_user.delay(cursor.author, ban_days)
+                # 禁言,并提醒用户发了违规帖子
+                lock_user(cursor, reason, exp_reduce, ban_days, category)
 
                 # 奖励举报人
                 for reporter in cursor.reporters:
@@ -123,16 +119,10 @@ class Inspection(TokenResource):
                 user = connection.Users.find_one({"_id": ObjectId(cursor.author)})
                 add_exp(user, -exp_reduce)
 
-                # 提醒用户发了违规评论
+                # 禁言,并提醒用户发了违规帖子
                 if not hasattr(cursor, "post_id"):
                     cursor["post_id"] = comment["post_id"]
-                notification.publish_illegal_comment.delay(cursor.author,
-                                                           cursor.theme_id,
-                                                           cursor.post_id,
-                                                           cursor.comment_id)
-
-                # 禁言
-                notification.ban_user.delay(cursor.author, ban_days)
+                lock_user(cursor, reason, exp_reduce, ban_days, category)
 
                 # 奖励举报人
                 for reporter in cursor.reporters:
@@ -163,12 +153,11 @@ class Inspection(TokenResource):
                 cursor.save()
         else:
             return {
-                'status': 'error',
-                'message': '%s, the value of category is wrong' % category
-            }, 400
+                       'status': 'error',
+                       'message': '%s, the value of category is wrong' % category
+                   }, 400
 
         return {
                    'status': 'ok',
                    'message': '审查成功'
                }, 201
-

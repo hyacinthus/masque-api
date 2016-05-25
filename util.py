@@ -99,10 +99,10 @@ def add_exp(user, exp=None):
             notification.level_down.delay(user._id, e2l.level_int)
 
 
-def lock_user(user_id, ban_days):
-    """封禁用户"""
+def lock_user(report, reason, exp_reduce, ban_days, category):
+    """封禁用户, 输入举报实例"""
     connection.Users.find_and_modify(
-        {"_id": ObjectId(user_id)},
+        {"_id": ObjectId(report.author)},
         {
             "$set": {
                 "user_level_id": "ban"
@@ -110,17 +110,26 @@ def lock_user(user_id, ban_days):
         }
     )
     if ban_days:
-        unlock_user(user_id, ban_days)
+        unlock_user(report.author, ban_days)
     else:
         pass
-    notification.ban_user.delay(user_id, ban_days)
+    if category == "post":
+        notification.publish_illegal_post.delay(
+            report.author, report.theme_id,
+            report.post_id, reason, exp_reduce, ban_days)
+    elif category == "comment":
+        notification.publish_illegal_comment.delay(
+            report.author, report.theme_id, report.post_id,
+            report.comment_id, reason, exp_reduce, ban_days)
+    else:
+        pass
 
 
 def unlock_user(user_id, ban_days):
     """解锁封禁用户"""
     user = connection.Users.find_one({'_id': ObjectId(user_id)})
     e2l = Exp2Level(user.exp)
-    notification.unban_user.apply_async(user_id, e2l.level_str,
+    notification.unban_user.apply_async(args=(user_id, e2l.level_str,),
                                         countdown=ban_days*24*3600)
 
 

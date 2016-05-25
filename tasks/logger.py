@@ -81,13 +81,13 @@ def posts_delete_log(dump_doc, exp_reduce, ban_days, admin, reason):
     pdl = connection.PostsDeleteLog()
     pdl.theme_id = report["theme_id"]
     pdl.post_id = report["post_id"]
-    print(report['author'])
     pdl.author = report["author"]
-    print(report['author'])
     pdl.admin = admin
     pdl.reason = reason
     pdl.exp_reduce = exp_reduce
     pdl.ban_days = ban_days
+    if not pdl.ban_days:
+        pdl.ban_account = report["author"]
     pdl.save()
 
 
@@ -106,4 +106,6 @@ def comments_ban_log(dump_doc, exp_reduce, ban_days, admin, reason):
     cbl.reason = reason
     cbl.exp_reduce = exp_reduce
     cbl.ban_days = ban_days
+    if not cbl.ban_days:
+        cbl.ban_account = report["author"]
     cbl.save()

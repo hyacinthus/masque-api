@@ -231,63 +231,44 @@ def valid_report_comment(author_id, theme_id, comment_id, exp):
 
 
 @app.task
-def publish_illegal_post(user_id, theme_id, post_id):
+def publish_illegal_post(user_id, theme_id, post_id, reason, exp_reduce, ban_days):
     content = "you post a illegal post %s" % post_id
     log.info(content)
     notifi = connection.Notifications()
     notifi.type = "system"
     notifi.user_id = user_id
-    notifi.title = "您发了违规帖子"
     notifi.theme_id = theme_id
     notifi.post_id = post_id
-    notifi.content = content
-    notifi.save()
-    save2redis(notifi)
-
-
-@app.task
-def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
-    content = "you post a illegal comment %s" % comment_id
-    log.info(content)
-    notifi = connection.Notifications()
-    notifi.type = "system"
-    notifi.user_id = user_id
-    notifi.theme_id = theme_id
-    notifi.title = "您发了违规评论"
-    notifi.post_id = post_id
-    notifi.comment_id = comment_id
-    notifi.content = content
-    notifi.save()
-    save2redis(notifi)
-
-
-@app.task
-def publish_illegal_comment(user_id, theme_id, post_id, comment_id):
-    content = "you post a illegal comment %s" % comment_id
-    log.info(content)
-    notifi = connection.Notifications()
-    notifi.type = "system"
-    notifi.user_id = user_id
-    notifi.theme_id = theme_id
-    notifi.post_id = post_id
-    notifi.comment_id = comment_id
-    notifi.content = content
-    notifi.save()
-
-
-@app.task
-def ban_user(user_id, ban_days):
-    """封禁用户"""
-    log.info("Warning! user %s has been frozen " % user_id)
-    notifi = connection.Notifications()
-    notifi.type = "system"
-    notifi.user_id = user_id
     if ban_days:
-        notifi.title = "您已被禁言%s天" % ban_days
-        notifi.content = "下次注意!"
+        notifi.title = "您的帖子违规啦"
+        notifi.content = "您的账号因为发送包含[{0}]的内容被禁言{1}天,颜值降{2},禁言的账号将于{1}天后恢复正常".format(
+            reason, ban_days, exp_reduce
+        )
     else:
-        notifi.title = "您已被永久禁言"
-        notifi.content = ""
+        notifi.title = "很抱歉,不能再和你做朋友了"
+        notifi.content = "您的账号因为发送包含[{0}]的内容,现已被永久禁言".format(reason)
+    notifi.save()
+    save2redis(notifi)
+
+
+@app.task
+def publish_illegal_comment(user_id, theme_id, post_id, comment_id, reason, exp_reduce, ban_days):
+    content = "you post a illegal comment %s" % comment_id
+    log.info(content)
+    notifi = connection.Notifications()
+    notifi.type = "system"
+    notifi.user_id = user_id
+    notifi.theme_id = theme_id
+    notifi.post_id = post_id
+    notifi.comment_id = comment_id
+    if ban_days:
+        notifi.title = "您的评论违规啦"
+        notifi.content = "您的账号因为发送包含[{0}]的内容被禁言{1}天,颜值降{2},禁言的账号将于{1}天后恢复正常".format({
+            reason, ban_days, exp_reduce
+        })
+    else:
+        notifi.title = "很抱歉,不能再和你做朋友了"
+        notifi.content = "您的账号因为发送包含[{0}]的内容,现已被永久禁言".format(reason)
     notifi.save()
     save2redis(notifi)
 
@@ -303,7 +284,7 @@ def unban_user(user_id, level_str):
     notifi.type = "user"
     notifi.user_id = user_id
     notifi.title = "您已被解除禁言"
-    notifi.content = "下次注意!"
+    notifi.content = "又可以一起愉快的玩耍啦!"
     notifi.save()
     save2redis(notifi)
 

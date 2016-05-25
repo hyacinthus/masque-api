@@ -1145,16 +1145,17 @@ class PostsDeleteLog(RootDocument):
         "_id": CustomObjectId(),
         "theme_id": str,
         "post_id": str,
-        "author ": str,
+        "author": str,
         "admin": str,
         "reason": str,
         "exp_reduce": int,
         "ban_days": int,
-        "ban_account": int,
+        "ban_account": str,
     }
     default_values = {
         "admin": "",
-        "reason": ""
+        "reason": "",
+        "ban_account": ""
     }
 
 
@@ -1166,14 +1167,15 @@ class CommentsBanLog(RootDocument):
         "theme_id": str,
         "post_id": str,
         "comment_id": str,
-        "author ": str,
+        "author": str,
         "admin": str,
         "reason": str,
         "exp_reduce": int,
         "ban_days": int,
-        "ban_account": int,
+        "ban_account": str,
     }
     default_values = {
         "admin": "",
-        "reason": ""
+        "reason": "",
+        "ban_account": ""
     }
