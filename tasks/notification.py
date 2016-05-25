@@ -150,22 +150,12 @@ def level_down(user_id, user_level):
     notifi.title = "您的等级掉到了%s级" % user_level
     notifi.content = "加油!"
     notifi.save()
+    save2redis(notifi)
 
 
 @app.task
 def encourage_valid_feedback(user_id, exp, name):
     content = "Thanks, your feedback %s have solved, exp +%s" % (name, exp)
-    log.info(content)
-    notifi = connection.Notifications()
-    notifi.type = "system"
-    notifi.user_id = user_id
-    notifi.content = content
-    notifi.save()
-
-
-@app.task
-def publish_forbid_post(user_id, expiry=7 * 24 * 3600):
-    content = "Warning! you are prohibited to post %s" % expiry
     log.info(content)
     notifi = connection.Notifications()
     notifi.type = "system"
@@ -183,8 +173,10 @@ def publish_invalid_report_post(author_id, theme_id, post_id, exp):
     notifi.user_id = author_id
     notifi.theme_id = theme_id
     notifi.post_id = post_id
-    notifi.content = content
+    notifi.title = "经核实,您的举报无效"
+    notifi.content = "您的账号扣除颜值%s" % exp
     notifi.save()
+    save2redis(notifi)
 
 
 @app.task
@@ -196,8 +188,10 @@ def publish_invalid_report_comment(author_id, theme_id, comment_id, exp):
     notifi.user_id = author_id
     notifi.theme_id = theme_id
     notifi.post_id = comment_id
-    notifi.content = content
+    notifi.title = "经核实,您的举报无效"
+    notifi.content = "您的账号扣除颜值%s" % exp
     notifi.save()
+    save2redis(notifi)
 
 
 @app.task
@@ -207,10 +201,10 @@ def valid_report_post(author_id, theme_id, post_id, exp):
     notifi = connection.Notifications()
     notifi.type = "system"
     notifi.user_id = author_id
-    notifi.title = "举报有效,获得颜值奖励%s" % exp
+    notifi.title = "感谢您的举报,我们已处理"
     notifi.theme_id = theme_id
     notifi.post_id = post_id
-    notifi.content = content
+    notifi.content = "您的账号获得颜值奖励%s" % exp
     notifi.save()
     save2redis(notifi)
 
@@ -222,10 +216,10 @@ def valid_report_comment(author_id, theme_id, comment_id, exp):
     notifi = connection.Notifications()
     notifi.type = "system"
     notifi.user_id = author_id
-    notifi.title = "举报有效,获得颜值奖励%s" % exp
+    notifi.title = "感谢您的举报,我们已处理"
     notifi.theme_id = theme_id
     notifi.post_id = comment_id
-    notifi.content = content
+    notifi.content = "您的账号获得颜值奖励%s" % exp
     notifi.save()
     save2redis(notifi)
 
