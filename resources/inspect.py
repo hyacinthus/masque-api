@@ -164,6 +164,8 @@ class Inspection(TokenResource):
                            'message': '%s, the value of category is wrong' % category
                        }, 400
         else:
+            exp_reduce = 0
+            ban_days = 0
             if category == 'post':
                 cursor = connection.ReportPosts.find_one({'_id': ObjectId(report_id)})
                 if not cursor:
