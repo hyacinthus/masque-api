@@ -9,7 +9,7 @@ from model import connection, TokenResource
 from tasks import logger
 
 # 需要过滤的黑名单
-black_list = ('网络教育', '继续教育', '远程教育', '仙桃学院', '纺织服装学院', '教学部', '分部', '小学')
+black_list = ('网络教育', '继续教育', '远程教育', '仙桃学院', '纺织服装学院', '教学部', '分部')
 log = logging.getLogger("masque.location")
 
 
@@ -72,7 +72,7 @@ class SchoolsList(TokenResource):
         regeo_url = 'http://restapi.amap.com/v3/geocode/regeo?' \
                     'key={}&' \
                     'location={},{}&' \
-                    'poitype=141201|141202|141203&' \
+                    'poitype=141201|141202&' \
                     'radius=500&' \
                     'extensions=all&' \
                     'batch=false&' \
@@ -160,14 +160,14 @@ class SchoolsList(TokenResource):
                 doc["locale"]["city"] = addr["city"]
                 doc["locale"]["district"] = addr["district"]
                 doc.save()  # 新建不存在的主题
-        result = list(connection.Themes.find_one(
+        result = list(connection.Themes.find(
             {
-                "full_name": i,
+                "full_name": {"$in": schools},
                 "category": {
                     "$nin": ["virtual", "private", "system"]
                 }
             }
-        ) for i in schools)
+        ))
         # 位置记录
         loc_log = dumps(
             {
