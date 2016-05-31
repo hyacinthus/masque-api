@@ -62,9 +62,9 @@ class SchoolsList(TokenResource):
             try:
                 convert_location = requests.get(convert_url).json()
             except:
-                return {'message': 'Amap API Server No Response!'}, 504
+                return {'message': 'Amap API Server No Response!'}, 500
             if not convert_location:
-                return {'message': 'Amap API Server No Response!'}, 504
+                return {'message': 'Amap API Server No Response!'}, 500
             if convert_location['status'] == "1":
                 args['lon'], args['lat'] = convert_location['locations'].split(',')[0],\
                                            convert_location['locations'].split(',')[1]
@@ -80,9 +80,9 @@ class SchoolsList(TokenResource):
         try:
             address = requests.get(regeo_url).json()
         except:
-            return {'message': 'Amap API Server No Response!'}, 504
+            return {'message': 'Amap API Server No Response!'}, 500
         if not address:
-            return {'message': 'Amap API Server No Response!'}, 504
+            return {'message': 'Amap API Server No Response!'}, 500
 
         if address['status'] == "1":
             if not address['regeocode'].get('formatted_address'):
@@ -101,15 +101,17 @@ class SchoolsList(TokenResource):
             }
             pois = address["regeocode"]["pois"]
         else:
-            return {'message': '%s' % address['info']}, 504
+            return {'message': '%s' % address['info']}, 500
         get_school = (addr["keyword"],) if addr["keyword"] else ()
         # 获取附近地点
         if pois:
             get_school += tuple(filter(guolv, (i['name'] for i in pois)))
             get_school = tuple(i.replace('-', '') for i in get_school)
         result = connection.Themes.find(
-            {"locale.city": "西安市",
-             "category": "school"},
+            {
+                "locale.province": addr["province"],
+                "category": "school"
+            },
             {"full_name": 1, "short_name": 1, "_id": 0}
         )
         data = tuple(item['full_name'] for item in result)
